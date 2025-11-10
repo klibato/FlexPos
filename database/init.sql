@@ -69,12 +69,15 @@ CREATE INDEX idx_menu_compositions_product_id ON menu_compositions(product_id);
 -- ============================================
 CREATE TABLE cash_registers (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id),
-    opening_amount DECIMAL(10, 2) NOT NULL,
-    closing_amount DECIMAL(10, 2),
-    expected_cash DECIMAL(10, 2),
-    actual_cash DECIMAL(10, 2),
-    cash_difference DECIMAL(10, 2),
+    register_name VARCHAR(100) NOT NULL,
+    opened_by INTEGER NOT NULL REFERENCES users(id),
+    closed_by INTEGER REFERENCES users(id),
+    opening_balance DECIMAL(10, 2) NOT NULL,
+    closing_balance DECIMAL(10, 2),
+    expected_balance DECIMAL(10, 2),
+    counted_cash DECIMAL(10, 2),
+    difference DECIMAL(10, 2),
+    total_cash_collected DECIMAL(10, 2) DEFAULT 0,
     total_sales DECIMAL(10, 2) DEFAULT 0,
     total_cash DECIMAL(10, 2) DEFAULT 0,
     total_card DECIMAL(10, 2) DEFAULT 0,
@@ -83,14 +86,17 @@ CREATE TABLE cash_registers (
     status VARCHAR(20) DEFAULT 'open' CHECK (status IN ('open', 'closed')),
     closing_report JSONB,
     closing_hash VARCHAR(64),
+    notes TEXT,
     opened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    closed_at TIMESTAMP
+    closed_at TIMESTAMP,
+    user_id INTEGER -- DEPRECATED: kept for compatibility
 );
 
-CREATE INDEX idx_cash_registers_user_id ON cash_registers(user_id);
+CREATE INDEX idx_cash_registers_opened_by ON cash_registers(opened_by);
+CREATE INDEX idx_cash_registers_closed_by ON cash_registers(closed_by);
 CREATE INDEX idx_cash_registers_status ON cash_registers(status);
 CREATE INDEX idx_cash_registers_opened_at ON cash_registers(opened_at);
-CREATE INDEX idx_cash_register_open ON cash_registers(user_id, status) WHERE status = 'open';
+CREATE INDEX idx_cash_register_open ON cash_registers(opened_by, status) WHERE status = 'open';
 
 -- ============================================
 -- TABLE: sales (Ventes)
