@@ -8,7 +8,7 @@
     "dev": "nodemon src/server.js",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
-    "db:seed": "node src/scripts/seed.js",
+    "db:seed-users": "node src/scripts/seedUsers.js",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix"
   },

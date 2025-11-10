@@ -5,21 +5,8 @@
 -- ATTENTION : Ce script insère des données de test
 -- NE PAS UTILISER EN PRODUCTION
 
--- ============================================
--- USERS (Utilisateurs)
--- ============================================
--- PIN codes hachés avec bcrypt (rounds=10)
--- admin: 1234 -> $2a$10$YourHashHere (sera généré par le backend)
--- john: 5678
--- marie: 9999
-
--- Note: Les hash bcrypt seront générés par le backend
--- Pour le développement, on utilise des hash temporaires
-
-INSERT INTO users (username, pin_code, role, first_name, last_name, email, is_active) VALUES
-('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'admin', 'Admin', 'Principal', 'admin@bensburger.com', TRUE),
-('john', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'cashier', 'John', 'Doe', 'john@bensburger.com', TRUE),
-('marie', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'cashier', 'Marie', 'Martin', 'marie@bensburger.com', TRUE);
+-- NOTE : Les utilisateurs sont créés via le script Node.js backend
+-- Exécutez : docker compose exec backend npm run db:seed-users
 
 -- ============================================
 -- PRODUCTS - BURGERS
