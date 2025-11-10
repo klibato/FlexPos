@@ -7,7 +7,7 @@ const {
   closeCashRegister,
   getCashRegisterById,
 } = require('../controllers/cashRegisterController');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken } = require('../middlewares/auth');
 
 // Toutes les routes nécessitent une authentification
 router.use(authenticateToken);
