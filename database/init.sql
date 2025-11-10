@@ -65,6 +65,34 @@ CREATE INDEX idx_menu_compositions_menu_id ON menu_compositions(menu_id);
 CREATE INDEX idx_menu_compositions_product_id ON menu_compositions(product_id);
 
 -- ============================================
+-- TABLE: cash_registers (Caisses)
+-- ============================================
+CREATE TABLE cash_registers (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    opening_amount DECIMAL(10, 2) NOT NULL,
+    closing_amount DECIMAL(10, 2),
+    expected_cash DECIMAL(10, 2),
+    actual_cash DECIMAL(10, 2),
+    cash_difference DECIMAL(10, 2),
+    total_sales DECIMAL(10, 2) DEFAULT 0,
+    total_cash DECIMAL(10, 2) DEFAULT 0,
+    total_card DECIMAL(10, 2) DEFAULT 0,
+    total_meal_voucher DECIMAL(10, 2) DEFAULT 0,
+    ticket_count INTEGER DEFAULT 0,
+    status VARCHAR(20) DEFAULT 'open' CHECK (status IN ('open', 'closed')),
+    closing_report JSONB,
+    closing_hash VARCHAR(64),
+    opened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    closed_at TIMESTAMP
+);
+
+CREATE INDEX idx_cash_registers_user_id ON cash_registers(user_id);
+CREATE INDEX idx_cash_registers_status ON cash_registers(status);
+CREATE INDEX idx_cash_registers_opened_at ON cash_registers(opened_at);
+CREATE INDEX idx_cash_register_open ON cash_registers(user_id, status) WHERE status = 'open';
+
+-- ============================================
 -- TABLE: sales (Ventes)
 -- ============================================
 CREATE SEQUENCE ticket_number_seq START 1;
@@ -131,34 +159,6 @@ CREATE TABLE sale_items (
 
 CREATE INDEX idx_sale_items_sale_id ON sale_items(sale_id);
 CREATE INDEX idx_sale_items_product_id ON sale_items(product_id);
-
--- ============================================
--- TABLE: cash_registers (Caisses)
--- ============================================
-CREATE TABLE cash_registers (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id),
-    opening_amount DECIMAL(10, 2) NOT NULL,
-    closing_amount DECIMAL(10, 2),
-    expected_cash DECIMAL(10, 2),
-    actual_cash DECIMAL(10, 2),
-    cash_difference DECIMAL(10, 2),
-    total_sales DECIMAL(10, 2) DEFAULT 0,
-    total_cash DECIMAL(10, 2) DEFAULT 0,
-    total_card DECIMAL(10, 2) DEFAULT 0,
-    total_meal_voucher DECIMAL(10, 2) DEFAULT 0,
-    ticket_count INTEGER DEFAULT 0,
-    status VARCHAR(20) DEFAULT 'open' CHECK (status IN ('open', 'closed')),
-    closing_report JSONB,
-    closing_hash VARCHAR(64),
-    opened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    closed_at TIMESTAMP
-);
-
-CREATE INDEX idx_cash_registers_user_id ON cash_registers(user_id);
-CREATE INDEX idx_cash_registers_status ON cash_registers(status);
-CREATE INDEX idx_cash_registers_opened_at ON cash_registers(opened_at);
-CREATE INDEX idx_cash_register_open ON cash_registers(user_id, status) WHERE status = 'open';
 
 -- ============================================
 -- TABLE: audit_logs (Traçabilité)
