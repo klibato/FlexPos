@@ -79,37 +79,37 @@ INSERT INTO products (name, description, price_ht, vat_rate, category, is_active
 -- ============================================
 -- MENU COMPOSITIONS
 -- ============================================
--- Menu Classic (id=31)
+-- Menu Classic (id=26)
 INSERT INTO menu_compositions (menu_id, product_id, quantity) VALUES
-(31, 1, 1),  -- Burger Classic
-(31, 7, 1),  -- Frites
-(31, 13, 1); -- Coca-Cola 33cl
+(26, 1, 1),  -- Burger Classic
+(26, 7, 1),  -- Frites
+(26, 13, 1); -- Coca-Cola 33cl
 
--- Menu Bacon (id=32)
+-- Menu Bacon (id=27)
 INSERT INTO menu_compositions (menu_id, product_id, quantity) VALUES
-(32, 2, 1),  -- Burger Bacon
-(32, 7, 1),  -- Frites
-(32, 13, 1); -- Coca-Cola 33cl
+(27, 2, 1),  -- Burger Bacon
+(27, 7, 1),  -- Frites
+(27, 13, 1); -- Coca-Cola 33cl
 
--- Menu Cheese (id=33)
+-- Menu Cheese (id=28)
 INSERT INTO menu_compositions (menu_id, product_id, quantity) VALUES
-(33, 3, 1),  -- Burger Cheese
-(33, 7, 1),  -- Frites
-(33, 13, 1); -- Coca-Cola 33cl
+(28, 3, 1),  -- Burger Cheese
+(28, 7, 1),  -- Frites
+(28, 13, 1); -- Coca-Cola 33cl
 
--- Menu XL (id=34)
+-- Menu XL (id=29)
 INSERT INTO menu_compositions (menu_id, product_id, quantity) VALUES
-(34, 6, 1),  -- Burger XL
-(34, 8, 1),  -- Potatoes
-(34, 14, 1), -- Coca-Cola 50cl
-(34, 25, 1); -- Cookie Chocolat
+(29, 6, 1),  -- Burger XL
+(29, 8, 1),  -- Potatoes
+(29, 14, 1), -- Coca-Cola 50cl
+(29, 25, 1); -- Cookie Chocolat
 
--- Menu Enfant (id=35)
+-- Menu Enfant (id=30)
 INSERT INTO menu_compositions (menu_id, product_id, quantity) VALUES
-(35, 10, 1), -- Nuggets
-(35, 7, 1),  -- Frites
-(35, 13, 1), -- Coca-Cola 33cl
-(35, 25, 1); -- Cookie Chocolat
+(30, 10, 1), -- Nuggets
+(30, 7, 1),  -- Frites
+(30, 13, 1), -- Coca-Cola 33cl
+(30, 25, 1); -- Cookie Chocolat
 
 -- ============================================
 -- Fin du seeding
