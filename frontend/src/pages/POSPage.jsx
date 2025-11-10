@@ -4,8 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../hooks/useProducts';
 import CategoryTabs from '../components/products/CategoryTabs';
 import ProductGrid from '../components/products/ProductGrid';
+import PaymentModal from '../components/payment/PaymentModal';
 import Button from '../components/ui/Button';
-import { LogOut, RefreshCw } from 'lucide-react';
+import { LogOut, RefreshCw, CheckCircle } from 'lucide-react';
 import { formatPrice } from '../utils/constants';
 
 const POSPage = () => {
@@ -23,6 +24,12 @@ const POSPage = () => {
   // État du panier (sera géré par CartContext dans Phase 1.4)
   const [cart, setCart] = useState([]);
 
+  // État du modal de paiement
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  // Notification de succès
+  const [successMessage, setSuccessMessage] = useState(null);
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
@@ -35,9 +42,7 @@ const POSPage = () => {
   };
 
   const handleProductClick = (product) => {
-    console.log('Produit cliqué:', product);
-    // Temporaire : ajouter au panier localement
-    // Dans Phase 1.4, ce sera géré par CartContext
+    // Ajouter au panier
     setCart((prev) => {
       const existingItem = prev.find((item) => item.id === product.id);
       if (existingItem) {
@@ -65,6 +70,28 @@ const POSPage = () => {
         )
         .filter((item) => item.quantity > 0)
     );
+  };
+
+  const handleOpenPayment = () => {
+    if (cart.length === 0) return;
+    setIsPaymentModalOpen(true);
+  };
+
+  const handlePaymentSuccess = (sale) => {
+    // Vider le panier
+    setCart([]);
+
+    // Afficher message de succès
+    setSuccessMessage({
+      ticketNumber: sale.ticket_number,
+      total: sale.total_ttc,
+      change: sale.change_given,
+    });
+
+    // Masquer après 5 secondes
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 5000);
   };
 
   const cartTotal = cart.reduce(
@@ -112,6 +139,28 @@ const POSPage = () => {
           </Button>
         </div>
       </header>
+
+      {/* Notification de succès */}
+      {successMessage && (
+        <div className="bg-green-500 text-white px-6 py-4 flex items-center justify-between animate-slide-in-right">
+          <div className="flex items-center gap-3">
+            <CheckCircle size={24} />
+            <div>
+              <p className="font-bold">Paiement réussi !</p>
+              <p className="text-sm">
+                Ticket {successMessage.ticketNumber} - Total: {formatPrice(successMessage.total)}
+                {successMessage.change > 0 && ` - Rendu: ${formatPrice(successMessage.change)}`}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setSuccessMessage(null)}
+            className="text-white hover:text-green-100"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
@@ -223,13 +272,21 @@ const POSPage = () => {
               size="xl"
               disabled={cart.length === 0}
               className="w-full"
-              onClick={() => alert('Paiement - Phase 1.5')}
+              onClick={handleOpenPayment}
             >
               Payer ({cart.length} {cart.length > 1 ? 'articles' : 'article'})
             </Button>
           </div>
         </div>
       </div>
+
+      {/* Modal de paiement */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        cart={cart}
+        onSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 };

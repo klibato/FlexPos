@@ -86,7 +86,7 @@ app.get('/health', (req, res) => {
 // Routes API
 app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/products', apiLimiter, require('./routes/products'));
-// app.use('/api/sales', apiLimiter, require('./routes/sales'));
+app.use('/api/sales', apiLimiter, require('./routes/sales'));
 // app.use('/api/cash-register', apiLimiter, require('./routes/cashRegister'));
 // app.use('/api/dashboard', apiLimiter, require('./routes/dashboard'));
 
