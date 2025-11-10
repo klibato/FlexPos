@@ -1,4 +1,4 @@
-const { Sale, SaleItem, sequelize } = require('../models');
+const { Sale, SaleItem, CashRegister, sequelize } = require('../models');
 const { calculateSaleTotals, calculateChange } = require('../services/vatService');
 const logger = require('../utils/logger');
 
@@ -10,6 +10,26 @@ const createSale = async (req, res, next) => {
 
   try {
     const { items, payment_method, amount_paid, payment_details } = req.body;
+
+    // Vérifier qu'une caisse est ouverte
+    const activeCashRegister = await CashRegister.findOne({
+      where: {
+        opened_by: req.user.id,
+        status: 'open',
+      },
+      transaction,
+    });
+
+    if (!activeCashRegister) {
+      await transaction.rollback();
+      return res.status(422).json({
+        success: false,
+        error: {
+          code: 'NO_ACTIVE_CASH_REGISTER',
+          message: 'Aucune caisse ouverte. Veuillez ouvrir une caisse avant de faire une vente.',
+        },
+      });
+    }
 
     // Validation
     if (!items || items.length === 0) {
@@ -57,10 +77,16 @@ const createSale = async (req, res, next) => {
     // Calculer la monnaie à rendre
     const changeGiven = calculateChange(totalTTC, parseFloat(amount_paid));
 
+    // Calculer les espèces collectées (montant payé - monnaie rendue)
+    const cashCollected = payment_method === 'cash'
+      ? parseFloat(amount_paid) - changeGiven
+      : 0;
+
     // Créer la vente (le trigger générera automatiquement le ticket_number)
     const sale = await Sale.create(
       {
         user_id: req.user.id,
+        cash_register_id: activeCashRegister.id,
         total_ht: totalHT,
         total_ttc: totalTTC,
         vat_details: vatDetails,
@@ -88,6 +114,19 @@ const createSale = async (req, res, next) => {
     }));
 
     await SaleItem.bulkCreate(saleItemsData, { transaction });
+
+    // Mettre à jour les totaux de la caisse
+    await activeCashRegister.update(
+      {
+        total_sales: parseFloat(activeCashRegister.total_sales || 0) + totalTTC,
+        total_cash: parseFloat(activeCashRegister.total_cash || 0) + (payment_method === 'cash' ? totalTTC : 0),
+        total_card: parseFloat(activeCashRegister.total_card || 0) + (payment_method === 'card' ? totalTTC : 0),
+        total_meal_voucher: parseFloat(activeCashRegister.total_meal_voucher || 0) + (payment_method === 'meal_voucher' ? totalTTC : 0),
+        total_cash_collected: parseFloat(activeCashRegister.total_cash_collected || 0) + cashCollected,
+        ticket_count: parseInt(activeCashRegister.ticket_count || 0) + 1,
+      },
+      { transaction }
+    );
 
     // Commit de la transaction
     await transaction.commit();
