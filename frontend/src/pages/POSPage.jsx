@@ -10,7 +10,7 @@ import PaymentModal from '../components/payment/PaymentModal';
 import OpenCashRegisterModal from '../components/cashRegister/OpenCashRegisterModal';
 import CloseCashRegisterModal from '../components/cashRegister/CloseCashRegisterModal';
 import Button from '../components/ui/Button';
-import { LogOut, RefreshCw, CheckCircle, CreditCard, DollarSign, Receipt } from 'lucide-react';
+import { LogOut, RefreshCw, CheckCircle, CreditCard, DollarSign, Receipt, BarChart3 } from 'lucide-react';
 import { formatPrice } from '../utils/constants';
 
 const POSPage = () => {
@@ -159,6 +159,15 @@ const POSPage = () => {
           >
             <Receipt size={20} />
             Journal
+          </Button>
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-2"
+          >
+            <BarChart3 size={20} />
+            Dashboard
           </Button>
           <Button
             variant="secondary"

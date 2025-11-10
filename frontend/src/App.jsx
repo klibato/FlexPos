@@ -5,6 +5,7 @@ import { CashRegisterProvider } from './context/CashRegisterContext';
 import LoginPage from './pages/LoginPage';
 import POSPage from './pages/POSPage';
 import SalesHistoryPage from './pages/SalesHistoryPage';
+import DashboardPage from './pages/DashboardPage';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/" element={<POSPage />} />
               <Route path="/sales" element={<SalesHistoryPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
             </Routes>
           </Router>
         </CartProvider>
