@@ -11,11 +11,11 @@ import {
 
 const CATEGORIES = [
   { value: '', label: 'Toutes les catégories' },
-  { value: 'burger', label: 'Burgers' },
-  { value: 'side', label: 'Accompagnements' },
-  { value: 'drink', label: 'Boissons' },
-  { value: 'dessert', label: 'Desserts' },
-  { value: 'menu', label: 'Menus' },
+  { value: 'burgers', label: 'Burgers' },
+  { value: 'sides', label: 'Accompagnements' },
+  { value: 'drinks', label: 'Boissons' },
+  { value: 'desserts', label: 'Desserts' },
+  { value: 'menus', label: 'Menus' },
 ];
 
 const ProductsPage = () => {

@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 
 const CATEGORIES = [
-  { value: 'burger', label: 'Burgers' },
-  { value: 'side', label: 'Accompagnements' },
-  { value: 'drink', label: 'Boissons' },
-  { value: 'dessert', label: 'Desserts' },
-  { value: 'menu', label: 'Menus' },
+  { value: 'burgers', label: 'Burgers' },
+  { value: 'sides', label: 'Accompagnements' },
+  { value: 'drinks', label: 'Boissons' },
+  { value: 'desserts', label: 'Desserts' },
+  { value: 'menus', label: 'Menus' },
 ];
 
 const VAT_RATES = [
@@ -21,7 +21,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
     description: '',
     price_ht: '',
     vat_rate: 10,
-    category: 'burger',
+    category: 'burgers',
     is_active: true,
     is_menu: false,
     display_order: 0,
@@ -34,7 +34,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
         description: product.description || '',
         price_ht: product.price_ht || '',
         vat_rate: product.vat_rate || 10,
-        category: product.category || 'burger',
+        category: product.category || 'burgers',
         is_active: product.is_active !== undefined ? product.is_active : true,
         is_menu: product.is_menu || false,
         display_order: product.display_order || 0,
@@ -45,7 +45,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
         description: '',
         price_ht: '',
         vat_rate: 10,
-        category: 'burger',
+        category: 'burgers',
         is_active: true,
         is_menu: false,
         display_order: 0,

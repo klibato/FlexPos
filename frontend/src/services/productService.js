@@ -6,7 +6,7 @@ import api from './api';
 
 /**
  * Récupérer tous les produits (avec cache)
- * @param {Object} filters - Filtres optionnels { category, is_menu }
+ * @param {Object} filters - Filtres optionnels { category, is_menu, include_inactive }
  * @returns {Promise<Array>} Liste des produits
  */
 export const getAllProducts = async (filters = {}) => {
@@ -19,6 +19,10 @@ export const getAllProducts = async (filters = {}) => {
 
     if (filters.is_menu !== undefined) {
       params.append('is_menu', filters.is_menu);
+    }
+
+    if (filters.include_inactive !== undefined) {
+      params.append('include_inactive', filters.include_inactive);
     }
 
     const response = await api.get(`/products?${params.toString()}`);

@@ -24,8 +24,9 @@ const getAllProducts = async (req, res, next) => {
       where.is_menu = is_menu === 'true';
     }
 
-    // Par défaut, ne montrer que les produits actifs (sauf si demandé par admin)
-    if (include_inactive === 'false' || req.user?.role !== 'admin') {
+    // Par défaut, ne montrer que les produits actifs
+    // Seulement un admin peut voir les produits inactifs si include_inactive est true
+    if (include_inactive !== 'true' || req.user?.role !== 'admin') {
       where.is_active = true;
     }
 
