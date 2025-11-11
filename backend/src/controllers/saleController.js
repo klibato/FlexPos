@@ -43,13 +43,13 @@ const createSale = async (req, res, next) => {
       });
     }
 
-    if (!payment_method || !amount_paid) {
+    if (!payment_method) {
       await transaction.rollback();
       return res.status(400).json({
         success: false,
         error: {
           code: 'MISSING_PAYMENT_INFO',
-          message: 'Méthode de paiement et montant requis',
+          message: 'Méthode de paiement requise',
         },
       });
     }
@@ -57,30 +57,102 @@ const createSale = async (req, res, next) => {
     // Calculer les totaux (HT, TTC, TVA)
     const { totalHT, totalTTC, vatDetails } = calculateSaleTotals(items);
 
-    // Vérifier que le montant payé est suffisant
-    if (parseFloat(amount_paid) < totalTTC) {
-      await transaction.rollback();
-      return res.status(422).json({
-        success: false,
-        error: {
-          code: 'INSUFFICIENT_PAYMENT',
-          message: 'Le montant payé est insuffisant',
-          details: {
-            total_due: totalTTC,
-            amount_paid: parseFloat(amount_paid),
-            missing: totalTTC - parseFloat(amount_paid),
+    let totalPaid = 0;
+    let changeGiven = 0;
+    let cashCollected = 0;
+    let cashAmount = 0;
+    let cardAmount = 0;
+    let mealVoucherAmount = 0;
+
+    // Validation selon le mode de paiement
+    if (payment_method === 'mixed') {
+      // Paiement mixte - valider payment_details
+      if (!payment_details || !payment_details.payments || payment_details.payments.length === 0) {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'INVALID_MIXED_PAYMENT',
+            message: 'Les détails de paiement mixte sont requis',
           },
-        },
+        });
+      }
+
+      // Calculer le total payé
+      payment_details.payments.forEach((p) => {
+        const amount = parseFloat(p.amount || 0);
+        totalPaid += amount;
+
+        if (p.method === 'cash') cashAmount += amount;
+        else if (p.method === 'card') cardAmount += amount;
+        else if (p.method === 'meal_voucher') mealVoucherAmount += amount;
       });
+
+      // Vérifier que le montant total payé est suffisant
+      if (totalPaid < totalTTC) {
+        await transaction.rollback();
+        return res.status(422).json({
+          success: false,
+          error: {
+            code: 'INSUFFICIENT_PAYMENT',
+            message: 'Le montant total payé est insuffisant',
+            details: {
+              total_due: totalTTC,
+              total_paid: totalPaid,
+              missing: totalTTC - totalPaid,
+            },
+          },
+        });
+      }
+
+      // La monnaie est rendue uniquement sur l'espèces
+      changeGiven = calculateChange(totalTTC, totalPaid);
+      cashCollected = cashAmount - changeGiven;
+    } else {
+      // Paiement simple
+      if (!amount_paid) {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'MISSING_PAYMENT_AMOUNT',
+            message: 'Montant payé requis',
+          },
+        });
+      }
+
+      totalPaid = parseFloat(amount_paid);
+
+      // Vérifier que le montant payé est suffisant
+      if (totalPaid < totalTTC) {
+        await transaction.rollback();
+        return res.status(422).json({
+          success: false,
+          error: {
+            code: 'INSUFFICIENT_PAYMENT',
+            message: 'Le montant payé est insuffisant',
+            details: {
+              total_due: totalTTC,
+              amount_paid: totalPaid,
+              missing: totalTTC - totalPaid,
+            },
+          },
+        });
+      }
+
+      // Calculer la monnaie à rendre (seulement pour cash)
+      changeGiven = payment_method === 'cash' ? calculateChange(totalTTC, totalPaid) : 0;
+
+      // Calculer les espèces collectées
+      if (payment_method === 'cash') {
+        cashAmount = totalTTC;
+        cashCollected = totalPaid - changeGiven;
+      } else if (payment_method === 'card') {
+        cardAmount = totalTTC;
+      } else if (payment_method === 'meal_voucher') {
+        mealVoucherAmount = totalTTC;
+      }
     }
-
-    // Calculer la monnaie à rendre
-    const changeGiven = calculateChange(totalTTC, parseFloat(amount_paid));
-
-    // Calculer les espèces collectées (montant payé - monnaie rendue)
-    const cashCollected = payment_method === 'cash'
-      ? parseFloat(amount_paid) - changeGiven
-      : 0;
 
     // Créer la vente (le trigger générera automatiquement le ticket_number)
     const sale = await Sale.create(
@@ -91,8 +163,8 @@ const createSale = async (req, res, next) => {
         total_ttc: totalTTC,
         vat_details: vatDetails,
         payment_method,
-        payment_details: payment_details || null,
-        amount_paid: parseFloat(amount_paid),
+        payment_details: payment_method === 'mixed' ? payment_details : null,
+        amount_paid: totalPaid,
         change_given: changeGiven,
         status: 'completed',
       },
@@ -119,9 +191,9 @@ const createSale = async (req, res, next) => {
     await activeCashRegister.update(
       {
         total_sales: parseFloat(activeCashRegister.total_sales || 0) + totalTTC,
-        total_cash: parseFloat(activeCashRegister.total_cash || 0) + (payment_method === 'cash' ? totalTTC : 0),
-        total_card: parseFloat(activeCashRegister.total_card || 0) + (payment_method === 'card' ? totalTTC : 0),
-        total_meal_voucher: parseFloat(activeCashRegister.total_meal_voucher || 0) + (payment_method === 'meal_voucher' ? totalTTC : 0),
+        total_cash: parseFloat(activeCashRegister.total_cash || 0) + cashAmount,
+        total_card: parseFloat(activeCashRegister.total_card || 0) + cardAmount,
+        total_meal_voucher: parseFloat(activeCashRegister.total_meal_voucher || 0) + mealVoucherAmount,
         total_cash_collected: parseFloat(activeCashRegister.total_cash_collected || 0) + cashCollected,
         ticket_count: parseInt(activeCashRegister.ticket_count || 0) + 1,
       },
@@ -142,7 +214,7 @@ const createSale = async (req, res, next) => {
     });
 
     logger.info(
-      `Vente créée: ${completeSale.ticket_number} - ${totalTTC}€ par ${req.user.username}`
+      `Vente créée: ${completeSale.ticket_number} - ${totalTTC}€ (${payment_method}) par ${req.user.username}`
     );
 
     res.status(201).json({
