@@ -58,3 +58,34 @@ export const getProductById = async (id) => {
     throw error;
   }
 };
+
+/**
+ * Créer un nouveau produit
+ * @param {Object} productData - Données du produit
+ * @returns {Promise<Object>} Produit créé
+ */
+export const createProduct = async (productData) => {
+  const response = await api.post('/products', productData);
+  return response.data;
+};
+
+/**
+ * Modifier un produit
+ * @param {number} id - ID du produit
+ * @param {Object} productData - Données du produit
+ * @returns {Promise<Object>} Produit modifié
+ */
+export const updateProduct = async (id, productData) => {
+  const response = await api.put(`/products/${id}`, productData);
+  return response.data;
+};
+
+/**
+ * Supprimer un produit
+ * @param {number} id - ID du produit
+ * @returns {Promise<Object>} Confirmation
+ */
+export const deleteProduct = async (id) => {
+  const response = await api.delete(`/products/${id}`);
+  return response.data;
+};

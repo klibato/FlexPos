@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import POSPage from './pages/POSPage';
 import SalesHistoryPage from './pages/SalesHistoryPage';
 import DashboardPage from './pages/DashboardPage';
+import ProductsPage from './pages/ProductsPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
               <Route path="/" element={<POSPage />} />
               <Route path="/sales" element={<SalesHistoryPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/products" element={<ProductsPage />} />
             </Routes>
           </Router>
         </CartProvider>
