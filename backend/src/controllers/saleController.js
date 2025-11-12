@@ -1,4 +1,4 @@
-const { Sale, SaleItem, CashRegister, User, sequelize } = require('../models');
+const { Sale, SaleItem, CashRegister, User, StoreSettings, sequelize } = require('../models');
 const { calculateSaleTotals, calculateChange } = require('../services/vatService');
 const { generateTicketPDF } = require('../services/pdfService');
 const logger = require('../utils/logger');
@@ -401,8 +401,16 @@ const generateTicketPDFEndpoint = async (req, res, next) => {
       });
     }
 
+    // Récupérer les paramètres du commerce
+    let settings = await StoreSettings.findByPk(1);
+
+    // Si pas de settings, créer les paramètres par défaut
+    if (!settings) {
+      settings = await StoreSettings.create({ id: 1 });
+    }
+
     // Générer le PDF
-    const doc = generateTicketPDF(sale, sale.cash_register, sale.user);
+    const doc = generateTicketPDF(sale, sale.cash_register, sale.user, settings);
 
     // Configurer les headers pour le téléchargement
     res.setHeader('Content-Type', 'application/pdf');

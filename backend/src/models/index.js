@@ -6,6 +6,7 @@ const Sale = require('./Sale');
 const SaleItem = require('./SaleItem');
 const CashRegister = require('./CashRegister');
 const AuditLog = require('./AuditLog');
+const StoreSettings = require('./StoreSettings');
 
 // ============================================
 // RELATIONS
@@ -61,4 +62,5 @@ module.exports = {
   SaleItem,
   CashRegister,
   AuditLog,
+  StoreSettings,
 };

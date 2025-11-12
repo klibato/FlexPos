@@ -6,9 +6,10 @@ const { formatPrice } = require('../utils/constants');
  * @param {Object} sale - La vente avec ses items
  * @param {Object} cashRegister - La caisse associée
  * @param {Object} user - L'utilisateur ayant fait la vente
+ * @param {Object} settings - Les paramètres du commerce
  * @returns {PDFDocument} Le document PDF
  */
-const generateTicketPDF = (sale, cashRegister, user) => {
+const generateTicketPDF = (sale, cashRegister, user, settings) => {
   const doc = new PDFDocument({
     size: [226.77, 841.89], // 80mm de largeur (ticket thermique)
     margins: { top: 20, bottom: 20, left: 20, right: 20 },
@@ -35,14 +36,28 @@ const generateTicketPDF = (sale, cashRegister, user) => {
 
   // Header - Logo et nom
   doc.fontSize(20).font('Helvetica-Bold');
-  centerText('BensBurger', doc.y);
+  centerText(settings.store_name || 'BensBurger', doc.y);
 
   doc.moveDown(0.5);
   doc.fontSize(10).font('Helvetica');
-  centerText('Restaurant Rapide', doc.y);
-  centerText('123 Avenue des Burgers', doc.y + 12);
-  centerText('75001 Paris', doc.y + 24);
-  centerText('Tél: 01 23 45 67 89', doc.y + 36);
+  if (settings.store_description) {
+    centerText(settings.store_description, doc.y);
+  }
+  if (settings.address_line1) {
+    centerText(settings.address_line1, doc.y + 12);
+  }
+  if (settings.address_line2) {
+    centerText(settings.address_line2, doc.y + 24);
+    centerText(`${settings.postal_code || ''} ${settings.city || ''}`, doc.y + 36);
+    if (settings.phone) {
+      centerText(`Tél: ${settings.phone}`, doc.y + 48);
+    }
+  } else {
+    centerText(`${settings.postal_code || ''} ${settings.city || ''}`, doc.y + 24);
+    if (settings.phone) {
+      centerText(`Tél: ${settings.phone}`, doc.y + 36);
+    }
+  }
 
   doc.moveDown(2);
 
@@ -212,19 +227,28 @@ const generateTicketPDF = (sale, cashRegister, user) => {
   doc.fontSize(8).fillColor('#666666');
   centerText('Merci de votre visite !', doc.y);
   doc.moveDown(0.3);
-  centerText('À bientôt chez BensBurger', doc.y);
+  centerText(`À bientôt chez ${settings.store_name || 'BensBurger'}`, doc.y);
 
   doc.moveDown(1);
 
   // Mentions légales
   doc.fontSize(7);
-  centerText('SARL BensBurger - Capital: 10000€', doc.y);
-  doc.moveDown(0.2);
-  centerText('SIRET: 123 456 789 00012', doc.y);
-  doc.moveDown(0.2);
-  centerText('TVA: FR12345678901', doc.y);
-  doc.moveDown(0.2);
-  centerText('RCS Paris B 123 456 789', doc.y);
+  if (settings.legal_form && settings.capital_amount) {
+    const capital = parseFloat(settings.capital_amount).toFixed(0);
+    centerText(`${settings.legal_form} ${settings.store_name} - Capital: ${capital}${settings.currency_symbol || '€'}`, doc.y);
+    doc.moveDown(0.2);
+  }
+  if (settings.siret) {
+    centerText(`SIRET: ${settings.siret}`, doc.y);
+    doc.moveDown(0.2);
+  }
+  if (settings.vat_number) {
+    centerText(`TVA: ${settings.vat_number}`, doc.y);
+    doc.moveDown(0.2);
+  }
+  if (settings.rcs) {
+    centerText(`RCS ${settings.rcs}`, doc.y);
+  }
 
   return doc;
 };
