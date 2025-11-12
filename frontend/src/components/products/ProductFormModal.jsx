@@ -59,10 +59,25 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+
+    // Si on coche/décoche "C'est un menu", ajuster automatiquement la catégorie
+    if (name === 'is_menu') {
+      const menuCategory = categories.find(cat =>
+        cat.id === 'menus' || cat.name?.toLowerCase().includes('menu')
+      );
+
+      setFormData((prev) => ({
+        ...prev,
+        is_menu: checked,
+        // Si on coche "menu" ET qu'on trouve une catégorie menu, la sélectionner
+        category: checked && menuCategory ? menuCategory.id : prev.category,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      }));
+    }
   };
 
   const handleSubmit = (e) => {
