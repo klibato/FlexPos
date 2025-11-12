@@ -76,6 +76,7 @@ const migrateStoreConfig = async () => {
         '{
           "cash": {"enabled": true, "name": "Espèces", "icon": "💵"},
           "card": {"enabled": true, "name": "Carte bancaire", "icon": "💳"},
+          "sumup": {"enabled": false, "name": "SumUp", "icon": "📱"},
           "meal_voucher": {"enabled": true, "name": "Ticket restaurant", "icon": "🎫"},
           "mixed": {"enabled": true, "name": "Paiement mixte", "icon": "💰"}
         }'::jsonb,
