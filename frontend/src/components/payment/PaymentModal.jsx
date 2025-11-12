@@ -13,7 +13,7 @@ import { useStoreConfig } from '../../context/StoreConfigContext';
  * Gère le processus complet de paiement avec choix du mode
  * Les moyens de paiement sont chargés dynamiquement depuis la configuration
  */
-const PaymentModal = ({ isOpen, onClose, cart, onSuccess }) => {
+const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
   const { config, isPaymentMethodEnabled } = useStoreConfig();
 
   // Construire la liste des méthodes de paiement avec les icônes
@@ -96,6 +96,7 @@ const PaymentModal = ({ isOpen, onClose, cart, onSuccess }) => {
         payment_method: paymentData.payment_method,
         amount_paid: paymentData.amount_paid,
         payment_details: paymentData.payment_details || null,
+        discount: discount || null, // Ajouter les données de remise si présentes
       };
 
       const response = await createSale(saleData);

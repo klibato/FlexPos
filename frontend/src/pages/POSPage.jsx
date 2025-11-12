@@ -10,7 +10,7 @@ import PaymentModal from '../components/payment/PaymentModal';
 import OpenCashRegisterModal from '../components/cashRegister/OpenCashRegisterModal';
 import CloseCashRegisterModal from '../components/cashRegister/CloseCashRegisterModal';
 import Button from '../components/ui/Button';
-import { LogOut, RefreshCw, CheckCircle, CreditCard, DollarSign, Receipt, BarChart3, Package, Users, Settings } from 'lucide-react';
+import { LogOut, RefreshCw, CheckCircle, CreditCard, DollarSign, Receipt, BarChart3, Package, Users, Settings, Percent, Tag, X } from 'lucide-react';
 import { formatPrice } from '../utils/constants';
 
 const POSPage = () => {
@@ -35,6 +35,9 @@ const POSPage = () => {
     clearCart,
     getTotal,
     getItemCount,
+    discount,
+    applyDiscount,
+    removeDiscount,
   } = useCart();
 
   // Utilisation du CashRegisterContext
@@ -49,6 +52,11 @@ const POSPage = () => {
 
   // Notification de succès
   const [successMessage, setSuccessMessage] = useState(null);
+
+  // État pour l'UI de remise
+  const [showDiscountInput, setShowDiscountInput] = useState(false);
+  const [discountType, setDiscountType] = useState('percentage'); // 'percentage' ou 'amount'
+  const [discountValue, setDiscountValue] = useState('');
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -99,8 +107,30 @@ const POSPage = () => {
     }, 5000);
   };
 
-  const cartTotal = getTotal();
+  const { subtotal, discountAmount, total: cartTotal, hasDiscount } = getTotal();
   const itemCount = getItemCount();
+
+  const handleApplyDiscount = () => {
+    const value = parseFloat(discountValue);
+    if (isNaN(value) || value <= 0) {
+      alert('Veuillez entrer une valeur valide');
+      return;
+    }
+
+    if (discountType === 'percentage' && value > 100) {
+      alert('Le pourcentage ne peut pas dépasser 100%');
+      return;
+    }
+
+    applyDiscount({ type: discountType, value });
+    setShowDiscountInput(false);
+    setDiscountValue('');
+  };
+
+  const handleRemoveDiscount = () => {
+    removeDiscount();
+    setDiscountValue('');
+  };
 
   if (!user) {
     return null;
@@ -374,13 +404,99 @@ const POSPage = () => {
             )}
           </div>
 
-          {/* Total et bouton payer */}
+          {/* Remise et Total */}
           <div className="border-t pt-4 flex-shrink-0">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-lg font-medium">Total TTC :</span>
-              <span className="text-3xl font-bold text-primary-500">
-                {formatPrice(cartTotal)}
-              </span>
+            {/* Bouton remise */}
+            {!hasDiscount && !showDiscountInput && cart.length > 0 && (
+              <button
+                onClick={() => setShowDiscountInput(true)}
+                className="w-full mb-3 py-2 px-3 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-lg hover:bg-yellow-100 transition-colors flex items-center justify-center gap-2"
+              >
+                <Tag size={18} />
+                <span className="text-sm font-medium">Appliquer une remise</span>
+              </button>
+            )}
+
+            {/* Input remise */}
+            {showDiscountInput && (
+              <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex gap-2 mb-2">
+                  <select
+                    value={discountType}
+                    onChange={(e) => setDiscountType(e.target.value)}
+                    className="px-2 py-1 border border-gray-300 rounded text-sm"
+                  >
+                    <option value="percentage">%</option>
+                    <option value="amount">€</option>
+                  </select>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={discountValue}
+                    onChange={(e) => setDiscountValue(e.target.value)}
+                    placeholder={discountType === 'percentage' ? '10' : '5.00'}
+                    className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleApplyDiscount}
+                    className="flex-1 py-1 px-2 bg-yellow-600 text-white rounded text-sm font-medium hover:bg-yellow-700"
+                  >
+                    Valider
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowDiscountInput(false);
+                      setDiscountValue('');
+                    }}
+                    className="px-2 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Affichage remise active */}
+            {hasDiscount && (
+              <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Tag size={16} className="text-yellow-600" />
+                  <span className="text-sm text-yellow-700 font-medium">
+                    Remise: {discount.type === 'percentage' ? `${discount.value}%` : `${discount.value}€`}
+                  </span>
+                </div>
+                <button
+                  onClick={handleRemoveDiscount}
+                  className="p-1 hover:bg-yellow-100 rounded transition-colors"
+                  title="Retirer la remise"
+                >
+                  <X size={16} className="text-yellow-600" />
+                </button>
+              </div>
+            )}
+
+            {/* Détail du total */}
+            <div className="space-y-2 mb-4">
+              {hasDiscount && (
+                <>
+                  <div className="flex justify-between items-center text-sm text-gray-600">
+                    <span>Sous-total:</span>
+                    <span>{formatPrice(subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm text-yellow-600">
+                    <span>Remise:</span>
+                    <span>- {formatPrice(discountAmount)}</span>
+                  </div>
+                </>
+              )}
+              <div className="flex justify-between items-center pt-2 border-t">
+                <span className="text-lg font-medium">Total TTC :</span>
+                <span className="text-3xl font-bold text-primary-500">
+                  {formatPrice(cartTotal)}
+                </span>
+              </div>
             </div>
 
             <Button
@@ -401,6 +517,7 @@ const POSPage = () => {
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         cart={cart}
+        discount={discount}
         onSuccess={handlePaymentSuccess}
       />
 

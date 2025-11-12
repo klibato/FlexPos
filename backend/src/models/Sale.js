@@ -68,6 +68,21 @@ const Sale = sequelize.define('sales', {
       key: 'id',
     },
   },
+  discount_type: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    validate: {
+      isIn: [['percentage', 'amount']],
+    },
+  },
+  discount_value: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+  },
+  discount_amount: {
+    type: DataTypes.DECIMAL(10, 2),
+    defaultValue: 0,
+  },
   notes: {
     type: DataTypes.TEXT,
     allowNull: true,

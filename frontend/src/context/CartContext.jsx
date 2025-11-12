@@ -12,6 +12,7 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
+  const [discount, setDiscount] = useState(null); // { type: 'percentage' | 'amount', value: number }
 
   // Charger le panier depuis localStorage au démarrage
   useEffect(() => {
@@ -105,16 +106,56 @@ export const CartProvider = ({ children }) => {
    */
   const clearCart = () => {
     setCart([]);
+    setDiscount(null); // Réinitialiser la remise aussi
   };
 
   /**
-   * Calculer le total du panier
+   * Appliquer une remise
+   * @param {Object} discountData - { type: 'percentage' | 'amount', value: number }
+   */
+  const applyDiscount = (discountData) => {
+    setDiscount(discountData);
+  };
+
+  /**
+   * Retirer la remise
+   */
+  const removeDiscount = () => {
+    setDiscount(null);
+  };
+
+  /**
+   * Calculer le total du panier (avec remise si applicable)
+   * @returns {Object} - { subtotal, discountAmount, total, hasDiscount }
    */
   const getTotal = () => {
-    return cart.reduce(
+    const subtotal = cart.reduce(
       (sum, item) => sum + parseFloat(item.price_ttc) * item.quantity,
       0
     );
+
+    let discountAmount = 0;
+    if (discount) {
+      if (discount.type === 'percentage') {
+        discountAmount = subtotal * (discount.value / 100);
+      } else if (discount.type === 'amount') {
+        discountAmount = Math.min(discount.value, subtotal); // Ne pas dépasser le sous-total
+      }
+    }
+
+    return {
+      subtotal,
+      discountAmount,
+      total: Math.max(0, subtotal - discountAmount), // Total ne peut pas être négatif
+      hasDiscount: !!discount,
+    };
+  };
+
+  /**
+   * Obtenir le total simple (pour rétrocompatibilité)
+   */
+  const getTotalAmount = () => {
+    return getTotal().total;
   };
 
   /**
@@ -148,9 +189,13 @@ export const CartProvider = ({ children }) => {
     decrementQuantity,
     clearCart,
     getTotal,
+    getTotalAmount,
     getItemCount,
     isInCart,
     getQuantity,
+    discount,
+    applyDiscount,
+    removeDiscount,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

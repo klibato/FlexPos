@@ -11,7 +11,7 @@ const createSale = async (req, res, next) => {
   const transaction = await sequelize.transaction();
 
   try {
-    const { items, payment_method, amount_paid, payment_details } = req.body;
+    const { items, payment_method, amount_paid, payment_details, discount } = req.body;
 
     // Vérifier qu'une caisse est ouverte
     const activeCashRegister = await CashRegister.findOne({
@@ -57,7 +57,27 @@ const createSale = async (req, res, next) => {
     }
 
     // Calculer les totaux (HT, TTC, TVA)
-    const { totalHT, totalTTC, vatDetails } = calculateSaleTotals(items);
+    let { totalHT, totalTTC, vatDetails } = calculateSaleTotals(items);
+
+    // Calculer la remise si présente
+    let discountAmount = 0;
+    let discountType = null;
+    let discountValue = null;
+
+    if (discount && discount.value > 0) {
+      discountType = discount.type;
+      discountValue = discount.value;
+
+      if (discount.type === 'percentage') {
+        discountAmount = totalTTC * (discount.value / 100);
+      } else if (discount.type === 'amount') {
+        discountAmount = Math.min(discount.value, totalTTC); // Ne pas dépasser le total
+      }
+
+      // Appliquer la remise aux totaux
+      totalTTC = Math.max(0, totalTTC - discountAmount);
+      totalHT = totalHT * (totalTTC / (totalHT * 1.2)); // Ajuster le HT proportionnellement
+    }
 
     let totalPaid = 0;
     let changeGiven = 0;
@@ -168,6 +188,9 @@ const createSale = async (req, res, next) => {
         payment_details: payment_method === 'mixed' ? payment_details : null,
         amount_paid: totalPaid,
         change_given: changeGiven,
+        discount_type: discountType,
+        discount_value: discountValue,
+        discount_amount: discountAmount,
         status: 'completed',
       },
       { transaction }
