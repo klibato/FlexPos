@@ -13,11 +13,19 @@ export const useCashRegister = () => {
 
 export const CashRegisterProvider = ({ children }) => {
   const [activeCashRegister, setActiveCashRegister] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Charger la caisse active au montage
   const fetchActiveCashRegister = async () => {
+    // Vérifier qu'un token existe avant de faire la requête
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setActiveCashRegister(null);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -26,6 +34,9 @@ export const CashRegisterProvider = ({ children }) => {
     } catch (err) {
       // Pas de caisse active n'est pas une erreur critique
       if (err.response?.status === 404) {
+        setActiveCashRegister(null);
+      } else if (err.response?.status === 401) {
+        // Non authentifié - ne pas afficher d'erreur
         setActiveCashRegister(null);
       } else {
         setError(err.response?.data?.error?.message || 'Erreur lors du chargement de la caisse');
