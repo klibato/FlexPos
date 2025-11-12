@@ -1,6 +1,15 @@
 import api from './api';
 
 /**
+ * Récupérer la configuration publique du commerce
+ * (Accessible sans authentification)
+ */
+export const getPublicConfig = async () => {
+  const response = await api.get('/settings/config');
+  return response.data;
+};
+
+/**
  * Récupérer les paramètres du commerce
  */
 export const getSettings = async () => {
