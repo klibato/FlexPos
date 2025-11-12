@@ -125,6 +125,9 @@ const startServer = async () => {
     const migrateProductsDisplayOrder = require('./scripts/migrateProductsDisplayOrder');
     await migrateProductsDisplayOrder();
 
+    const migrateStoreConfig = require('./scripts/migrateStoreConfig');
+    await migrateStoreConfig();
+
     // Initialiser l'imprimante thermique
     const printerService = require('./services/printerService');
     await printerService.initialize();

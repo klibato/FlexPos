@@ -4,21 +4,25 @@ const settingsController = require('../controllers/settingsController');
 const { authenticateToken, requirePermission } = require('../middlewares/auth');
 const { PERMISSIONS } = require('../config/permissions');
 
-// Toutes les routes nécessitent une authentification
-router.use(authenticateToken);
+/**
+ * @route   GET /api/settings/config
+ * @desc    Récupérer la configuration publique du commerce (catégories, TVA, paiements, thème)
+ * @access  Public (pas d'authentification requise)
+ */
+router.get('/config', settingsController.getPublicConfig);
 
 /**
  * @route   GET /api/settings
  * @desc    Récupérer les paramètres du commerce
  * @access  Authentifié
  */
-router.get('/', settingsController.getSettings);
+router.get('/', authenticateToken, settingsController.getSettings);
 
 /**
  * @route   PUT /api/settings
  * @desc    Mettre à jour les paramètres du commerce
  * @access  Admin uniquement
  */
-router.put('/', requirePermission(PERMISSIONS.SETTINGS_UPDATE), settingsController.updateSettings);
+router.put('/', authenticateToken, requirePermission(PERMISSIONS.SETTINGS_UPDATE), settingsController.updateSettings);
 
 module.exports = router;
