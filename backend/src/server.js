@@ -92,6 +92,7 @@ app.use('/api/dashboard', apiLimiter, require('./routes/dashboard'));
 app.use('/api/users', apiLimiter, require('./routes/users'));
 app.use('/api/settings', apiLimiter, require('./routes/settings'));
 app.use('/api/printer', apiLimiter, require('./routes/printer'));
+app.use('/api/sumup', apiLimiter, require('./routes/sumup'));
 
 // ============================================
 // GESTION DES ERREURS
@@ -127,6 +128,10 @@ const startServer = async () => {
     // Initialiser l'imprimante thermique
     const printerService = require('./services/printerService');
     await printerService.initialize();
+
+    // Tester la connexion SumUp
+    const sumupService = require('./services/sumupService');
+    await sumupService.testConnection();
 
     // Démarrer le serveur
     app.listen(config.PORT, () => {
