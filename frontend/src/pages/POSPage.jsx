@@ -58,10 +58,10 @@ const POSPage = () => {
 
   // Ouvrir automatiquement le modal de caisse si aucune caisse n'est ouverte
   useEffect(() => {
-    if (!cashRegisterLoading && !hasActiveCashRegister()) {
+    if (!cashRegisterLoading && !activeCashRegister) {
       setIsOpenCashRegisterModalOpen(true);
     }
-  }, [cashRegisterLoading, hasActiveCashRegister]);
+  }, [cashRegisterLoading, activeCashRegister]);
 
   const handleLogout = () => {
     logout();
