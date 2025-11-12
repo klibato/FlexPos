@@ -16,4 +16,7 @@ router.get('/', requirePermission(PERMISSIONS.SALES_VIEW), saleController.getAll
 // GET /api/sales/:id - Récupérer une vente
 router.get('/:id', requirePermission(PERMISSIONS.SALES_VIEW), saleController.getSaleById);
 
+// GET /api/sales/:id/pdf - Générer le PDF du ticket
+router.get('/:id/pdf', requirePermission(PERMISSIONS.SALES_VIEW), saleController.generateTicketPDFEndpoint);
+
 module.exports = router;

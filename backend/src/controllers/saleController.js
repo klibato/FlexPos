@@ -1,5 +1,6 @@
-const { Sale, SaleItem, CashRegister, sequelize } = require('../models');
+const { Sale, SaleItem, CashRegister, User, sequelize } = require('../models');
 const { calculateSaleTotals, calculateChange } = require('../services/vatService');
+const { generateTicketPDF } = require('../services/pdfService');
 const logger = require('../utils/logger');
 
 /**
@@ -353,8 +354,77 @@ const getSaleById = async (req, res, next) => {
   }
 };
 
+/**
+ * Générer un PDF du ticket de caisse
+ */
+const generateTicketPDFEndpoint = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Récupérer la vente avec tous les détails
+    const sale = await Sale.findByPk(id, {
+      include: [
+        {
+          model: SaleItem,
+          as: 'items',
+        },
+        {
+          model: CashRegister,
+          as: 'cash_register',
+        },
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'first_name', 'last_name', 'username'],
+        },
+      ],
+    });
+
+    if (!sale) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Vente non trouvée',
+        },
+      });
+    }
+
+    // Vérifier les permissions
+    if (req.user.role !== 'admin' && sale.user_id !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'Accès refusé',
+        },
+      });
+    }
+
+    // Générer le PDF
+    const doc = generateTicketPDF(sale, sale.cash_register, sale.user);
+
+    // Configurer les headers pour le téléchargement
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="ticket-${sale.ticket_number}.pdf"`
+    );
+
+    // Streamer le PDF vers la réponse
+    doc.pipe(res);
+    doc.end();
+
+    logger.info(`PDF généré pour le ticket ${sale.ticket_number} par ${req.user.username}`);
+  } catch (error) {
+    logger.error('Erreur lors de la génération du PDF:', error);
+    next(error);
+  }
+};
+
 module.exports = {
   createSale,
   getAllSales,
   getSaleById,
+  generateTicketPDFEndpoint,
 };

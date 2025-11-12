@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getAllSales } from '../services/saleService';
 import Button from '../components/ui/Button';
-import { ArrowLeft, Search, Filter, Eye } from 'lucide-react';
+import { ArrowLeft, Search, Filter, Eye, Download } from 'lucide-react';
 import { formatPrice } from '../utils/constants';
 
 const SalesHistoryPage = () => {
@@ -93,6 +93,35 @@ const SalesHistoryPage = () => {
       mixed: 'Mixte',
     };
     return labels[method] || method;
+  };
+
+  const handleDownloadPDF = async (saleId, ticketNumber) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/sales/${saleId}/pdf`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors du téléchargement du PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ticket-${ticketNumber}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Erreur téléchargement PDF:', error);
+      alert('Erreur lors du téléchargement du PDF');
+    }
   };
 
   if (!user) return null;
@@ -257,13 +286,22 @@ const SalesHistoryPage = () => {
                           {sale.items?.length || 0}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <button
-                            onClick={() => setSelectedSale(sale)}
-                            className="text-primary-600 hover:text-primary-800"
-                            title="Voir détails"
-                          >
-                            <Eye size={20} />
-                          </button>
+                          <div className="flex justify-center gap-3">
+                            <button
+                              onClick={() => setSelectedSale(sale)}
+                              className="text-primary-600 hover:text-primary-800"
+                              title="Voir détails"
+                            >
+                              <Eye size={20} />
+                            </button>
+                            <button
+                              onClick={() => handleDownloadPDF(sale.id, sale.ticket_number)}
+                              className="text-green-600 hover:text-green-800"
+                              title="Télécharger PDF"
+                            >
+                              <Download size={20} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
