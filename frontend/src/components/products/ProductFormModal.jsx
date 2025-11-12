@@ -8,12 +8,17 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
   // Utiliser les catégories et taux de TVA de la configuration
   const categories = config.categories || [];
   const vatRates = config.vat_rates || [];
+
+  // Valeurs par défaut intelligentes
+  const defaultCategory = categories.length > 0 ? categories[0].id : 'burgers';
+  const defaultVatRate = vatRates.length > 0 ? vatRates[0].rate : 10;
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price_ht: '',
-    vat_rate: 10,
-    category: 'burgers',
+    vat_rate: defaultVatRate,
+    category: defaultCategory,
     image_url: '',
     is_active: true,
     is_menu: false,
@@ -26,8 +31,8 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
         name: product.name || '',
         description: product.description || '',
         price_ht: product.price_ht || '',
-        vat_rate: product.vat_rate || 10,
-        category: product.category || 'burgers',
+        vat_rate: product.vat_rate || defaultVatRate,
+        category: product.category || defaultCategory,
         image_url: product.image_url || '',
         is_active: product.is_active !== undefined ? product.is_active : true,
         is_menu: product.is_menu || false,
@@ -38,15 +43,15 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
         name: '',
         description: '',
         price_ht: '',
-        vat_rate: 10,
-        category: 'burgers',
+        vat_rate: defaultVatRate,
+        category: defaultCategory,
         image_url: '',
         is_active: true,
         is_menu: false,
         display_order: 0,
       });
     }
-  }, [product, isOpen]);
+  }, [product, isOpen, defaultCategory, defaultVatRate]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
