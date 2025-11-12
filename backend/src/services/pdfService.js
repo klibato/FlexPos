@@ -35,7 +35,7 @@ const generateTicketPDF = (sale, cashRegister, user) => {
 
   // Header - Logo et nom
   doc.fontSize(20).font('Helvetica-Bold');
-  centerText('🍔 BensBurger', doc.y);
+  centerText('BensBurger', doc.y);
 
   doc.moveDown(0.5);
   doc.fontSize(10).font('Helvetica');
@@ -130,7 +130,7 @@ const generateTicketPDF = (sale, cashRegister, user) => {
     Object.entries(sale.vat_details).forEach(([rate, details]) => {
       lineText(
         `TVA ${rate}%`,
-        `${formatPrice(details.amount_ht)} HT`,
+        `${formatPrice(details.base_ht)} HT`,
         doc.y
       );
       doc.moveDown(0.2);
