@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import Button from '../components/ui/Button';
 import ProductFormModal from '../components/products/ProductFormModal';
+import { useStoreConfig } from '../context/StoreConfigContext';
 import {
   getAllProducts,
   createProduct,
@@ -11,17 +12,34 @@ import {
   updateProductsOrder,
 } from '../services/productService';
 
-const CATEGORIES = [
-  { value: '', label: 'Toutes les catégories' },
-  { value: 'burgers', label: 'Burgers' },
-  { value: 'sides', label: 'Accompagnements' },
-  { value: 'drinks', label: 'Boissons' },
-  { value: 'desserts', label: 'Desserts' },
-  { value: 'menus', label: 'Menus' },
-];
-
 const ProductsPage = () => {
   const navigate = useNavigate();
+  const { config } = useStoreConfig();
+
+  // Construire la liste des catégories dynamiquement depuis la config
+  const CATEGORIES = useMemo(() => {
+    const cats = [{ value: '', label: 'Toutes les catégories' }];
+
+    if (config.categories && config.categories.length > 0) {
+      config.categories.forEach((cat) => {
+        cats.push({
+          value: cat.id,
+          label: `${cat.icon} ${cat.name}`,
+        });
+      });
+    } else {
+      // Fallback si pas de catégories configurées
+      cats.push(
+        { value: 'burgers', label: 'Burgers' },
+        { value: 'sides', label: 'Accompagnements' },
+        { value: 'drinks', label: 'Boissons' },
+        { value: 'desserts', label: 'Desserts' },
+        { value: 'menus', label: 'Menus' }
+      );
+    }
+
+    return cats;
+  }, [config.categories]);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,6 +99,9 @@ const ProductsPage = () => {
     try {
       setModalLoading(true);
       setError(null);
+
+      console.log('Données envoyées au backend:', formData);
+
       await createProduct(formData);
       setSuccessMessage('Produit créé avec succès');
       setIsModalOpen(false);
@@ -89,7 +110,13 @@ const ProductsPage = () => {
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       console.error('Erreur lors de la création:', err);
-      setError(err.response?.data?.message || 'Erreur lors de la création du produit');
+      console.error('Détails erreur:', err.response?.data);
+
+      const errorMessage = err.response?.data?.error?.message
+        || err.response?.data?.message
+        || 'Erreur lors de la création du produit';
+
+      setError(errorMessage);
     } finally {
       setModalLoading(false);
     }
