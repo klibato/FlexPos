@@ -29,14 +29,15 @@ const Product = sequelize.define('products', {
     type: DataTypes.DECIMAL(4, 2),
     allowNull: false,
     validate: {
-      isIn: [[5.5, 10.0, 20.0]],
+      min: 0,
+      max: 100,
     },
   },
   category: {
     type: DataTypes.STRING(50),
     allowNull: false,
     validate: {
-      isIn: [['burgers', 'sides', 'drinks', 'desserts', 'menus']],
+      notEmpty: true,
     },
   },
   image_url: {
