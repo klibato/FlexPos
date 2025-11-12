@@ -98,6 +98,41 @@ const StoreSettings = sequelize.define('store_settings', {
     allowNull: false,
     defaultValue: '€',
   },
+  // Configuration paramétrable pour multi-commerce
+  categories: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: [],
+  },
+  vat_rates: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: [],
+  },
+  payment_methods: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {},
+  },
+  theme_color: {
+    type: DataTypes.STRING(7),
+    allowNull: true,
+    defaultValue: '#FF6B35',
+  },
+  logo_url: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  language: {
+    type: DataTypes.STRING(5),
+    allowNull: true,
+    defaultValue: 'fr-FR',
+  },
+  timezone: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    defaultValue: 'Europe/Paris',
+  },
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,

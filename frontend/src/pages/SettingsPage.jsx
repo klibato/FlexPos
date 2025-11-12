@@ -62,7 +62,21 @@ const SettingsPage = () => {
     try {
       setLoading(true);
       const response = await getSettings();
-      setSettings(response.data);
+
+      // Normaliser les données pour garantir que les tableaux/objets existent
+      const normalizedSettings = {
+        ...response.data,
+        categories: response.data.categories || [],
+        vat_rates: response.data.vat_rates || [],
+        payment_methods: response.data.payment_methods || {},
+        theme_color: response.data.theme_color || '#FF6B35',
+        currency: response.data.currency || 'EUR',
+        currency_symbol: response.data.currency_symbol || '€',
+        language: response.data.language || 'fr-FR',
+        timezone: response.data.timezone || 'Europe/Paris',
+      };
+
+      setSettings(normalizedSettings);
     } catch (err) {
       setError(err.response?.data?.error?.message || 'Erreur lors du chargement des paramètres');
     } finally {
@@ -108,7 +122,7 @@ const SettingsPage = () => {
     setSettings((prev) => ({
       ...prev,
       categories: [
-        ...prev.categories,
+        ...(prev.categories || []),
         {
           id: `cat_${Date.now()}`,
           name: '',
@@ -121,7 +135,8 @@ const SettingsPage = () => {
 
   const updateCategory = (index, field, value) => {
     setSettings((prev) => {
-      const newCategories = [...prev.categories];
+      const currentCategories = prev.categories || [];
+      const newCategories = [...currentCategories];
       newCategories[index] = {
         ...newCategories[index],
         [field]: value,
@@ -133,7 +148,7 @@ const SettingsPage = () => {
   const removeCategory = (index) => {
     setSettings((prev) => ({
       ...prev,
-      categories: prev.categories.filter((_, i) => i !== index),
+      categories: (prev.categories || []).filter((_, i) => i !== index),
     }));
   };
 
@@ -142,7 +157,7 @@ const SettingsPage = () => {
     setSettings((prev) => ({
       ...prev,
       vat_rates: [
-        ...prev.vat_rates,
+        ...(prev.vat_rates || []),
         {
           rate: 20,
           name: '',
@@ -154,7 +169,8 @@ const SettingsPage = () => {
 
   const updateVatRate = (index, field, value) => {
     setSettings((prev) => {
-      const newVatRates = [...prev.vat_rates];
+      const currentVatRates = prev.vat_rates || [];
+      const newVatRates = [...currentVatRates];
       newVatRates[index] = {
         ...newVatRates[index],
         [field]: field === 'rate' ? parseFloat(value) : value,
@@ -166,35 +182,41 @@ const SettingsPage = () => {
   const removeVatRate = (index) => {
     setSettings((prev) => ({
       ...prev,
-      vat_rates: prev.vat_rates.filter((_, i) => i !== index),
+      vat_rates: (prev.vat_rates || []).filter((_, i) => i !== index),
     }));
   };
 
   // Gestion des moyens de paiement
   const togglePaymentMethod = (method) => {
-    setSettings((prev) => ({
-      ...prev,
-      payment_methods: {
-        ...prev.payment_methods,
-        [method]: {
-          ...prev.payment_methods[method],
-          enabled: !prev.payment_methods[method]?.enabled,
+    setSettings((prev) => {
+      const currentPaymentMethods = prev.payment_methods || {};
+      return {
+        ...prev,
+        payment_methods: {
+          ...currentPaymentMethods,
+          [method]: {
+            ...(currentPaymentMethods[method] || {}),
+            enabled: !(currentPaymentMethods[method]?.enabled),
+          },
         },
-      },
-    }));
+      };
+    });
   };
 
   const updatePaymentMethodName = (method, name) => {
-    setSettings((prev) => ({
-      ...prev,
-      payment_methods: {
-        ...prev.payment_methods,
-        [method]: {
-          ...prev.payment_methods[method],
-          name: name,
+    setSettings((prev) => {
+      const currentPaymentMethods = prev.payment_methods || {};
+      return {
+        ...prev,
+        payment_methods: {
+          ...currentPaymentMethods,
+          [method]: {
+            ...(currentPaymentMethods[method] || {}),
+            name: name,
+          },
         },
-      },
-    }));
+      };
+    });
   };
 
   const tabs = [
