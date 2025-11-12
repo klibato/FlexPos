@@ -98,7 +98,7 @@ const SalesHistoryPage = () => {
   const handleDownloadPDF = async (saleId, ticketNumber) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/sales/${saleId}/pdf`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/sales/${saleId}/pdf`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
