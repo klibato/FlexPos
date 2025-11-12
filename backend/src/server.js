@@ -116,6 +116,10 @@ const startServer = async () => {
       process.exit(1);
     }
 
+    // Exécuter la migration store_settings
+    const migrateStoreSettings = require('./scripts/migrateStoreSettings');
+    await migrateStoreSettings();
+
     // Démarrer le serveur
     app.listen(config.PORT, () => {
       logger.info(`🚀 Serveur démarré sur le port ${config.PORT}`);
