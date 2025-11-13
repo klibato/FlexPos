@@ -3,6 +3,28 @@
 @tailwind utilities;
 
 /* ========================================
+   CSS VARIABLES - Theme Colors (Dynamic)
+======================================== */
+:root {
+  /* Couleurs primaires par défaut (overridées dynamiquement par JS) */
+  --color-primary: #FF6B35;
+  --color-primary-hover: #ea580c;
+  --color-primary-light: #ffedd5;
+
+  /* Nuances Tailwind (format RGB pour alpha-value) */
+  --color-primary-50: 255 247 237;
+  --color-primary-100: 255 237 213;
+  --color-primary-200: 254 215 170;
+  --color-primary-300: 253 186 116;
+  --color-primary-400: 251 146 60;
+  --color-primary-500: 255 107 53;
+  --color-primary-600: 234 88 12;
+  --color-primary-700: 194 65 12;
+  --color-primary-800: 154 52 18;
+  --color-primary-900: 124 45 18;
+}
+
+/* ========================================
    BASE STYLES
 ======================================== */
 * {

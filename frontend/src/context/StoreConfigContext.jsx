@@ -3,15 +3,52 @@ import { getPublicConfig } from '../services/settingsService';
 
 const StoreConfigContext = createContext();
 
+// Helper pour convertir hex en RGB
+const hexToRgb = (hex) => {
+  const num = parseInt(hex.replace('#', ''), 16);
+  return {
+    r: (num >> 16) & 255,
+    g: (num >> 8) & 255,
+    b: num & 255,
+  };
+};
+
 // Helper pour ajuster la luminosité d'une couleur hexadécimale
 const adjustBrightness = (hex, percent) => {
-  // Convertir hex en RGB
   const num = parseInt(hex.replace('#', ''), 16);
   const r = Math.min(255, Math.max(0, (num >> 16) + percent));
   const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + percent));
   const b = Math.min(255, Math.max(0, (num & 0x0000FF) + percent));
 
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+};
+
+// Générer toutes les nuances d'une couleur (50-900) pour Tailwind
+const generateColorShades = (baseColor) => {
+  const rgb = hexToRgb(baseColor);
+  const shades = {};
+
+  // Générer les nuances avec différents niveaux de luminosité
+  const levels = {
+    50: 140,
+    100: 100,
+    200: 60,
+    300: 30,
+    400: 15,
+    500: 0,    // Couleur de base
+    600: -15,
+    700: -30,
+    800: -50,
+    900: -70,
+  };
+
+  Object.entries(levels).forEach(([shade, adjustment]) => {
+    const adjusted = adjustBrightness(baseColor, adjustment);
+    const rgbAdjusted = hexToRgb(adjusted);
+    shades[shade] = `${rgbAdjusted.r} ${rgbAdjusted.g} ${rgbAdjusted.b}`;
+  });
+
+  return shades;
 };
 
 export const useStoreConfig = () => {
@@ -59,9 +96,17 @@ export const StoreConfigProvider = ({ children }) => {
   // Appliquer le theme_color dynamiquement au DOM
   useEffect(() => {
     if (config.theme_color) {
+      // Générer toutes les nuances de la couleur principale
+      const shades = generateColorShades(config.theme_color);
+
+      // Injecter toutes les nuances comme variables CSS pour Tailwind
+      Object.entries(shades).forEach(([shade, rgb]) => {
+        document.documentElement.style.setProperty(`--color-primary-${shade}`, rgb);
+      });
+
+      // Variables principales pour compatibilité
       document.documentElement.style.setProperty('--color-primary', config.theme_color);
-      // Générer des variations de la couleur pour hover, etc.
-      document.documentElement.style.setProperty('--color-primary-hover', adjustBrightness(config.theme_color, -10));
+      document.documentElement.style.setProperty('--color-primary-hover', adjustBrightness(config.theme_color, -15));
       document.documentElement.style.setProperty('--color-primary-light', adjustBrightness(config.theme_color, 30));
     }
   }, [config.theme_color]);
