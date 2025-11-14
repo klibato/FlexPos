@@ -129,9 +129,87 @@ const getPermissions = async (req, res, next) => {
   }
 };
 
+/**
+ * Changer de caissier rapidement (sans rate limiting strict)
+ * Nécessite d'être déjà authentifié
+ */
+const switchCashier = async (req, res, next) => {
+  try {
+    const { username, pin_code } = req.body;
+
+    // Validation
+    if (!username || !pin_code) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Username et PIN code requis',
+        },
+      });
+    }
+
+    // Trouver le nouvel utilisateur
+    const newUser = await User.findOne({ where: { username } });
+
+    if (!newUser) {
+      return res.status(401).json({
+        success: false,
+        error: {
+          code: 'INVALID_CREDENTIALS',
+          message: 'Identifiants invalides',
+        },
+      });
+    }
+
+    // Vérifier que l'utilisateur est actif
+    if (!newUser.is_active) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'ACCOUNT_DISABLED',
+          message: 'Compte désactivé',
+        },
+      });
+    }
+
+    // Vérifier le PIN code
+    const isValidPin = await newUser.validatePinCode(pin_code);
+
+    if (!isValidPin) {
+      return res.status(401).json({
+        success: false,
+        error: {
+          code: 'INVALID_CREDENTIALS',
+          message: 'Identifiants invalides',
+        },
+      });
+    }
+
+    // Générer un nouveau token JWT pour le nouveau caissier
+    const token = jwt.sign(
+      { userId: newUser.id, username: newUser.username, role: newUser.role },
+      config.jwt.secret,
+      { expiresIn: config.jwt.expiration }
+    );
+
+    logger.info(`Changement de caissier: ${req.user.username} -> ${newUser.username}`);
+
+    res.json({
+      success: true,
+      data: {
+        token,
+        user: newUser.toPublicJSON(),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   login,
   logout,
   getMe,
   getPermissions,
+  switchCashier,
 };

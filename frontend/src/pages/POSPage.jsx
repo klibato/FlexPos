@@ -15,7 +15,7 @@ import { LogOut, RefreshCw, CheckCircle, CreditCard, DollarSign, Receipt, BarCha
 import { formatPrice } from '../utils/constants';
 
 const POSPage = () => {
-  const { user, logout, login, isAuthenticated } = useAuth();
+  const { user, logout, switchCashier, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const {
     products,
@@ -85,7 +85,7 @@ const POSPage = () => {
   const handleSwitchCashier = async (username, pin) => {
     setIsSwitchingCashier(true);
     try {
-      const result = await login(username, pin);
+      const result = await switchCashier(username, pin);
       if (!result.success) {
         throw new Error(result.error);
       }

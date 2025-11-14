@@ -50,11 +50,30 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const switchCashier = async (username, pin_code) => {
+    try {
+      const response = await api.post('/auth/switch-cashier', { username, pin_code });
+      const { token, user: userData } = response.data.data;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error?.message || 'Erreur lors du changement de caissier',
+      };
+    }
+  };
+
   const value = {
     user,
     loading,
     login,
     logout,
+    switchCashier,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
   };
