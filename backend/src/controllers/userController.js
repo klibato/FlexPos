@@ -1,5 +1,4 @@
 const { User } = require('../models');
-const bcrypt = require('bcryptjs');
 const logger = require('../utils/logger');
 const { Op } = require('sequelize');
 
@@ -118,13 +117,11 @@ const createUser = async (req, res, next) => {
       });
     }
 
-    // Hasher le PIN
-    const hashedPin = await bcrypt.hash(pin_code, 10);
-
     // Créer l'utilisateur
+    // Note: Le PIN sera hashé automatiquement par le hook beforeCreate du modèle User
     const user = await User.create({
       username,
-      pin_code: hashedPin,
+      pin_code,
       first_name,
       last_name,
       email: email || null,
@@ -205,7 +202,8 @@ const updateUser = async (req, res, next) => {
     if (role !== undefined) updateData.role = role;
     if (is_active !== undefined) updateData.is_active = is_active;
 
-    // Si un nouveau PIN est fourni, le hasher
+    // Si un nouveau PIN est fourni, l'ajouter aux données
+    // Note: Le PIN sera hashé automatiquement par le hook beforeUpdate du modèle User
     if (pin_code) {
       if (!/^\d{4}$/.test(pin_code)) {
         return res.status(400).json({
@@ -216,7 +214,7 @@ const updateUser = async (req, res, next) => {
           },
         });
       }
-      updateData.pin_code = await bcrypt.hash(pin_code, 10);
+      updateData.pin_code = pin_code;
     }
 
     // Mettre à jour l'utilisateur
