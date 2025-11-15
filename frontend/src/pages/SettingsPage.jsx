@@ -1258,40 +1258,24 @@ const SettingsPage = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Langue
-                        </label>
-                        <select
-                          name="language"
-                          value={settings.language}
-                          onChange={handleChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        >
-                          <option value="fr-FR">Français</option>
-                          <option value="en-US">English</option>
-                          <option value="es-ES">Español</option>
-                          <option value="de-DE">Deutsch</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Fuseau horaire
-                        </label>
-                        <select
-                          name="timezone"
-                          value={settings.timezone}
-                          onChange={handleChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        >
-                          <option value="Europe/Paris">Europe/Paris</option>
-                          <option value="Europe/London">Europe/London</option>
-                          <option value="America/New_York">America/New_York</option>
-                          <option value="America/Los_Angeles">America/Los_Angeles</option>
-                        </select>
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Fuseau horaire
+                      </label>
+                      <select
+                        name="timezone"
+                        value={settings.timezone}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="Europe/Paris">Europe/Paris</option>
+                        <option value="Europe/London">Europe/London</option>
+                        <option value="America/New_York">America/New_York</option>
+                        <option value="America/Los_Angeles">America/Los_Angeles</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Note: La langue et le thème se configurent depuis le menu burger
+                      </p>
                     </div>
                   </div>
                 </div>
