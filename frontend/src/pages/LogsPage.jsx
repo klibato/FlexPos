@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getLogs, exportLogsCSV } from '../services/logsService';
 import { getAllUsers } from '../services/userService';
-import { Download, RefreshCw, Filter, X } from 'lucide-react';
+import { Download, RefreshCw, Filter, X, ArrowLeft } from 'lucide-react';
 
 const LogsPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -189,6 +191,13 @@ const LogsPage = () => {
           <p className="text-gray-600 mt-1">Journal de toutes les actions du système</p>
         </div>
         <div className="flex gap-3">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Retour
+          </button>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"

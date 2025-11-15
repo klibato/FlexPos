@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUp, ArrowDown, Download } from 'lucide-react';
+import { ArrowUp, ArrowDown, Download, Edit2, Trash2 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import ProductFormModal from '../components/products/ProductFormModal';
 import { useStoreConfig } from '../context/StoreConfigContext';
@@ -352,146 +352,137 @@ const ProductsPage = () => {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Produit
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Catégorie
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Prix HT
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      TVA
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Prix TTC
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Stock
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Statut
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Ordre
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+            <table className="w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Produit
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Catégorie
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Prix
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Stock
+                  </th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Statut
+                  </th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Ordre
+                  </th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredProducts.map((product) => (
+                  <tr key={product.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                      {product.description && (
+                        <div className="text-xs text-gray-500 truncate max-w-xs">
+                          {product.description}
+                        </div>
+                      )}
+                      {product.is_menu && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 mt-1">
+                          Menu
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <span className="text-sm text-gray-900">
+                        {getCategoryLabel(product.category)}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {calculatePriceTTC(product.price_ht, product.vat_rate)} €
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        HT: {parseFloat(product.price_ht).toFixed(2)} € • TVA {product.vat_rate}%
+                      </div>
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      {product.is_menu ? (
+                        <span className="text-xs text-gray-400 italic">N/A</span>
+                      ) : product.is_out_of_stock ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          ⚠️ Rupture
+                        </span>
+                      ) : product.is_low_stock ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                          ⚡ {product.quantity}
+                        </span>
+                      ) : (
+                        <span className="text-sm font-medium text-green-600">
+                          ✓ {product.quantity}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap text-center">
+                      {product.is_active ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Actif
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          Inactif
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <div className="flex items-center justify-center gap-1">
+                        <span className="text-xs text-gray-500 w-6 text-center">{product.display_order}</span>
+                        <div className="flex flex-col gap-0.5">
+                          <button
+                            onClick={() => handleMoveProduct(filteredProducts.indexOf(product), 'up')}
+                            disabled={filteredProducts.indexOf(product) === 0}
+                            className="p-0.5 text-gray-400 hover:text-primary-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Monter"
+                          >
+                            <ArrowUp size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleMoveProduct(filteredProducts.indexOf(product), 'down')}
+                            disabled={filteredProducts.indexOf(product) === filteredProducts.length - 1}
+                            className="p-0.5 text-gray-400 hover:text-primary-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Descendre"
+                          >
+                            <ArrowDown size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => {
+                            setEditingProduct(product);
+                            setIsModalOpen(true);
+                          }}
+                          className="p-1.5 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                          title="Modifier"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirm(product)}
+                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Supprimer"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredProducts.map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                        {product.description && (
-                          <div className="text-sm text-gray-500 truncate max-w-xs">
-                            {product.description}
-                          </div>
-                        )}
-                        {product.is_menu && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 mt-1">
-                            Menu
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-gray-900">
-                          {getCategoryLabel(product.category)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-gray-900">{parseFloat(product.price_ht).toFixed(2)} €</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-gray-900">{product.vat_rate}%</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm font-medium text-gray-900">
-                          {calculatePriceTTC(product.price_ht, product.vat_rate)} €
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {product.is_menu ? (
-                          <span className="text-sm text-gray-400 italic">N/A</span>
-                        ) : product.is_out_of_stock ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                            ⚠️ Rupture
-                          </span>
-                        ) : product.is_low_stock ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                            ⚡ Bas ({product.quantity})
-                          </span>
-                        ) : (
-                          <span className="text-sm font-medium text-green-600">
-                            ✓ {product.quantity}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {product.is_active ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Actif
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                            Inactif
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-500">{product.display_order}</span>
-                          <div className="flex flex-col gap-0.5">
-                            <button
-                              onClick={() => handleMoveProduct(filteredProducts.indexOf(product), 'up')}
-                              disabled={filteredProducts.indexOf(product) === 0}
-                              className="p-0.5 text-gray-400 hover:text-primary-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                              title="Monter"
-                            >
-                              <ArrowUp size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleMoveProduct(filteredProducts.indexOf(product), 'down')}
-                              disabled={filteredProducts.indexOf(product) === filteredProducts.length - 1}
-                              className="p-0.5 text-gray-400 hover:text-primary-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                              title="Descendre"
-                            >
-                              <ArrowDown size={16} />
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => {
-                              setEditingProduct(product);
-                              setIsModalOpen(true);
-                            }}
-                            className="text-primary-600 hover:text-primary-900"
-                          >
-                            Modifier
-                          </button>
-                          <button
-                            onClick={() => setDeleteConfirm(product)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Supprimer
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
