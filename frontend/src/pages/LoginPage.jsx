@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -9,6 +10,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -28,16 +30,16 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-primary-500 to-primary-700 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">🍔 BensBurger</h1>
-          <p className="text-gray-600">Système de caisse</p>
+          <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">🍔 BensBurger</h1>
+          <p className="text-gray-600 dark:text-gray-400">  {t('pos.title')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Nom d'utilisateur
             </label>
             <input
@@ -53,7 +55,7 @@ const LoginPage = () => {
           </div>
 
           <div>
-            <label htmlFor="pinCode" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="pinCode" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Code PIN
             </label>
             <input

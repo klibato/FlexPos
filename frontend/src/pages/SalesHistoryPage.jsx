@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { getAllSales } from '../services/saleService';
 import Button from '../components/ui/Button';
 import { ArrowLeft, Search, Filter, Eye, Download, Printer } from 'lucide-react';
@@ -8,6 +9,7 @@ import { formatPrice } from '../utils/constants';
 
 const SalesHistoryPage = () => {
   const { user, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [sales, setSales] = useState([]);
@@ -192,9 +194,9 @@ const SalesHistoryPage = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+      <header className="bg-white dark:bg-gray-800 shadow-sm px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-4">
           <Button
             variant="secondary"
@@ -206,8 +208,8 @@ const SalesHistoryPage = () => {
             Retour
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Journal des ventes</h1>
-            <p className="text-sm text-gray-600">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">  {t('sales.title')}</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               {pagination.total} vente{pagination.total > 1 ? 's' : ''}
             </p>
           </div>
@@ -241,35 +243,35 @@ const SalesHistoryPage = () => {
             <h3 className="font-semibold text-gray-800 mb-4">Filtres</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Date début
                 </label>
                 <input
                   type="date"
                   value={filters.start_date}
                   onChange={(e) => handleFilterChange('start_date', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Date fin
                 </label>
                 <input
                   type="date"
                   value={filters.end_date}
                   onChange={(e) => handleFilterChange('end_date', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Paiement
                 </label>
                 <select
                   value={filters.payment_method}
                   onChange={(e) => handleFilterChange('payment_method', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="">Tous</option>
                   <option value="cash">Espèces</option>
@@ -280,13 +282,13 @@ const SalesHistoryPage = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Statut
                 </label>
                 <select
                   value={filters.status}
                   onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="">Tous</option>
                   <option value="completed">Complétée</option>
@@ -300,7 +302,7 @@ const SalesHistoryPage = () => {
 
         {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg mb-4">
             {error}
           </div>
         )}
@@ -308,16 +310,16 @@ const SalesHistoryPage = () => {
         {/* Liste des ventes */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-gray-500">Chargement...</div>
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">  {t('common.loading')}</div>
           ) : sales.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
               Aucune vente trouvée
             </div>
           ) : (
             <>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
+                  <thead className="bg-gray-50 border-b border-gray-200 dark:border-gray-700">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Ticket
@@ -339,19 +341,19 @@ const SalesHistoryPage = () => {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700">
                     {sales.map((sale) => (
-                      <tr key={sale.id} className="hover:bg-gray-50">
+                      <tr key={sale.id} className="hover:bg-gray-50 dark:bg-gray-700">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-sm font-medium text-gray-900">
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                             {sale.ticket_number}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                           {formatDate(sale.created_at)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-sm text-gray-900">
+                          <span className="text-sm text-gray-900 dark:text-gray-100">
                             {getPaymentMethodLabel(sale.payment_method)}
                           </span>
                         </td>
@@ -360,7 +362,7 @@ const SalesHistoryPage = () => {
                             {formatPrice(sale.total_ttc)}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">
+                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600 dark:text-gray-400">
                           {sale.items?.length || 0}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -395,8 +397,8 @@ const SalesHistoryPage = () => {
               </div>
 
               {/* Pagination */}
-              <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
-                <div className="text-sm text-gray-600">
+              <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
                   Affichage de {pagination.offset + 1} à{' '}
                   {Math.min(pagination.offset + pagination.limit, pagination.total)} sur{' '}
                   {pagination.total}
@@ -428,7 +430,7 @@ const SalesHistoryPage = () => {
       {/* Modal détail vente */}
       {selectedSale && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50"
           onClick={() => setSelectedSale(null)}
         >
           <div
@@ -446,21 +448,21 @@ const SalesHistoryPage = () => {
                 <h3 className="font-semibold text-gray-800 mb-3">Informations</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-600">Date:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Date:</span>
                     <p className="font-medium">{formatDate(selectedSale.created_at)}</p>
                   </div>
                   <div>
-                    <span className="text-gray-600">Paiement:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Paiement:</span>
                     <p className="font-medium">
                       {getPaymentMethodLabel(selectedSale.payment_method)}
                     </p>
                   </div>
                   <div>
-                    <span className="text-gray-600">Montant payé:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Montant payé:</span>
                     <p className="font-medium">{formatPrice(selectedSale.amount_paid)}</p>
                   </div>
                   <div>
-                    <span className="text-gray-600">Monnaie rendue:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Monnaie rendue:</span>
                     <p className="font-medium">{formatPrice(selectedSale.change_given)}</p>
                   </div>
                 </div>
@@ -476,12 +478,12 @@ const SalesHistoryPage = () => {
                       className="flex justify-between items-center p-3 bg-gray-50 rounded"
                     >
                       <div className="flex-1">
-                        <p className="font-medium text-gray-800">{item.product_name}</p>
-                        <p className="text-sm text-gray-600">
+                        <p className="font-medium text-gray-800 dark:text-gray-100">{item.product_name}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
                           {formatPrice(item.unit_price_ht)} HT × {item.quantity} (TVA {item.vat_rate}%)
                         </p>
                       </div>
-                      <p className="font-semibold text-gray-800">
+                      <p className="font-semibold text-gray-800 dark:text-gray-100">
                         {formatPrice(item.total_ttc)}
                       </p>
                     </div>
@@ -492,7 +494,7 @@ const SalesHistoryPage = () => {
               {/* Totaux */}
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center text-sm mb-2">
-                  <span className="text-gray-600">Total HT:</span>
+                  <span className="text-gray-600 dark:text-gray-400">Total HT:</span>
                   <span className="font-medium">{formatPrice(selectedSale.total_ht)}</span>
                 </div>
                 <div className="flex justify-between items-center text-lg font-bold">

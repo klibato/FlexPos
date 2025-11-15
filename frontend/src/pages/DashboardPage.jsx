@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { getDashboardStats } from '../services/dashboardService';
 import Button from '../components/ui/Button';
 import { ArrowLeft, TrendingUp, ShoppingCart, DollarSign, CreditCard, RefreshCw, Download } from 'lucide-react';
@@ -23,6 +24,7 @@ import {
 
 const DashboardPage = () => {
   const { user, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [stats, setStats] = useState(null);
@@ -55,12 +57,12 @@ const DashboardPage = () => {
 
   const getPeriodLabel = () => {
     const labels = {
-      today: "Aujourd'hui",
-      week: 'Cette semaine',
-      month: 'Ce mois',
-      year: 'Cette année',
+      today: t('dashboard.today'),
+      week: t('dashboard.thisWeek'),
+      month: t('dashboard.thisMonth'),
+      year: t('dashboard.thisYear'),
     };
-    return labels[period] || 'Aujourd\'hui';
+    return labels[period] || t('dashboard.today');
   };
 
   // Export cash register closures to CSV
@@ -98,11 +100,11 @@ const DashboardPage = () => {
 
   const getPaymentMethodLabel = (method) => {
     const labels = {
-      cash: 'Espèces',
-      card: 'Carte',
-      meal_voucher: 'Ticket resto',
-      mixed: 'Mixte',
-      sumup: 'SumUp',
+      cash: t('payment.cash'),
+      card: t('payment.card'),
+      meal_voucher: t('payment.mealVoucher'),
+      mixed: t('payment.mixed'),
+      sumup: t('payment.sumup'),
     };
     return labels[method] || method;
   };
@@ -129,9 +131,9 @@ const DashboardPage = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+      <header className="bg-white dark:bg-gray-800 shadow-sm px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-4">
           <Button
             variant="secondary"
@@ -140,23 +142,23 @@ const DashboardPage = () => {
             className="flex items-center gap-2"
           >
             <ArrowLeft size={20} />
-            Retour
+            {t('common.back')}
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">📊 Dashboard</h1>
-            <p className="text-sm text-gray-600">{getPeriodLabel()}</p>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">📊 {t('dashboard.title')}</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{getPeriodLabel()}</p>
           </div>
         </div>
         <div className="flex gap-2">
           <select
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
           >
-            <option value="today">Aujourd'hui</option>
-            <option value="week">Cette semaine</option>
-            <option value="month">Ce mois</option>
-            <option value="year">Cette année</option>
+            <option value="today">{t('dashboard.today')}</option>
+            <option value="week">{t('dashboard.thisWeek')}</option>
+            <option value="month">{t('dashboard.thisMonth')}</option>
+            <option value="year">{t('dashboard.thisYear')}</option>
           </select>
           <Button
             variant="secondary"
@@ -165,7 +167,7 @@ const DashboardPage = () => {
             className="flex items-center gap-2"
           >
             <RefreshCw size={20} />
-            Actualiser
+            {t('common.refresh')}
           </Button>
           {user?.role === 'admin' && (
             <Button
@@ -175,7 +177,7 @@ const DashboardPage = () => {
               className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
             >
               <Download size={20} />
-              Export Clôtures
+              {t('dashboard.exportClosures')}
             </Button>
           )}
         </div>
@@ -184,88 +186,88 @@ const DashboardPage = () => {
       <div className="max-w-7xl mx-auto px-6 py-6">
         {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg mb-4">
             {error}
           </div>
         )}
 
         {loading ? (
-          <div className="text-center py-12 text-gray-500">Chargement...</div>
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400">{t('common.loading')}</div>
         ) : stats ? (
           <>
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
               {/* CA Total */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-medium text-gray-600">CA Total</h3>
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">  {t('dashboard.revenue')}</h3>
                   <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                     <DollarSign className="text-green-600" size={20} />
                   </div>
                 </div>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                   {formatPrice(stats.stats.total_revenue)}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   HT: {formatPrice(stats.stats.total_ht)}
                 </p>
               </div>
 
               {/* Nombre de ventes */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-medium text-gray-600">Ventes</h3>
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">  {t('dashboard.sales')}</h3>
                   <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                     <ShoppingCart className="text-blue-600" size={20} />
                   </div>
                 </div>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                   {stats.stats.total_sales}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">transactions</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">  {t('dashboard.transactions')}</p>
               </div>
 
               {/* Panier moyen */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-medium text-gray-600">Panier moyen</h3>
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">  {t('dashboard.avgTicket')}</h3>
                   <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
                     <TrendingUp className="text-purple-600" size={20} />
                   </div>
                 </div>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                   {formatPrice(stats.stats.average_ticket)}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">par transaction</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">par transaction</p>
               </div>
 
               {/* Caisses ouvertes */}
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-medium text-gray-600">Caisses ouvertes</h3>
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Open Registers</h3>
                   <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
                     <CreditCard className="text-orange-600" size={20} />
                   </div>
                 </div>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                   {stats.stats.open_registers}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">actuellement</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">currently</p>
               </div>
             </div>
 
             {/* Grid 2 colonnes */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Top produits */}
-              <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-800">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                     🏆 Top 5 Produits
                   </h3>
                 </div>
                 <div className="p-6">
                   {stats.top_products.length === 0 ? (
-                    <p className="text-gray-500 text-center py-4">Aucune vente</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-center py-4">  {t('sales.noSales')}</p>
                   ) : (
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart
@@ -306,15 +308,15 @@ const DashboardPage = () => {
               </div>
 
               {/* Ventes par mode de paiement */}
-              <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-800">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                     💳 Modes de paiement
                   </h3>
                 </div>
                 <div className="p-6">
                   {stats.sales_by_payment_method.length === 0 ? (
-                    <p className="text-gray-500 text-center py-4">Aucune vente</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-center py-4">  {t('sales.noSales')}</p>
                   ) : (
                     <ResponsiveContainer width="100%" height={300}>
                       <PieChart>
@@ -359,8 +361,8 @@ const DashboardPage = () => {
             {/* Ventes par jour */}
             {stats.sales_by_day.length > 0 && (
               <div className="bg-white rounded-lg shadow mt-6">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-800">
+                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                     📈 Évolution des ventes
                   </h3>
                 </div>

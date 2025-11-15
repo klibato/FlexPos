@@ -119,9 +119,9 @@ const UsersPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+      <header className="bg-white dark:bg-gray-800 shadow-sm px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-4">
           <Button
             variant="secondary"
@@ -133,11 +133,11 @@ const UsersPage = () => {
             Retour
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
               <UsersIcon size={28} />
               Gestion des Utilisateurs
             </h1>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               {filteredUsers.length} utilisateur{filteredUsers.length > 1 ? 's' : ''}
             </p>
           </div>
@@ -188,17 +188,17 @@ const UsersPage = () => {
         {/* Users Table */}
         {loading ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-500">Chargement des utilisateurs...</p>
+            <p className="text-gray-500 dark:text-gray-400">Chargement des utilisateurs...</p>
           </div>
         ) : filteredUsers.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-500">Aucun utilisateur trouvé</p>
+            <p className="text-gray-500 dark:text-gray-400">  {t('users.noUsers')}</p>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Utilisateur
@@ -220,19 +220,19 @@ const UsersPage = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
+                    <tr key={user.id} className="hover:bg-gray-50 dark:bg-gray-700">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{user.username}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.username}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
+                        <div className="text-sm text-gray-900 dark:text-gray-100">
                           {user.first_name} {user.last_name}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{user.email || '-'}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{user.email || '-'}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
@@ -251,7 +251,7 @@ const UsersPage = () => {
                             Actif
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:text-gray-100">
                             Inactif
                           </span>
                         )}
@@ -301,7 +301,7 @@ const UsersPage = () => {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
             <div className="p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-2">

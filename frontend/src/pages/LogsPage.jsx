@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { getLogs, exportLogsCSV } from '../services/logsService';
 import { getAllUsers } from '../services/userService';
 import { Download, RefreshCw, Filter, X, ArrowLeft, FileText } from 'lucide-react';
@@ -176,7 +177,7 @@ const LogsPage = () => {
   if (!user || user.role !== 'admin') {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-200 px-4 py-3 rounded">
           Accès réservé aux administrateurs
         </div>
       </div>
@@ -184,9 +185,9 @@ const LogsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+      <header className="bg-white dark:bg-gray-800 shadow-sm px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-4">
           <Button
             variant="secondary"
@@ -198,11 +199,11 @@ const LogsPage = () => {
             Retour
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
               <FileText size={28} />
               Logs & Audit
             </h1>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Journal de toutes les actions du système
             </p>
           </div>
@@ -241,10 +242,10 @@ const LogsPage = () => {
       <div className="max-w-7xl mx-auto px-6 py-6">
         {/* Filtres */}
         {showFilters && (
-          <div className="bg-white p-6 rounded-lg shadow-md mb-6 border border-gray-200">
+          <div className="bg-white p-6 rounded-lg shadow-md mb-6 border border-gray-200 dark:border-gray-700">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Date début
                 </label>
                 <input
@@ -252,12 +253,12 @@ const LogsPage = () => {
                   name="start_date"
                   value={filters.start_date}
                   onChange={handleFilterChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Date fin
                 </label>
                 <input
@@ -265,19 +266,19 @@ const LogsPage = () => {
                   name="end_date"
                   value={filters.end_date}
                   onChange={handleFilterChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Utilisateur
                 </label>
                 <select
                   name="user_id"
                   value={filters.user_id}
                   onChange={handleFilterChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Tous les utilisateurs</option>
                   {users.map(u => (
@@ -289,14 +290,14 @@ const LogsPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Action
                 </label>
                 <select
                   name="action"
                   value={filters.action}
                   onChange={handleFilterChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Toutes les actions</option>
                   {actionTypes.map(action => (
@@ -308,14 +309,14 @@ const LogsPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                   Type d'entité
                 </label>
                 <select
                   name="entity_type"
                   value={filters.entity_type}
                   onChange={handleFilterChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Tous les types</option>
                   {entityTypes.map(type => (
@@ -347,13 +348,13 @@ const LogsPage = () => {
 
         {/* Erreur */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-200 px-4 py-3 rounded mb-4">
             {error}
           </div>
         )}
 
         {/* Tableau des logs */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+        <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
           {loading ? (
             <div className="text-center py-12">
               <RefreshCw className="w-12 h-12 animate-spin mx-auto text-gray-400" />
@@ -361,12 +362,12 @@ const LogsPage = () => {
             </div>
           ) : logs.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-600">Aucun log trouvé</p>
+              <p className="text-gray-600 dark:text-gray-400">  {t('logs.noLogs')}</p>
             </div>
           ) : (
             <>
               <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gray-50 border-b border-gray-200 dark:border-gray-700">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
@@ -385,16 +386,16 @@ const LogsPage = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700">
                   {logs.map((log) => (
-                    <tr key={log.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <tr key={log.id} className="hover:bg-gray-50 dark:bg-gray-700">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                         {formatDate(log.created_at)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {log.user ? (
                           <div>
-                            <div className="font-medium text-gray-900">
+                            <div className="font-medium text-gray-900 dark:text-gray-100">
                               {log.user.first_name} {log.user.last_name}
                             </div>
                             <div className="text-gray-500 text-xs">
@@ -402,7 +403,7 @@ const LogsPage = () => {
                             </div>
                           </div>
                         ) : (
-                          <span className="text-gray-500">Système</span>
+                          <span className="text-gray-500 dark:text-gray-400">Système</span>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -412,13 +413,13 @@ const LogsPage = () => {
                           {log.action}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                         {log.entity_type || '-'}
                         {log.entity_id && (
                           <span className="text-gray-500 ml-1">#{log.entity_id}</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {log.ip_address || '-'}
                       </td>
                     </tr>
@@ -427,7 +428,7 @@ const LogsPage = () => {
               </table>
 
               {/* Pagination */}
-              <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
+              <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700">
                 <div className="text-sm text-gray-700">
                   Affichage de {pagination.offset + 1} à{' '}
                   {Math.min(pagination.offset + pagination.limit, pagination.total)} sur{' '}
