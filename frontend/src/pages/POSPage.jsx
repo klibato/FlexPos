@@ -384,6 +384,8 @@ const POSPage = () => {
       <PaymentModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
+        cart={cart}
+        discount={discount}
         onSuccess={handlePaymentSuccess}
       />
 
