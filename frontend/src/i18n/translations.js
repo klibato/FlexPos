@@ -47,6 +47,7 @@ export const translations = {
       emptyCart: 'Panier vide',
       clickToAdd: 'Cliquez sur un produit pour l\'ajouter',
       total: 'Total TTC',
+      subtotal: 'Sous-total:',
       pay: 'Payer',
       items: 'articles',
       item: 'article',
@@ -57,6 +58,10 @@ export const translations = {
       applyDiscount: 'Appliquer une remise',
       removeDiscount: 'Retirer la remise',
       menu: 'Menu',
+      // Alerts
+      noCashRegister: 'Veuillez ouvrir une caisse avant de commencer à vendre.',
+      invalidValue: 'Veuillez entrer une valeur valide',
+      percentageMax: 'Le pourcentage ne peut pas dépasser 100%',
     },
 
     // Cash Register
@@ -388,11 +393,43 @@ export const translations = {
 
     // Payment methods
     payment: {
+      // Modal
+      title: 'Encaissement',
+      selectMethod: 'Sélectionnez le mode de paiement',
+      amountToPay: 'Montant à payer',
+      processing: 'Traitement du paiement...',
+      error: 'Erreur lors du paiement',
+      // Payment methods
       cash: 'Espèces',
       card: 'Carte bancaire',
       mealVoucher: 'Ticket restaurant',
       mixed: 'Mixte',
       sumup: 'SumUp',
+      // Card payment
+      cardPayment: 'Paiement par Carte',
+      cardPresent: 'Présentez la carte au terminal de paiement',
+      confirmPayment: 'Confirmer le paiement',
+      processingPayment: 'Traitement...',
+      back: 'Retour',
+      // Meal voucher
+      mealVoucherPayment: 'Titres Restaurant',
+      mealVoucherScan: 'Scannez ou saisissez le(s) titre(s) restaurant',
+      mealVoucherLimit: '⚠️ Plafond journalier: 25€ par titre',
+      // SumUp
+      sumupPayment: 'Paiement SumUp',
+      sumupPresent: 'Présentez la carte au terminal SumUp',
+      sumupAutomatic: '⚡ Le paiement sera traité automatiquement',
+      sumupProcessing: 'Traitement du paiement SumUp en cours...',
+      sumupWait: 'Veuillez patienter pendant la communication avec le terminal',
+      sumupStart: 'Lancer le paiement SumUp',
+      sumupError: 'Erreur lors du paiement SumUp',
+      // Mixed payment
+      totalToPay: 'Total à payer:',
+      alreadyPaid: 'Déjà payé:',
+      remainingToPay: 'Reste à payer:',
+      amount: 'Montant',
+      addPaymentMethod: '+ Ajouter un mode de paiement',
+      insufficientAmount: 'Le montant total payé est insuffisant',
     },
 
     // Messages
@@ -468,6 +505,7 @@ export const translations = {
       emptyCart: 'Empty cart',
       clickToAdd: 'Click on a product to add it',
       total: 'Total (incl. tax)',
+      subtotal: 'Subtotal:',
       pay: 'Pay',
       items: 'items',
       item: 'item',
@@ -478,6 +516,10 @@ export const translations = {
       applyDiscount: 'Apply discount',
       removeDiscount: 'Remove discount',
       menu: 'Menu',
+      // Alerts
+      noCashRegister: 'Please open a cash register before starting to sell.',
+      invalidValue: 'Please enter a valid value',
+      percentageMax: 'Percentage cannot exceed 100%',
     },
 
     // Cash Register
@@ -809,11 +851,43 @@ export const translations = {
 
     // Payment methods
     payment: {
+      // Modal
+      title: 'Checkout',
+      selectMethod: 'Select payment method',
+      amountToPay: 'Amount to pay',
+      processing: 'Processing payment...',
+      error: 'Error during payment',
+      // Payment methods
       cash: 'Cash',
       card: 'Card',
       mealVoucher: 'Meal voucher',
       mixed: 'Mixed',
       sumup: 'SumUp',
+      // Card payment
+      cardPayment: 'Card Payment',
+      cardPresent: 'Present the card to the payment terminal',
+      confirmPayment: 'Confirm payment',
+      processingPayment: 'Processing...',
+      back: 'Back',
+      // Meal voucher
+      mealVoucherPayment: 'Meal Vouchers',
+      mealVoucherScan: 'Scan or enter the meal voucher(s)',
+      mealVoucherLimit: '⚠️ Daily limit: 25€ per voucher',
+      // SumUp
+      sumupPayment: 'SumUp Payment',
+      sumupPresent: 'Present the card to the SumUp terminal',
+      sumupAutomatic: '⚡ Payment will be processed automatically',
+      sumupProcessing: 'Processing SumUp payment...',
+      sumupWait: 'Please wait while communicating with the terminal',
+      sumupStart: 'Start SumUp payment',
+      sumupError: 'Error during SumUp payment',
+      // Mixed payment
+      totalToPay: 'Total to pay:',
+      alreadyPaid: 'Already paid:',
+      remainingToPay: 'Remaining to pay:',
+      amount: 'Amount',
+      addPaymentMethod: '+ Add payment method',
+      insufficientAmount: 'Total amount paid is insufficient',
     },
 
     // Messages

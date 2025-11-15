@@ -109,7 +109,7 @@ const POSPage = () => {
   const handleProductClick = (product) => {
     // Vérifier qu'une caisse est ouverte
     if (!hasActiveCashRegister()) {
-      alert('Veuillez ouvrir une caisse avant de commencer à vendre.');
+      alert(t('pos.noCashRegister'));
       return;
     }
     addToCart(product);
@@ -143,12 +143,12 @@ const POSPage = () => {
   const handleApplyDiscount = () => {
     const value = parseFloat(discountValue);
     if (isNaN(value) || value <= 0) {
-      alert('Veuillez entrer une valeur valide');
+      alert(t('pos.invalidValue'));
       return;
     }
 
     if (discountType === 'percentage' && value > 100) {
-      alert('Le pourcentage ne peut pas dépasser 100%');
+      alert(t('pos.percentageMax'));
       return;
     }
 
@@ -676,7 +676,7 @@ const POSPage = () => {
               {hasDiscount && (
                 <>
                   <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
-                    <span>Sous-total:</span>
+                    <span>{t('pos.subtotal')}</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm text-yellow-600 dark:text-yellow-400">

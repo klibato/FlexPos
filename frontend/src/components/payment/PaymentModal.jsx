@@ -7,6 +7,7 @@ import { createSale } from '../../services/saleService';
 import { processSumUpPayment } from '../../services/sumupService';
 import { Banknote, CreditCard, Ticket, Shuffle, Smartphone } from 'lucide-react';
 import { useStoreConfig } from '../../context/StoreConfigContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 /**
  * Modal de paiement
@@ -15,6 +16,7 @@ import { useStoreConfig } from '../../context/StoreConfigContext';
  */
 const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
   const { config, isPaymentMethodEnabled } = useStoreConfig();
+  const { t } = useLanguage();
 
   // Construire la liste des méthodes de paiement avec les icônes
   const PAYMENT_METHODS_CONFIG = useMemo(() => {
@@ -53,15 +55,15 @@ const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
     // Si aucune méthode configurée, utiliser les valeurs par défaut
     if (methods.length === 0) {
       return [
-        { id: 'cash', label: 'Espèces', icon: Banknote, color: 'bg-green-500' },
-        { id: 'card', label: 'Carte Bancaire', icon: CreditCard, color: 'bg-blue-500' },
-        { id: 'meal_voucher', label: 'Titres Restaurant', icon: Ticket, color: 'bg-orange-500' },
-        { id: 'mixed', label: 'Paiement Mixte', icon: Shuffle, color: 'bg-purple-500' },
+        { id: 'cash', label: t('payment.cash'), icon: Banknote, color: 'bg-green-500' },
+        { id: 'card', label: t('payment.card'), icon: CreditCard, color: 'bg-blue-500' },
+        { id: 'meal_voucher', label: t('payment.mealVoucher'), icon: Ticket, color: 'bg-orange-500' },
+        { id: 'mixed', label: t('payment.mixed'), icon: Shuffle, color: 'bg-purple-500' },
       ];
     }
 
     return methods;
-  }, [config.payment_methods]);
+  }, [config.payment_methods, t]);
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -109,7 +111,7 @@ const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
       }
     } catch (err) {
       setError(
-        err.response?.data?.error?.message || 'Erreur lors du paiement'
+        err.response?.data?.error?.message || t('payment.error')
       );
       console.error('Erreur paiement:', err);
     } finally {
@@ -167,11 +169,11 @@ const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
           setSelectedMethod(null);
         }
       } else {
-        throw new Error(sumupResponse.error || 'Erreur lors du paiement SumUp');
+        throw new Error(sumupResponse.error || t('payment.sumupError'));
       }
     } catch (err) {
       setError(
-        err.response?.data?.error?.message || err.message || 'Erreur lors du paiement SumUp'
+        err.response?.data?.error?.message || err.message || t('payment.sumupError')
       );
       console.error('Erreur paiement SumUp:', err);
     } finally {
@@ -193,20 +195,20 @@ const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
     if (selectedMethod === 'card') {
       return (
         <div className="space-y-4">
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 text-center">
-            <CreditCard size={64} className="mx-auto mb-4 text-blue-500" />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Paiement par Carte</h3>
-            <p className="text-3xl font-bold text-blue-600 mb-4">
+          <div className="bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-6 text-center">
+            <CreditCard size={64} className="mx-auto mb-4 text-blue-500 dark:text-blue-400" />
+            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">{t('payment.cardPayment')}</h3>
+            <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-4">
               {totalTTC.toFixed(2)} €
             </p>
-            <p className="text-gray-600 mb-4">
-              Présentez la carte au terminal de paiement
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
+              {t('payment.cardPresent')}
             </p>
           </div>
 
           <div className="flex gap-3">
             <Button variant="secondary" onClick={handleBack} className="flex-1">
-              Retour
+              {t('payment.back')}
             </Button>
             <Button
               variant="primary"
@@ -214,7 +216,7 @@ const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
               disabled={loading}
               className="flex-1 bg-blue-600 hover:bg-blue-700"
             >
-              {loading ? 'Traitement...' : 'Confirmer le paiement'}
+              {loading ? t('payment.processingPayment') : t('payment.confirmPayment')}
             </Button>
           </div>
         </div>
@@ -224,23 +226,23 @@ const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
     if (selectedMethod === 'meal_voucher') {
       return (
         <div className="space-y-4">
-          <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-6 text-center">
-            <Ticket size={64} className="mx-auto mb-4 text-orange-500" />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Titres Restaurant</h3>
-            <p className="text-3xl font-bold text-orange-600 mb-4">
+          <div className="bg-orange-50 dark:bg-orange-900/30 border-2 border-orange-200 dark:border-orange-700 rounded-lg p-6 text-center">
+            <Ticket size={64} className="mx-auto mb-4 text-orange-500 dark:text-orange-400" />
+            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">{t('payment.mealVoucherPayment')}</h3>
+            <p className="text-3xl font-bold text-orange-600 dark:text-orange-400 mb-4">
               {totalTTC.toFixed(2)} €
             </p>
-            <p className="text-gray-600 mb-2">
-              Scannez ou saisissez le(s) titre(s) restaurant
+            <p className="text-gray-600 dark:text-gray-300 mb-2">
+              {t('payment.mealVoucherScan')}
             </p>
-            <p className="text-sm text-orange-600">
-              ⚠️ Plafond journalier: 25€ par titre
+            <p className="text-sm text-orange-600 dark:text-orange-400">
+              {t('payment.mealVoucherLimit')}
             </p>
           </div>
 
           <div className="flex gap-3">
             <Button variant="secondary" onClick={handleBack} className="flex-1">
-              Retour
+              {t('payment.back')}
             </Button>
             <Button
               variant="primary"
@@ -248,7 +250,7 @@ const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
               disabled={loading}
               className="flex-1 bg-orange-600 hover:bg-orange-700"
             >
-              {loading ? 'Traitement...' : 'Confirmer le paiement'}
+              {loading ? t('payment.processingPayment') : t('payment.confirmPayment')}
             </Button>
           </div>
         </div>
@@ -258,35 +260,35 @@ const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
     if (selectedMethod === 'sumup') {
       return (
         <div className="space-y-4">
-          <div className="bg-indigo-50 border-2 border-indigo-200 rounded-lg p-6 text-center">
-            <Smartphone size={64} className="mx-auto mb-4 text-indigo-500" />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Paiement SumUp</h3>
-            <p className="text-3xl font-bold text-indigo-600 mb-4">
+          <div className="bg-indigo-50 dark:bg-indigo-900/30 border-2 border-indigo-200 dark:border-indigo-700 rounded-lg p-6 text-center">
+            <Smartphone size={64} className="mx-auto mb-4 text-indigo-500 dark:text-indigo-400" />
+            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">{t('payment.sumupPayment')}</h3>
+            <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-4">
               {totalTTC.toFixed(2)} €
             </p>
-            <p className="text-gray-600 mb-2">
-              Présentez la carte au terminal SumUp
+            <p className="text-gray-600 dark:text-gray-300 mb-2">
+              {t('payment.sumupPresent')}
             </p>
-            <p className="text-sm text-indigo-600">
-              ⚡ Le paiement sera traité automatiquement
+            <p className="text-sm text-indigo-600 dark:text-indigo-400">
+              {t('payment.sumupAutomatic')}
             </p>
           </div>
 
           {loading && (
-            <div className="bg-indigo-100 border border-indigo-300 rounded-lg p-4 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-indigo-600 mx-auto mb-3"></div>
-              <p className="text-indigo-700 font-medium">
-                Traitement du paiement SumUp en cours...
+            <div className="bg-indigo-100 dark:bg-indigo-900/50 border border-indigo-300 dark:border-indigo-700 rounded-lg p-4 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-indigo-600 dark:border-indigo-400 mx-auto mb-3"></div>
+              <p className="text-indigo-700 dark:text-indigo-300 font-medium">
+                {t('payment.sumupProcessing')}
               </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Veuillez patienter pendant la communication avec le terminal
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {t('payment.sumupWait')}
               </p>
             </div>
           )}
 
           <div className="flex gap-3">
             <Button variant="secondary" onClick={handleBack} disabled={loading} className="flex-1">
-              Retour
+              {t('payment.back')}
             </Button>
             <Button
               variant="primary"
@@ -294,7 +296,7 @@ const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
               disabled={loading}
               className="flex-1 bg-indigo-600 hover:bg-indigo-700"
             >
-              {loading ? 'Traitement...' : 'Lancer le paiement SumUp'}
+              {loading ? t('payment.processingPayment') : t('payment.sumupStart')}
             </Button>
           </div>
         </div>
@@ -312,11 +314,11 @@ const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="💳 Encaissement"
+      title={`💳 ${t('payment.title')}`}
       size="lg"
     >
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg mb-4">
           {error}
         </div>
       )}
@@ -324,24 +326,24 @@ const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
       {loading && !selectedMethod ? (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Traitement du paiement...</p>
+          <p className="text-gray-600 dark:text-gray-300 text-lg">{t('payment.processing')}</p>
         </div>
       ) : selectedMethod ? (
         renderPaymentMethod()
       ) : (
         <div className="space-y-6">
           {/* Total */}
-          <div className="bg-primary-50 rounded-lg p-6 text-center">
-            <p className="text-gray-600 text-lg mb-2">Montant à payer</p>
-            <p className="text-4xl font-bold text-primary-600">
+          <div className="bg-primary-50 dark:bg-primary-900/30 rounded-lg p-6 text-center">
+            <p className="text-gray-600 dark:text-gray-300 text-lg mb-2">{t('payment.amountToPay')}</p>
+            <p className="text-4xl font-bold text-primary-600 dark:text-primary-400">
               {totalTTC.toFixed(2)} €
             </p>
           </div>
 
           {/* Modes de paiement */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              Sélectionnez le mode de paiement
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+              {t('payment.selectMethod')}
             </h3>
             <div className="grid grid-cols-2 gap-4">
               {PAYMENT_METHODS_CONFIG.map((method) => {
@@ -362,7 +364,7 @@ const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
 
           {/* Bouton annuler */}
           <Button variant="secondary" onClick={onClose} className="w-full">
-            Annuler
+            {t('common.cancel')}
           </Button>
         </div>
       )}
@@ -374,6 +376,7 @@ const PaymentModal = ({ isOpen, onClose, cart, discount, onSuccess }) => {
  * Composant de paiement mixte
  */
 const MixedPayment = ({ totalTTC, onConfirm, onCancel, loading }) => {
+  const { t } = useLanguage();
   const [payments, setPayments] = useState([
     { method: 'cash', amount: '' },
   ]);
@@ -400,7 +403,7 @@ const MixedPayment = ({ totalTTC, onConfirm, onCancel, loading }) => {
 
   const handleSubmit = () => {
     if (remaining > 0.01) {
-      alert('Le montant total payé est insuffisant');
+      alert(t('payment.insufficientAmount'));
       return;
     }
 
@@ -418,24 +421,24 @@ const MixedPayment = ({ totalTTC, onConfirm, onCancel, loading }) => {
 
   return (
     <div className="space-y-4">
-      <div className="bg-purple-50 border-2 border-purple-200 rounded-lg p-4">
+      <div className="bg-purple-50 dark:bg-purple-900/30 border-2 border-purple-200 dark:border-purple-700 rounded-lg p-4">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-gray-700">Total à payer:</span>
-          <span className="text-2xl font-bold text-purple-600">
+          <span className="text-gray-700 dark:text-gray-200">{t('payment.totalToPay')}</span>
+          <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
             {totalTTC.toFixed(2)} €
           </span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-gray-700">Déjà payé:</span>
+          <span className="text-gray-700 dark:text-gray-200">{t('payment.alreadyPaid')}</span>
           <span className="text-xl font-semibold text-gray-800 dark:text-gray-100">
             {totalPaid.toFixed(2)} €
           </span>
         </div>
-        <div className="border-t border-purple-200 mt-2 pt-2 flex justify-between items-center">
-          <span className="text-gray-700">Reste à payer:</span>
+        <div className="border-t border-purple-200 dark:border-purple-700 mt-2 pt-2 flex justify-between items-center">
+          <span className="text-gray-700 dark:text-gray-200">{t('payment.remainingToPay')}</span>
           <span
             className={`text-2xl font-bold ${
-              remaining > 0 ? 'text-orange-600' : 'text-green-600'
+              remaining > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400'
             }`}
           >
             {remaining.toFixed(2)} €
@@ -451,17 +454,17 @@ const MixedPayment = ({ totalTTC, onConfirm, onCancel, loading }) => {
               onChange={(e) => updatePayment(index, 'method', e.target.value)}
               className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-purple-500"
             >
-              <option value="cash">Espèces</option>
-              <option value="card">Carte</option>
-              <option value="sumup">SumUp</option>
-              <option value="meal_voucher">Titres Restaurant</option>
+              <option value="cash">{t('payment.cash')}</option>
+              <option value="card">{t('payment.card')}</option>
+              <option value="sumup">{t('payment.sumup')}</option>
+              <option value="meal_voucher">{t('payment.mealVoucher')}</option>
             </select>
             <input
               type="number"
               step="0.01"
               value={payment.amount}
               onChange={(e) => updatePayment(index, 'amount', e.target.value)}
-              placeholder="Montant"
+              placeholder={t('payment.amount')}
               className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-purple-500"
             />
             {payments.length > 1 && (
@@ -481,12 +484,12 @@ const MixedPayment = ({ totalTTC, onConfirm, onCancel, loading }) => {
         onClick={addPayment}
         className="w-full"
       >
-        + Ajouter un mode de paiement
+        {t('payment.addPaymentMethod')}
       </Button>
 
       <div className="flex gap-3">
         <Button variant="secondary" onClick={onCancel} className="flex-1">
-          Retour
+          {t('payment.back')}
         </Button>
         <Button
           variant="primary"
@@ -494,7 +497,7 @@ const MixedPayment = ({ totalTTC, onConfirm, onCancel, loading }) => {
           disabled={loading || remaining > 0.01}
           className="flex-1 bg-purple-600 hover:bg-purple-700"
         >
-          {loading ? 'Traitement...' : 'Confirmer le paiement'}
+          {loading ? t('payment.processingPayment') : t('payment.confirmPayment')}
         </Button>
       </div>
     </div>
