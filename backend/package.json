@@ -9,6 +9,7 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "db:seed-users": "node src/scripts/seedUsers.js",
+    "db:migrate": "node src/scripts/runMigration.js",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix"
   },

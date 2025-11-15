@@ -24,6 +24,8 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
     is_active: true,
     is_menu: false,
     display_order: 0,
+    quantity: 0,
+    low_stock_threshold: 10,
     menu_items: [],
   });
 
@@ -39,6 +41,8 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
         is_active: product.is_active !== undefined ? product.is_active : true,
         is_menu: product.is_menu || false,
         display_order: product.display_order || 0,
+        quantity: product.quantity !== undefined ? product.quantity : 0,
+        low_stock_threshold: product.low_stock_threshold || 10,
         menu_items: product.menu_composition || product.menu_items || [],
       });
     } else {
@@ -52,6 +56,8 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
         is_active: true,
         is_menu: false,
         display_order: 0,
+        quantity: 0,
+        low_stock_threshold: 10,
         menu_items: [],
       });
     }
@@ -248,6 +254,44 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
                 min="0"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               />
+            </div>
+
+            {/* Quantité en stock */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Quantité en stock
+              </label>
+              <input
+                type="number"
+                name="quantity"
+                value={formData.quantity}
+                onChange={handleChange}
+                min="0"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                placeholder="0"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Nombre d'unités disponibles (0 = rupture de stock)
+              </p>
+            </div>
+
+            {/* Seuil d'alerte stock bas */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Seuil d'alerte stock bas
+              </label>
+              <input
+                type="number"
+                name="low_stock_threshold"
+                value={formData.low_stock_threshold}
+                onChange={handleChange}
+                min="0"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                placeholder="10"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Alerte déclenchée quand le stock atteint ce seuil
+              </p>
             </div>
 
             {/* Checkboxes */}

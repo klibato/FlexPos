@@ -372,6 +372,9 @@ const ProductsPage = () => {
                       Prix TTC
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Stock
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Statut
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -413,6 +416,23 @@ const ProductsPage = () => {
                         <span className="text-sm font-medium text-gray-900">
                           {calculatePriceTTC(product.price_ht, product.vat_rate)} €
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {product.is_menu ? (
+                          <span className="text-sm text-gray-400 italic">N/A</span>
+                        ) : product.is_out_of_stock ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            ⚠️ Rupture
+                          </span>
+                        ) : product.is_low_stock ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                            ⚡ Bas ({product.quantity})
+                          </span>
+                        ) : (
+                          <span className="text-sm font-medium text-green-600">
+                            ✓ {product.quantity}
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {product.is_active ? (

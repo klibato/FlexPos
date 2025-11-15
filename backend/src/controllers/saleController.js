@@ -1,4 +1,4 @@
-const { Sale, SaleItem, CashRegister, User, StoreSettings, sequelize } = require('../models');
+const { Sale, SaleItem, CashRegister, User, StoreSettings, Product, sequelize } = require('../models');
 const { calculateSaleTotals, calculateChange } = require('../services/vatService');
 const { generateTicketPDF } = require('../services/pdfService');
 const printerService = require('../services/printerService');
@@ -211,6 +211,33 @@ const createSale = async (req, res, next) => {
     }));
 
     await SaleItem.bulkCreate(saleItemsData, { transaction });
+
+    // Décrémenter les stocks des produits vendus
+    for (const item of items) {
+      try {
+        const product = await Product.findByPk(item.product_id, { transaction });
+
+        if (!product) {
+          logger.warn(`Produit non trouvé pour décrémentation stock: ID ${item.product_id}`);
+          continue;
+        }
+
+        // Décrémenter le stock (cette méthode gère les menus automatiquement)
+        await product.decrementStock(item.quantity);
+
+        logger.info(`Stock décrémenté: ${product.name} - Quantité: ${item.quantity}, Nouveau stock: ${product.quantity}`);
+      } catch (error) {
+        // Si erreur de stock insuffisant, on rollback toute la transaction
+        await transaction.rollback();
+        return res.status(422).json({
+          success: false,
+          error: {
+            code: 'INSUFFICIENT_STOCK',
+            message: error.message || `Stock insuffisant pour un ou plusieurs produits`,
+          },
+        });
+      }
+    }
 
     // Mettre à jour les totaux de la caisse
     await activeCashRegister.update(
