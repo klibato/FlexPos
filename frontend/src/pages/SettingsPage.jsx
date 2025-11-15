@@ -130,7 +130,7 @@ const SettingsPage = () => {
 
       setSettings(normalizedSettings);
     } catch (err) {
-      setError(err.response?.data?.error?.message || 'Erreur lors du chargement des paramètres');
+      setError(err.response?.data?.error?.message || t('messages.loadSettingsError'));
     } finally {
       setLoading(false);
     }
@@ -152,7 +152,7 @@ const SettingsPage = () => {
 
     try {
       const response = await updateSettings(settings);
-      setSuccessMessage('Paramètres enregistrés avec succès !');
+      setSuccessMessage(t('messages.settingsSaved'));
       setSettings(response.data);
 
       // Rafraîchir la configuration globale
@@ -163,7 +163,7 @@ const SettingsPage = () => {
         setSuccessMessage(null);
       }, 3000);
     } catch (err) {
-      setError(err.response?.data?.error?.message || 'Erreur lors de l\'enregistrement des paramètres');
+      setError(err.response?.data?.error?.message || t('messages.saveSettingsError'));
     } finally {
       setSaving(false);
     }
@@ -305,14 +305,14 @@ const SettingsPage = () => {
   };
 
   const tabs = [
-    { id: 'general', label: 'Informations générales', icon: Store },
-    { id: 'categories', label: 'Catégories', icon: Package },
-    { id: 'vat', label: 'Taux de TVA', icon: Percent },
-    { id: 'payment', label: 'Moyens de paiement', icon: CreditCard },
-    { id: 'sumup', label: 'SumUp', icon: Smartphone },
-    { id: 'printer', label: 'Imprimante', icon: Printer },
-    { id: 'email', label: 'Email / SMTP', icon: Mail },
-    { id: 'appearance', label: 'Apparence', icon: Palette },
+    { id: 'general', label: t('settings.general'), icon: Store },
+    { id: 'categories', label: t('settings.categories'), icon: Package },
+    { id: 'vat', label: t('settings.vat'), icon: Percent },
+    { id: 'payment', label: t('settings.payment'), icon: CreditCard },
+    { id: 'sumup', label: t('settings.sumup'), icon: Smartphone },
+    { id: 'printer', label: t('settings.printer'), icon: Printer },
+    { id: 'email', label: t('settings.email'), icon: Mail },
+    { id: 'appearance', label: t('settings.appearance'), icon: Palette },
   ];
 
   if (!user || user.role !== 'admin') {
@@ -331,15 +331,15 @@ const SettingsPage = () => {
             className="flex items-center gap-2"
           >
             <ArrowLeft size={20} />
-            Retour
+            {t('common.back')}
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
               <Store size={28} />
-              Paramètres du Commerce
+              {t('settings.title')}
             </h1>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Configuration complète de votre commerce
+              {t('settings.description')}
             </p>
           </div>
         </div>
@@ -363,7 +363,7 @@ const SettingsPage = () => {
         {loading ? (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-500 mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">Chargement des paramètres...</p>
+            <p className="text-gray-600 dark:text-gray-400">{t('messages.loadingSettings')}</p>
           </div>
         ) : (
           <>
@@ -506,7 +506,7 @@ const SettingsPage = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                          Email
+                          {t('settings.emailAddress')}
                         </label>
                         <input
                           type="email"
@@ -620,7 +620,7 @@ const SettingsPage = () => {
                   <div className="flex justify-between items-center mb-4">
                     <div>
                       <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-                        Catégories de produits
+                        {t('settings.productCategories')}
                       </h2>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         {t('settings.manageCategoriesDesc')}
@@ -634,7 +634,7 @@ const SettingsPage = () => {
                       className="flex items-center gap-2"
                     >
                       <Plus size={18} />
-                      Ajouter
+                      {t('common.add')}
                     </Button>
                   </div>
 
@@ -679,8 +679,8 @@ const SettingsPage = () => {
                     ))}
 
                     {settings.categories?.length === 0 && (
-                      <div className="text-center py-8 text-gray-500">
-                        Aucune catégorie configurée. Cliquez sur "Ajouter" pour créer une catégorie.
+                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                        {t('settings.noCategoriesConfigured')}
                       </div>
                     )}
                   </div>
@@ -693,7 +693,7 @@ const SettingsPage = () => {
                   <div className="flex justify-between items-center mb-4">
                     <div>
                       <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-                        Taux de TVA
+                        {t('settings.vatRates')}
                       </h2>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         {t('settings.configureVatRatesDesc')}
@@ -707,7 +707,7 @@ const SettingsPage = () => {
                       className="flex items-center gap-2"
                     >
                       <Plus size={18} />
-                      Ajouter
+                      {t('common.add')}
                     </Button>
                   </div>
 
@@ -733,7 +733,7 @@ const SettingsPage = () => {
                           type="text"
                           value={vat.description}
                           onChange={(e) => updateVatRate(index, 'description', e.target.value)}
-                          placeholder="{t('settings.description')}"
+                          placeholder={t('settings.vatDescription')}
                           className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg"
                         />
                         <button
@@ -747,8 +747,8 @@ const SettingsPage = () => {
                     ))}
 
                     {settings.vat_rates?.length === 0 && (
-                      <div className="text-center py-8 text-gray-500">
-                        Aucun taux de TVA configuré. Cliquez sur "Ajouter" pour créer un taux.
+                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                        {t('settings.noVatConfigured')}
                       </div>
                     )}
                   </div>
@@ -759,7 +759,7 @@ const SettingsPage = () => {
               {activeTab === 'payment' && (
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                   <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
-                    Moyens de paiement
+                    {t('settings.paymentMethods')}
                   </h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
                     {t('settings.paymentMethodsDesc')}
@@ -802,7 +802,7 @@ const SettingsPage = () => {
                           />
 
                           <span className={`text-sm font-medium ${isEnabled ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'}`}>
-                            {isEnabled ? '{t('settings.enabled')}' : '{t('settings.disabled')}'}
+                            {isEnabled ? t('settings.enabled') : t('settings.disabled')}
                           </span>
                         </div>
                       );
@@ -817,7 +817,7 @@ const SettingsPage = () => {
                   <div className="flex justify-between items-center mb-4">
                     <div>
                       <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-                        Configuration SumUp
+                        {t('settings.sumupConfig')}
                       </h2>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         {t('settings.sumupConfigDesc')}
@@ -900,7 +900,7 @@ const SettingsPage = () => {
                   <div className="flex justify-between items-center mb-4">
                     <div>
                       <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-                        Configuration Imprimante
+                        {t('settings.printerConfig')}
                       </h2>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         {t('settings.printerConfigDesc')}
@@ -1034,7 +1034,7 @@ const SettingsPage = () => {
                   <div className="flex justify-between items-center mb-4">
                     <div>
                       <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-                        Configuration Email / SMTP
+                        {t('settings.emailConfig')}
                       </h2>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         {t('settings.emailConfigDesc')}
@@ -1181,7 +1181,7 @@ const SettingsPage = () => {
               {activeTab === 'appearance' && (
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                   <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
-                    Apparence et branding
+                    {t('settings.appearanceBranding')}
                   </h2>
 
                   <div className="space-y-4">
@@ -1293,7 +1293,7 @@ const SettingsPage = () => {
                   className="flex-1 flex items-center justify-center gap-2"
                 >
                   <Save size={20} />
-                  {saving ? 'Enregistrement...' : 'Enregistrer les paramètres'}
+                  {saving ? t('messages.saving') : t('messages.saveSettings')}
                 </Button>
               </div>
             </form>
