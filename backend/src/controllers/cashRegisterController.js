@@ -337,7 +337,7 @@ const closeCashRegister = async (req, res, next) => {
 
     // Logger l'action dans audit_logs
     setImmediate(() => {
-      logAction(req, 'CLOSE_REGISTER', 'cash_register', closedCashRegister.id, {
+      logAction(req, 'CLOSE_REGISTER', 'cash_register', completeCashRegister.id, {
         register_name: cashRegister.register_name,
         difference,
         total_sales: cashRegister.total_sales,
