@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useCashRegister } from '../context/CashRegisterContext';
 import { useProducts } from '../hooks/useProducts';
-import Header from '../components/layout/Header';
 import CategoryTabs from '../components/products/CategoryTabs';
 import ProductGrid from '../components/products/ProductGrid';
 import PaymentModal from '../components/payment/PaymentModal';
@@ -12,11 +11,11 @@ import OpenCashRegisterModal from '../components/cashRegister/OpenCashRegisterMo
 import CloseCashRegisterModal from '../components/cashRegister/CloseCashRegisterModal';
 import QuickSwitchCashierModal from '../components/auth/QuickSwitchCashierModal';
 import Button from '../components/ui/Button';
-import { CheckCircle, CreditCard, DollarSign, Percent, Tag, X } from 'lucide-react';
+import { LogOut, RefreshCw, CheckCircle, CreditCard, DollarSign, Receipt, BarChart3, Package, Users, Settings, Percent, Tag, X, UserCircle, FileText, Menu } from 'lucide-react';
 import { formatPrice } from '../utils/constants';
 
 const POSPage = () => {
-  const { user, switchCashier, isAuthenticated } = useAuth();
+  const { user, logout, switchCashier, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const {
     products,
@@ -27,6 +26,7 @@ const POSPage = () => {
     refresh,
   } = useProducts();
 
+  // Utilisation du CartContext
   const {
     cart,
     addToCart,
@@ -41,31 +41,52 @@ const POSPage = () => {
     removeDiscount,
   } = useCart();
 
+  // Utilisation du CashRegisterContext
   const { activeCashRegister, loading: cashRegisterLoading, hasActiveCashRegister } = useCashRegister();
 
+  // État du modal de paiement
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  // État des modals de caisse
   const [isOpenCashRegisterModalOpen, setIsOpenCashRegisterModalOpen] = useState(false);
   const [isCloseCashRegisterModalOpen, setIsCloseCashRegisterModalOpen] = useState(false);
+
+  // État de la modal de changement de caissier
   const [isSwitchCashierModalOpen, setIsSwitchCashierModalOpen] = useState(false);
   const [isSwitchingCashier, setIsSwitchingCashier] = useState(false);
+
+  // État du menu burger
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Notification de succès
   const [successMessage, setSuccessMessage] = useState(null);
+
+  // État pour l'UI de remise
   const [showDiscountInput, setShowDiscountInput] = useState(false);
-  const [discountType, setDiscountType] = useState('percentage');
+  const [discountType, setDiscountType] = useState('percentage'); // 'percentage' ou 'amount'
   const [discountValue, setDiscountValue] = useState('');
 
   useEffect(() => {
+    // Ne pas rediriger si on est en train de changer de caissier
     if (!isAuthenticated && !isSwitchingCashier) {
       navigate('/login');
     }
   }, [isAuthenticated, navigate, isSwitchingCashier]);
 
+  // Ouvrir automatiquement le modal de caisse si aucune caisse n'est ouverte
   useEffect(() => {
     if (!cashRegisterLoading && !activeCashRegister) {
       setIsOpenCashRegisterModalOpen(true);
     } else if (activeCashRegister) {
+      // Fermer le modal si une caisse est maintenant ouverte
       setIsOpenCashRegisterModalOpen(false);
     }
   }, [cashRegisterLoading, activeCashRegister]);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const handleSwitchCashier = async (username, pin) => {
     setIsSwitchingCashier(true);
@@ -74,326 +95,541 @@ const POSPage = () => {
       if (!result.success) {
         throw new Error(result.error);
       }
+      // Succès : le contexte Auth a été mis à jour automatiquement
+      // La caisse reste ouverte
     } finally {
       setIsSwitchingCashier(false);
     }
   };
 
   const handleProductClick = (product) => {
+    // Vérifier qu'une caisse est ouverte
     if (!hasActiveCashRegister()) {
-      alert('Veuillez ouvrir une caisse avant d\'ajouter des produits');
-      return;
-    }
-    if (!product.is_active) {
-      alert('Ce produit n\'est pas disponible');
-      return;
-    }
-    if (!product.is_menu && product.quantity <= 0) {
-      alert(`${product.name} est en rupture de stock`);
+      alert('Veuillez ouvrir une caisse avant de commencer à vendre.');
       return;
     }
     addToCart(product);
   };
 
-  const handlePay = () => {
-    if (cart.length === 0) {
-      alert('Le panier est vide');
-      return;
-    }
-    if (!hasActiveCashRegister()) {
-      alert('Veuillez ouvrir une caisse avant de procéder au paiement');
-      return;
-    }
+  const handleOpenPayment = () => {
+    if (cart.length === 0) return;
     setIsPaymentModalOpen(true);
   };
 
-  const handlePaymentSuccess = () => {
-    setSuccessMessage('Paiement enregistré avec succès !');
-    setTimeout(() => setSuccessMessage(null), 3000);
+  const handlePaymentSuccess = (sale) => {
+    // Vider le panier
+    clearCart();
+
+    // Afficher message de succès
+    setSuccessMessage({
+      ticketNumber: sale.ticket_number,
+      total: sale.total_ttc,
+      change: sale.change_given,
+    });
+
+    // Masquer après 5 secondes
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 5000);
   };
 
+  const { subtotal, discountAmount, total: cartTotal, hasDiscount } = getTotal();
+  const itemCount = getItemCount();
+
   const handleApplyDiscount = () => {
-    if (!discountValue || parseFloat(discountValue) <= 0) {
-      alert('Veuillez entrer une valeur de remise valide');
+    const value = parseFloat(discountValue);
+    if (isNaN(value) || value <= 0) {
+      alert('Veuillez entrer une valeur valide');
       return;
     }
-    applyDiscount({
-      type: discountType,
-      value: parseFloat(discountValue),
-    });
+
+    if (discountType === 'percentage' && value > 100) {
+      alert('Le pourcentage ne peut pas dépasser 100%');
+      return;
+    }
+
+    applyDiscount({ type: discountType, value });
     setShowDiscountInput(false);
     setDiscountValue('');
   };
 
-  const calculateTotal = () => {
-    let total = getTotal();
-    if (discount) {
-      if (discount.type === 'percentage') {
-        total = total * (1 - discount.value / 100);
-      } else if (discount.type === 'amount') {
-        total = Math.max(0, total - discount.value);
-      }
-    }
-    return total;
+  const handleRemoveDiscount = () => {
+    removeDiscount();
+    setDiscountValue('');
   };
 
-  if (!user) return null;
+  const navigateTo = (path) => {
+    navigate(path);
+    setIsMenuOpen(false);
+  };
+
+  const handleMenuAction = (action) => {
+    action();
+    setIsMenuOpen(false);
+  };
+
+  if (!user) {
+    return null;
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header avec menu burger */}
-      <Header
-        onOpenCloseCashModal={() => setIsCloseCashRegisterModalOpen(true)}
-        onOpenSwitchCashierModal={() => setIsSwitchCashierModalOpen(true)}
-      />
-
-      {/* Notification de succès */}
-      {successMessage && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5" />
-            {successMessage}
-          </div>
+    <div className="h-screen bg-gray-100 flex flex-col overflow-hidden">
+      {/* Header */}
+      <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center flex-shrink-0">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">🍔 BensBurger POS</h1>
+          <p className="text-sm text-gray-600">
+            Caissier : {user.first_name} {user.last_name}
+            {user.role === 'admin' && (
+              <span className="ml-2 text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded">
+                Admin
+              </span>
+            )}
+          </p>
+          {/* Statut de la caisse */}
+          {hasActiveCashRegister() && activeCashRegister && (
+            <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+              <DollarSign size={14} />
+              Caisse: {activeCashRegister.register_name} - Fond: {formatPrice(activeCashRegister.opening_balance)}
+            </p>
+          )}
         </div>
-      )}
-
-      {/* Boutons caisse (visibles) */}
-      <div className="bg-white border-b border-gray-200 py-2 px-4">
-        <div className="flex gap-2 justify-center">
-          {activeCashRegister ? (
-            <>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsCloseCashRegisterModalOpen(true)}
-                className="flex items-center gap-2"
-              >
-                <DollarSign size={18} />
-                Fermer la caisse
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsSwitchCashierModalOpen(true)}
-                className="flex items-center gap-2"
-              >
-                <CheckCircle size={18} />
-                Changer caissier
-              </Button>
-            </>
+        <div className="flex gap-2">
+          {/* Bouton gestion caisse - toujours visible */}
+          {hasActiveCashRegister() ? (
+            <Button
+              variant="danger"
+              size="md"
+              onClick={() => setIsCloseCashRegisterModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <CreditCard size={20} />
+              Fermer caisse
+            </Button>
           ) : (
             <Button
-              variant="primary"
-              size="sm"
+              variant="success"
+              size="md"
               onClick={() => setIsOpenCashRegisterModalOpen(true)}
               className="flex items-center gap-2"
             >
-              <DollarSign size={18} />
-              Ouvrir une caisse
+              <CreditCard size={20} />
+              Ouvrir caisse
             </Button>
           )}
+
+          {/* Bouton changer caissier - toujours visible */}
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => setIsSwitchCashierModalOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <UserCircle size={20} />
+            Changer caissier
+          </Button>
+
+          {/* Bouton menu burger */}
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => setIsMenuOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Menu size={20} />
+            Menu
+          </Button>
         </div>
-      </div>
+      </header>
 
-      {/* Layout principal */}
-      <div className="container mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Colonne gauche - Produits */}
-        <div className="lg:col-span-2">
-          {/* Catégories */}
-          <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
-            <CategoryTabs
-              selectedCategory={selectedCategory}
-              onSelectCategory={changeCategory}
-            />
-          </div>
+      {/* Menu burger slide-in */}
+      {isMenuOpen && (
+        <>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setIsMenuOpen(false)}
+          />
 
-          {/* Grille produits */}
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Chargement des produits...</p>
-            </div>
-          ) : error ? (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              {error}
-            </div>
-          ) : (
-            <ProductGrid products={products} onProductClick={handleProductClick} />
-          )}
-        </div>
-
-        {/* Colonne droite - Panier */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-md p-6 sticky top-20">
-            {/* Header panier */}
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-gray-800">Panier</h2>
-              <div className="text-sm text-gray-600">
-                {getItemCount()} article{getItemCount() > 1 ? 's' : ''}
+          {/* Menu slide-in */}
+          <div className="fixed top-0 right-0 h-full w-80 max-w-full bg-white shadow-2xl z-50 flex flex-col">
+            {/* Header du menu */}
+            <div className="p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">Menu</h2>
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-1 hover:bg-white/20 rounded transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                  <UserCircle className="w-8 h-8" />
+                </div>
+                <div>
+                  <div className="font-semibold">
+                    {user?.first_name} {user?.last_name}
+                  </div>
+                  <div className="text-blue-100 text-sm capitalize">{user?.role}</div>
+                </div>
               </div>
             </div>
 
-            {/* Liste articles */}
-            <div className="space-y-3 mb-6 max-h-96 overflow-y-auto">
-              {cart.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  Votre panier est vide
+            {/* Navigation */}
+            <div className="flex-1 overflow-y-auto">
+              <nav className="p-4">
+                <div className="space-y-1">
+                  {/* Dashboard */}
+                  <button
+                    onClick={() => navigateTo('/dashboard')}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <BarChart3 className="w-5 h-5 text-gray-600" />
+                    <span className="font-medium text-gray-800">Dashboard</span>
+                  </button>
+
+                  {/* Journal des ventes */}
+                  <button
+                    onClick={() => navigateTo('/sales')}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <Receipt className="w-5 h-5 text-gray-600" />
+                    <span className="font-medium text-gray-800">Journal des ventes</span>
+                  </button>
+
+                  {/* Actualiser */}
+                  <button
+                    onClick={() => handleMenuAction(refresh)}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <RefreshCw className="w-5 h-5 text-gray-600" />
+                    <span className="font-medium text-gray-800">Actualiser</span>
+                  </button>
+
+                  {/* Admin uniquement */}
+                  {user?.role === 'admin' && (
+                    <>
+                      <div className="pt-4 pb-2">
+                        <div className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          Administration
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => navigateTo('/products')}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                      >
+                        <Package className="w-5 h-5 text-gray-600" />
+                        <span className="font-medium text-gray-800">Produits</span>
+                      </button>
+
+                      <button
+                        onClick={() => navigateTo('/users')}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                      >
+                        <Users className="w-5 h-5 text-gray-600" />
+                        <span className="font-medium text-gray-800">Utilisateurs</span>
+                      </button>
+
+                      <button
+                        onClick={() => navigateTo('/settings')}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                      >
+                        <Settings className="w-5 h-5 text-gray-600" />
+                        <span className="font-medium text-gray-800">Paramètres</span>
+                      </button>
+
+                      <button
+                        onClick={() => navigateTo('/logs')}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                      >
+                        <FileText className="w-5 h-5 text-gray-600" />
+                        <span className="font-medium text-gray-800">Logs & Audit</span>
+                      </button>
+                    </>
+                  )}
                 </div>
-              ) : (
-                cart.map((item) => (
-                  <div key={item.id} className="bg-gray-50 rounded-lg p-3">
+              </nav>
+            </div>
+
+            {/* Déconnexion en bas */}
+            <div className="p-4 border-t border-gray-200">
+              <button
+                onClick={() => handleMenuAction(handleLogout)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                <span>Déconnexion</span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Notification de succès */}
+      {successMessage && (
+        <div className="bg-green-500 text-white px-6 py-4 flex items-center justify-between animate-slide-in-right">
+          <div className="flex items-center gap-3">
+            <CheckCircle size={24} />
+            <div>
+              <p className="font-bold">Paiement réussi !</p>
+              <p className="text-sm">
+                Ticket {successMessage.ticketNumber} - Total: {formatPrice(successMessage.total)}
+                {successMessage.change > 0 && ` - Rendu: ${formatPrice(successMessage.change)}`}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setSuccessMessage(null)}
+            className="text-white hover:text-green-100"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Zone produits */}
+        <div className="flex-1 p-6 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            {/* Avertissement si pas de caisse ouverte */}
+            {!hasActiveCashRegister() && !cashRegisterLoading && (
+              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-yellow-700">
+                      <strong>Caisse non ouverte :</strong> Veuillez ouvrir une caisse pour commencer à vendre.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Onglets catégories */}
+            <CategoryTabs
+              selectedCategory={selectedCategory}
+              onCategoryChange={changeCategory}
+            />
+
+            {/* Message d'erreur */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                {error}
+              </div>
+            )}
+
+            {/* Grille de produits */}
+            <ProductGrid
+              products={products}
+              onProductClick={handleProductClick}
+              loading={loading}
+            />
+          </div>
+        </div>
+
+        {/* Zone panier */}
+        <div className="w-96 bg-white shadow-lg p-6 flex flex-col overflow-hidden">
+          <h2 className="text-xl font-semibold mb-4 flex-shrink-0">Panier</h2>
+
+          {/* Liste des items */}
+          <div className="flex-1 overflow-y-auto mb-4">
+            {cart.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <span className="text-6xl mb-4 block">🛒</span>
+                <p>Panier vide</p>
+                <p className="text-sm mt-2">
+                  Cliquez sur un produit pour l'ajouter
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {cart.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-gray-50 rounded-lg p-3 border border-gray-200"
+                  >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-800">{item.product_name}</h3>
-                        <p className="text-sm text-gray-600">
-                          {formatPrice(item.unit_price_ttc)} × {item.quantity}
-                        </p>
+                        <h3 className="font-medium text-gray-800 flex items-center gap-2">
+                          {item.name}
+                          {item.is_menu && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                              📦 Menu
+                            </span>
+                          )}
+                        </h3>
+                        {/* Afficher la composition du menu */}
+                        {item.is_menu && item.menu_composition && item.menu_composition.length > 0 && (
+                          <div className="mt-1 text-xs text-gray-600 pl-2 border-l-2 border-purple-300">
+                            {item.menu_composition.map((comp, idx) => (
+                              <div key={idx} className="flex items-center gap-1">
+                                <span>• {comp.quantity}x {comp.product_name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <button
                         onClick={() => removeFromCart(item.id)}
-                        className="text-red-600 hover:text-red-700 p-1"
+                        className="text-red-500 hover:text-red-700 ml-2"
                       >
-                        <X className="w-4 h-4" />
+                        ✕
                       </button>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => decrementQuantity(item.id)}
-                        className="w-8 h-8 bg-white border border-gray-300 rounded hover:bg-gray-50 font-bold"
-                      >
-                        −
-                      </button>
-                      <span className="w-12 text-center font-medium">{item.quantity}</span>
-                      <button
-                        onClick={() => incrementQuantity(item.id)}
-                        className="w-8 h-8 bg-white border border-gray-300 rounded hover:bg-gray-50 font-bold"
-                      >
-                        +
-                      </button>
-                      <div className="flex-1 text-right font-bold text-gray-800">
-                        {formatPrice(item.total_ttc)}
+
+                    <div className="flex items-center justify-between">
+                      {/* Contrôles quantité */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => decrementQuantity(item.id)}
+                          className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 active:scale-95 font-bold"
+                        >
+                          −
+                        </button>
+                        <span className="w-8 text-center font-semibold">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => incrementQuantity(item.id)}
+                          className="w-8 h-8 rounded-full bg-primary-500 text-white hover:bg-primary-600 active:scale-95 font-bold"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      {/* Prix */}
+                      <div className="text-right">
+                        <p className="text-sm text-gray-600">
+                          {formatPrice(item.price_ttc)} × {item.quantity}
+                        </p>
+                        <p className="font-bold text-primary-600">
+                          {formatPrice(parseFloat(item.price_ttc) * item.quantity)}
+                        </p>
                       </div>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-            {/* Remise */}
-            {cart.length > 0 && (
-              <div className="mb-4">
-                {!showDiscountInput ? (
-                  <button
-                    onClick={() => setShowDiscountInput(true)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50"
+          {/* Remise et Total */}
+          <div className="border-t pt-4 flex-shrink-0">
+            {/* Bouton remise */}
+            {!hasDiscount && !showDiscountInput && cart.length > 0 && (
+              <button
+                onClick={() => setShowDiscountInput(true)}
+                className="w-full mb-3 py-2 px-3 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-lg hover:bg-yellow-100 transition-colors flex items-center justify-center gap-2"
+              >
+                <Tag size={18} />
+                <span className="text-sm font-medium">Appliquer une remise</span>
+              </button>
+            )}
+
+            {/* Input remise */}
+            {showDiscountInput && (
+              <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex gap-2 mb-2">
+                  <select
+                    value={discountType}
+                    onChange={(e) => setDiscountType(e.target.value)}
+                    className="px-2 py-1 border border-gray-300 rounded text-sm"
                   >
-                    {discount ? <Tag className="w-4 h-4" /> : <Percent className="w-4 h-4" />}
-                    {discount ? (
-                      <span>Remise: {discount.type === 'percentage' ? `${discount.value}%` : `${discount.value}€`}</span>
-                    ) : (
-                      <span>Appliquer une remise</span>
-                    )}
-                  </button>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="flex gap-2">
-                      <select
-                        value={discountType}
-                        onChange={(e) => setDiscountType(e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-lg"
-                      >
-                        <option value="percentage">%</option>
-                        <option value="amount">€</option>
-                      </select>
-                      <input
-                        type="number"
-                        value={discountValue}
-                        onChange={(e) => setDiscountValue(e.target.value)}
-                        placeholder="Montant"
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setShowDiscountInput(false);
-                          setDiscountValue('');
-                        }}
-                        className="flex-1 px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-                      >
-                        Annuler
-                      </button>
-                      <button
-                        onClick={handleApplyDiscount}
-                        className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                      >
-                        Appliquer
-                      </button>
-                    </div>
-                  </div>
-                )}
-                {discount && (
+                    <option value="percentage">%</option>
+                    <option value="amount">€</option>
+                  </select>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={discountValue}
+                    onChange={(e) => setDiscountValue(e.target.value)}
+                    placeholder={discountType === 'percentage' ? '10' : '5.00'}
+                    className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                  />
+                </div>
+                <div className="flex gap-2">
                   <button
-                    onClick={removeDiscount}
-                    className="text-sm text-red-600 hover:text-red-700 mt-2"
+                    onClick={handleApplyDiscount}
+                    className="flex-1 py-1 px-2 bg-yellow-600 text-white rounded text-sm font-medium hover:bg-yellow-700"
                   >
-                    Retirer la remise
+                    Valider
                   </button>
-                )}
+                  <button
+                    onClick={() => {
+                      setShowDiscountInput(false);
+                      setDiscountValue('');
+                    }}
+                    className="px-2 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
+                  >
+                    Annuler
+                  </button>
+                </div>
               </div>
             )}
 
-            {/* Totaux */}
-            {cart.length > 0 && (
-              <>
-                <div className="border-t border-gray-200 pt-4 mb-4 space-y-2">
-                  <div className="flex justify-between text-gray-700">
-                    <span>Sous-total</span>
-                    <span className="font-medium">{formatPrice(getTotal())}</span>
-                  </div>
-                  {discount && (
-                    <div className="flex justify-between text-green-600">
-                      <span>Remise</span>
-                      <span className="font-medium">
-                        -{formatPrice(getTotal() - calculateTotal())}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-xl font-bold text-gray-900 pt-2 border-t border-gray-300">
-                    <span>Total TTC</span>
-                    <span>{formatPrice(calculateTotal())}</span>
-                  </div>
+            {/* Affichage remise active */}
+            {hasDiscount && (
+              <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Tag size={16} className="text-yellow-600" />
+                  <span className="text-sm text-yellow-700 font-medium">
+                    Remise: {discount.type === 'percentage' ? `${discount.value}%` : `${discount.value}€`}
+                  </span>
                 </div>
-
-                {/* Boutons actions */}
-                <div className="space-y-2">
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    onClick={handlePay}
-                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
-                  >
-                    <CreditCard size={20} />
-                    Procéder au paiement
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="md"
-                    onClick={clearCart}
-                    className="w-full"
-                  >
-                    Vider le panier
-                  </Button>
-                </div>
-              </>
+                <button
+                  onClick={handleRemoveDiscount}
+                  className="p-1 hover:bg-yellow-100 rounded transition-colors"
+                  title="Retirer la remise"
+                >
+                  <X size={16} className="text-yellow-600" />
+                </button>
+              </div>
             )}
+
+            {/* Détail du total */}
+            <div className="space-y-2 mb-4">
+              {hasDiscount && (
+                <>
+                  <div className="flex justify-between items-center text-sm text-gray-600">
+                    <span>Sous-total:</span>
+                    <span>{formatPrice(subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm text-yellow-600">
+                    <span>Remise:</span>
+                    <span>- {formatPrice(discountAmount)}</span>
+                  </div>
+                </>
+              )}
+              <div className="flex justify-between items-center pt-2 border-t">
+                <span className="text-lg font-medium">Total TTC :</span>
+                <span className="text-3xl font-bold text-primary-500">
+                  {formatPrice(cartTotal)}
+                </span>
+              </div>
+            </div>
+
+            <Button
+              variant="success"
+              size="xl"
+              disabled={cart.length === 0}
+              className="w-full"
+              onClick={handleOpenPayment}
+            >
+              Payer ({itemCount} {itemCount > 1 ? 'articles' : 'article'})
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* Modals */}
+      {/* Modal de paiement */}
       <PaymentModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
@@ -402,16 +638,20 @@ const POSPage = () => {
         onSuccess={handlePaymentSuccess}
       />
 
+      {/* Modal ouverture de caisse */}
       <OpenCashRegisterModal
         isOpen={isOpenCashRegisterModalOpen}
         onClose={() => setIsOpenCashRegisterModalOpen(false)}
       />
 
+      {/* Modal fermeture de caisse */}
       <CloseCashRegisterModal
         isOpen={isCloseCashRegisterModalOpen}
         onClose={() => setIsCloseCashRegisterModalOpen(false)}
+        cashRegister={activeCashRegister}
       />
 
+      {/* Modal changement de caissier */}
       <QuickSwitchCashierModal
         isOpen={isSwitchCashierModalOpen}
         onClose={() => setIsSwitchCashierModalOpen(false)}
