@@ -8,6 +8,7 @@
     "dev": "nodemon src/server.js",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
+    "db:seed": "node src/scripts/seedAll.js",
     "db:seed-users": "node src/scripts/seedUsers.js",
     "db:migrate": "node src/scripts/runMigration.js",
     "lint": "eslint src/**/*.js",
