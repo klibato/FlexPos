@@ -12,7 +12,7 @@ async function seedProducts() {
     logger.info('🌱 Seeding products and menus...');
 
     // Lire le fichier SQL de seeds
-    const sqlPath = path.join(__dirname, '../../../database/seeds.sql');
+    const sqlPath = path.join(__dirname, '../../database/seeds.sql');
 
     if (!fs.existsSync(sqlPath)) {
       logger.warn('⚠️  Fichier seeds.sql non trouvé, skip du seeding produits');
@@ -59,6 +59,13 @@ async function seedUsers() {
     const existingUsers = await User.count();
     if (existingUsers > 0) {
       logger.info(`${existingUsers} utilisateur(s) déjà présent(s). Suppression...`);
+
+      // Supprimer d'abord les dépendances (foreign keys)
+      await sequelize.query('DELETE FROM sale_items');
+      await sequelize.query('DELETE FROM sales');
+      await sequelize.query('DELETE FROM cash_registers');
+
+      // Maintenant on peut supprimer les users
       await User.destroy({ where: {}, force: true });
     }
 

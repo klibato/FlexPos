@@ -74,6 +74,9 @@ const POSPage = () => {
   useEffect(() => {
     if (!cashRegisterLoading && !activeCashRegister) {
       setIsOpenCashRegisterModalOpen(true);
+    } else if (activeCashRegister) {
+      // Fermer le modal si une caisse est maintenant ouverte
+      setIsOpenCashRegisterModalOpen(false);
     }
   }, [cashRegisterLoading, activeCashRegister]);
 
