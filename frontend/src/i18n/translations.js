@@ -160,6 +160,8 @@ export const translations = {
     users: {
       title: 'Gestion des Utilisateurs',
       newUser: '+ Nouvel Utilisateur',
+      newUserTitle: 'Nouvel utilisateur',
+      editUser: 'Modifier l\'utilisateur',
       user: 'Utilisateur',
       role: 'Rôle',
       firstName: 'Prénom',
@@ -167,12 +169,33 @@ export const translations = {
       username: 'Nom d\'utilisateur',
       email: 'Email',
       phone: 'Téléphone',
+      pinCode: 'Code PIN',
+      pinCodeDigits: 'Code PIN (4 chiffres)',
+      userActive: 'Utilisateur actif',
       deactivate: 'Désactiver',
       loading: 'Chargement des utilisateurs...',
       noUsers: 'Aucun utilisateur trouvé',
       created: 'Utilisateur créé avec succès',
       updated: 'Utilisateur modifié avec succès',
       deleted: 'Utilisateur supprimé avec succès',
+      // Roles
+      cashier: 'Caissier',
+      admin: 'Administrateur',
+      // Form placeholders
+      usernamePlaceholder: 'Ex: jdupont',
+      firstNamePlaceholder: 'Jean',
+      lastNamePlaceholder: 'Dupont',
+      emailPlaceholder: 'jean.dupont@example.com',
+      pinPlaceholder: '1234',
+      pinPlaceholderEdit: 'Laisser vide pour ne pas changer',
+      // Helper texts
+      pinKeepCurrent: 'Laissez vide pour conserver le PIN actuel',
+      pinError4Digits: 'Le code PIN doit contenir 4 chiffres',
+      pinErrorExactly4: 'Le code PIN doit contenir exactement 4 chiffres',
+      // Button states
+      saving: 'Enregistrement...',
+      create: 'Créer',
+      modify: 'Modifier',
     },
 
     // Dashboard
@@ -558,6 +581,8 @@ export const translations = {
     users: {
       title: 'User Management',
       newUser: '+ New User',
+      newUserTitle: 'New user',
+      editUser: 'Edit user',
       user: 'User',
       role: 'Role',
       firstName: 'First Name',
@@ -565,12 +590,33 @@ export const translations = {
       username: 'Username',
       email: 'Email',
       phone: 'Phone',
+      pinCode: 'PIN code',
+      pinCodeDigits: 'PIN code (4 digits)',
+      userActive: 'Active user',
       deactivate: 'Deactivate',
       loading: 'Loading users...',
       noUsers: 'No users found',
       created: 'User created successfully',
       updated: 'User updated successfully',
       deleted: 'User deleted successfully',
+      // Roles
+      cashier: 'Cashier',
+      admin: 'Administrator',
+      // Form placeholders
+      usernamePlaceholder: 'Ex: jsmith',
+      firstNamePlaceholder: 'John',
+      lastNamePlaceholder: 'Smith',
+      emailPlaceholder: 'john.smith@example.com',
+      pinPlaceholder: '1234',
+      pinPlaceholderEdit: 'Leave empty to keep unchanged',
+      // Helper texts
+      pinKeepCurrent: 'Leave empty to keep current PIN',
+      pinError4Digits: 'PIN code must contain 4 digits',
+      pinErrorExactly4: 'PIN code must contain exactly 4 digits',
+      // Button states
+      saving: 'Saving...',
+      create: 'Create',
+      modify: 'Modify',
     },
 
     // Dashboard

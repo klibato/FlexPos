@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import Button from '../ui/Button';
-
-const ROLES = [
-  { value: 'cashier', label: 'Caissier' },
-  { value: 'admin', label: 'Administrateur' },
-];
+import { useLanguage } from '../../context/LanguageContext';
 
 const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
+  const { t } = useLanguage();
+
+  const ROLES = [
+    { value: 'cashier', label: t('users.cashier') },
+    { value: 'admin', label: t('users.admin') },
+  ];
   const [formData, setFormData] = useState({
     username: '',
     pin_code: '',
@@ -58,7 +60,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
 
       // Valider le PIN
       if (numericValue.length > 0 && numericValue.length < 4) {
-        setPinError('Le code PIN doit contenir 4 chiffres');
+        setPinError(t('users.pinError4Digits'));
       } else {
         setPinError('');
       }
@@ -75,13 +77,13 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
 
     // Validation du PIN pour création
     if (!user && formData.pin_code.length !== 4) {
-      setPinError('Le code PIN doit contenir exactement 4 chiffres');
+      setPinError(t('users.pinErrorExactly4'));
       return;
     }
 
     // Validation du PIN pour modification (si fourni)
     if (user && formData.pin_code && formData.pin_code.length !== 4) {
-      setPinError('Le code PIN doit contenir exactement 4 chiffres');
+      setPinError(t('users.pinErrorExactly4'));
       return;
     }
 
@@ -101,7 +103,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="bg-primary-600 text-white px-6 py-4 rounded-t-lg sticky top-0">
           <h2 className="text-xl font-bold">
-            {user ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur'}
+            {user ? t('users.editUser') : t('users.newUserTitle')}
           </h2>
         </div>
 
@@ -110,7 +112,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
             {/* Nom d'utilisateur */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Nom d'utilisateur *
+                {t('users.username')} *
               </label>
               <input
                 type="text"
@@ -119,14 +121,14 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
-                placeholder="Ex: jdupont"
+                placeholder={t('users.usernamePlaceholder')}
               />
             </div>
 
             {/* Code PIN */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Code PIN (4 chiffres) {user ? '' : '*'}
+                {t('users.pinCodeDigits')} {user ? '' : '*'}
               </label>
               <div className="relative">
                 <input
@@ -137,29 +139,29 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                   required={!user}
                   pattern="\d{4}"
                   maxLength="4"
-                  className={`w-full px-4 py-2 border ${pinError ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:ring-2 focus:ring-primary-500`}
-                  placeholder={user ? 'Laisser vide pour ne pas changer' : '1234'}
+                  className={`w-full px-4 py-2 border ${pinError ? 'border-red-500 dark:border-red-700' : 'border-gray-300 dark:border-gray-600'} dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500`}
+                  placeholder={user ? t('users.pinPlaceholderEdit') : t('users.pinPlaceholder')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPin(!showPin)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                 >
                   {showPin ? '🙈' : '👁️'}
                 </button>
               </div>
               {pinError && (
-                <p className="text-red-500 text-sm mt-1">{pinError}</p>
+                <p className="text-red-500 dark:text-red-400 text-sm mt-1">{pinError}</p>
               )}
               {user && !formData.pin_code && (
-                <p className="text-gray-500 text-sm mt-1">Laissez vide pour conserver le PIN actuel</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{t('users.pinKeepCurrent')}</p>
               )}
             </div>
 
             {/* Prénom */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Prénom *
+                {t('users.firstName')} *
               </label>
               <input
                 type="text"
@@ -168,14 +170,14 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
-                placeholder="Jean"
+                placeholder={t('users.firstNamePlaceholder')}
               />
             </div>
 
             {/* Nom */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Nom *
+                {t('users.lastName')} *
               </label>
               <input
                 type="text"
@@ -184,14 +186,14 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
-                placeholder="Dupont"
+                placeholder={t('users.lastNamePlaceholder')}
               />
             </div>
 
             {/* Email */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Email
+                {t('users.email')}
               </label>
               <input
                 type="email"
@@ -199,14 +201,14 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                 value={formData.email}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
-                placeholder="jean.dupont@example.com"
+                placeholder={t('users.emailPlaceholder')}
               />
             </div>
 
             {/* Rôle */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Rôle *
+                {t('users.role')} *
               </label>
               <select
                 name="role"
@@ -233,13 +235,13 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
                   onChange={handleChange}
                   className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
-                <span className="text-sm font-medium text-gray-700">Utilisateur actif</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{t('users.userActive')}</span>
               </label>
             </div>
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-3 mt-6 pt-6 border-t">
+          <div className="flex gap-3 mt-6 pt-6 border-t dark:border-gray-600">
             <Button
               type="button"
               variant="secondary"
@@ -247,7 +249,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
               disabled={loading}
               className="flex-1"
             >
-              Annuler
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
@@ -255,7 +257,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, user, loading }) => {
               disabled={loading || !!pinError}
               className="flex-1"
             >
-              {loading ? 'Enregistrement...' : user ? 'Modifier' : 'Créer'}
+              {loading ? t('users.saving') : user ? t('users.modify') : t('users.create')}
             </Button>
           </div>
         </form>
