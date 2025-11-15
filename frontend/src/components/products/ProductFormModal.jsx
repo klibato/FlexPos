@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import { useStoreConfig } from '../../context/StoreConfigContext';
+import { useLanguage } from '../../context/LanguageContext';
 import MenuComposer from './MenuComposer';
 
 const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
   const { config } = useStoreConfig();
+  const { t } = useLanguage();
 
   // Utiliser les catégories et taux de TVA de la configuration
   const categories = config.categories || [];
@@ -98,7 +100,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="bg-primary-600 text-white px-6 py-4 rounded-t-lg sticky top-0">
           <h2 className="text-xl font-bold">
-            {product ? 'Modifier le produit' : 'Nouveau produit'}
+            {product ? t('products.editProduct') : t('products.newProductTitle')}
           </h2>
         </div>
 
@@ -107,7 +109,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
             {/* Nom */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Nom du produit *
+                {t('products.productName')} *
               </label>
               <input
                 type="text"
@@ -116,14 +118,14 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
-                placeholder="Ex: Burger Classic"
+                placeholder={t('products.namePlaceholder')}
               />
             </div>
 
             {/* Description */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Description
+                {t('products.description')}
               </label>
               <textarea
                 name="description"
@@ -131,14 +133,14 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
                 onChange={handleChange}
                 rows="3"
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500 resize-none"
-                placeholder="Description du produit..."
+                placeholder={t('products.descriptionPlaceholder')}
               />
             </div>
 
             {/* Image URL */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                URL de l'image (optionnel)
+                {t('products.imageUrl')}
               </label>
               <input
                 type="url"
@@ -146,18 +148,18 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
                 value={formData.image_url}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
-                placeholder="https://exemple.com/image.jpg"
+                placeholder={t('products.imageUrlPlaceholder')}
               />
               {formData.image_url && (
                 <div className="mt-3">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Prévisualisation :</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{t('products.preview')}</p>
                   <img
                     src={formData.image_url}
-                    alt="Prévisualisation"
+                    alt={t('products.preview')}
                     className="w-32 h-32 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-600"
                     onError={(e) => {
                       e.target.src = '';
-                      e.target.alt = 'Image non disponible';
+                      e.target.alt = t('products.imageNotAvailable');
                       e.target.className = 'w-32 h-32 flex items-center justify-center bg-gray-100 rounded-lg border-2 border-gray-200 text-gray-400 text-sm';
                     }}
                   />
@@ -168,7 +170,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
             {/* Prix HT */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Prix HT (€) *
+                {t('products.priceHT')} (€) *
               </label>
               <input
                 type="number"
@@ -179,14 +181,14 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
                 step="0.01"
                 min="0"
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
-                placeholder="0.00"
+                placeholder={t('products.pricePlaceholder')}
               />
             </div>
 
             {/* TVA */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Taux TVA *
+                {t('products.vatRate')} *
               </label>
               <select
                 name="vat_rate"
@@ -214,7 +216,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
             {/* Catégorie */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Catégorie *
+                {t('products.category')} *
               </label>
               <select
                 name="category"
@@ -244,7 +246,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
             {/* Ordre d'affichage */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Ordre d'affichage
+                {t('products.displayOrder')}
               </label>
               <input
                 type="number"
@@ -259,7 +261,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
             {/* Quantité en stock */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Quantité en stock
+                {t('products.quantity')}
               </label>
               <input
                 type="number"
@@ -268,17 +270,17 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
                 onChange={handleChange}
                 min="0"
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
-                placeholder="0"
+                placeholder={t('products.stockPlaceholder')}
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Nombre d'unités disponibles (0 = rupture de stock)
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {t('products.stockHelp')}
               </p>
             </div>
 
             {/* Seuil d'alerte stock bas */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Seuil d'alerte stock bas
+                {t('products.lowStockThreshold')}
               </label>
               <input
                 type="number"
@@ -287,10 +289,10 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
                 onChange={handleChange}
                 min="0"
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
-                placeholder="10"
+                placeholder={t('products.lowStockThresholdPlaceholder')}
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Alerte déclenchée quand le stock atteint ce seuil
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {t('products.lowStockAlertHelp')}
               </p>
             </div>
 
@@ -304,7 +306,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
                   onChange={handleChange}
                   className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
-                <span className="text-sm font-medium text-gray-700">Produit actif</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{t('products.productActive')}</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -315,7 +317,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
                   onChange={handleChange}
                   className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
-                <span className="text-sm font-medium text-gray-700">C'est un menu</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{t('products.isMenu')}</span>
               </label>
             </div>
 
@@ -332,7 +334,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-3 mt-6 pt-6 border-t">
+          <div className="flex gap-3 mt-6 pt-6 border-t dark:border-gray-600">
             <Button
               type="button"
               variant="secondary"
@@ -340,7 +342,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
               disabled={loading}
               className="flex-1"
             >
-              Annuler
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
@@ -348,7 +350,7 @@ const ProductFormModal = ({ isOpen, onClose, onSubmit, product, loading }) => {
               disabled={loading}
               className="flex-1"
             >
-              {loading ? 'Enregistrement...' : product ? 'Modifier' : 'Créer'}
+              {loading ? t('products.saving') : product ? t('products.modify') : t('products.create')}
             </Button>
           </div>
         </form>
