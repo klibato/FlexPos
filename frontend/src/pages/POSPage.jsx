@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useCashRegister } from '../context/CashRegisterContext';
+import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { useProducts } from '../hooks/useProducts';
 import CategoryTabs from '../components/products/CategoryTabs';
 import ProductGrid from '../components/products/ProductGrid';
@@ -11,11 +13,13 @@ import OpenCashRegisterModal from '../components/cashRegister/OpenCashRegisterMo
 import CloseCashRegisterModal from '../components/cashRegister/CloseCashRegisterModal';
 import QuickSwitchCashierModal from '../components/auth/QuickSwitchCashierModal';
 import Button from '../components/ui/Button';
-import { LogOut, RefreshCw, CheckCircle, CreditCard, DollarSign, Receipt, BarChart3, Package, Users, Settings, Percent, Tag, X, UserCircle, FileText, Menu } from 'lucide-react';
+import { LogOut, RefreshCw, CheckCircle, CreditCard, DollarSign, Receipt, BarChart3, Package, Users, Settings, Percent, Tag, X, UserCircle, FileText, Menu, Globe, Moon, Sun } from 'lucide-react';
 import { formatPrice } from '../utils/constants';
 
 const POSPage = () => {
   const { user, logout, switchCashier, isAuthenticated } = useAuth();
+  const { t, language, setLanguage } = useLanguage();
+  const { theme, setTheme, isDark } = useTheme();
   const navigate = useNavigate();
   const {
     products,
@@ -252,7 +256,7 @@ const POSPage = () => {
           />
 
           {/* Menu slide-in */}
-          <div className="fixed top-0 right-0 h-full w-80 max-w-full bg-white shadow-2xl z-50 flex flex-col">
+          <div className="fixed top-0 right-0 h-full w-80 max-w-full bg-white dark:bg-gray-800 shadow-2xl z-50 flex flex-col">
             {/* Header du menu */}
             <div className="p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
               <div className="flex items-center justify-between mb-4">
@@ -284,69 +288,69 @@ const POSPage = () => {
                   {/* Dashboard */}
                   <button
                     onClick={() => navigateTo('/dashboard')}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
                   >
-                    <BarChart3 className="w-5 h-5 text-gray-600" />
-                    <span className="font-medium text-gray-800">Dashboard</span>
+                    <BarChart3 className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                    <span className="font-medium text-gray-800 dark:text-gray-200">Dashboard</span>
                   </button>
 
                   {/* Journal des ventes */}
                   <button
                     onClick={() => navigateTo('/sales')}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
                   >
-                    <Receipt className="w-5 h-5 text-gray-600" />
-                    <span className="font-medium text-gray-800">Journal des ventes</span>
+                    <Receipt className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                    <span className="font-medium text-gray-800 dark:text-gray-200">Journal des ventes</span>
                   </button>
 
                   {/* Actualiser */}
                   <button
                     onClick={() => handleMenuAction(refresh)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
                   >
-                    <RefreshCw className="w-5 h-5 text-gray-600" />
-                    <span className="font-medium text-gray-800">Actualiser</span>
+                    <RefreshCw className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                    <span className="font-medium text-gray-800 dark:text-gray-200">Actualiser</span>
                   </button>
 
                   {/* Admin uniquement */}
                   {user?.role === 'admin' && (
                     <>
                       <div className="pt-4 pb-2">
-                        <div className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <div className="px-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           Administration
                         </div>
                       </div>
 
                       <button
                         onClick={() => navigateTo('/products')}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
                       >
-                        <Package className="w-5 h-5 text-gray-600" />
-                        <span className="font-medium text-gray-800">Produits</span>
+                        <Package className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                        <span className="font-medium text-gray-800 dark:text-gray-200">Produits</span>
                       </button>
 
                       <button
                         onClick={() => navigateTo('/users')}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
                       >
-                        <Users className="w-5 h-5 text-gray-600" />
-                        <span className="font-medium text-gray-800">Utilisateurs</span>
+                        <Users className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                        <span className="font-medium text-gray-800 dark:text-gray-200">Utilisateurs</span>
                       </button>
 
                       <button
                         onClick={() => navigateTo('/settings')}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
                       >
-                        <Settings className="w-5 h-5 text-gray-600" />
-                        <span className="font-medium text-gray-800">Paramètres</span>
+                        <Settings className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                        <span className="font-medium text-gray-800 dark:text-gray-200">Paramètres</span>
                       </button>
 
                       <button
                         onClick={() => navigateTo('/logs')}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
                       >
-                        <FileText className="w-5 h-5 text-gray-600" />
-                        <span className="font-medium text-gray-800">Logs & Audit</span>
+                        <FileText className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                        <span className="font-medium text-gray-800 dark:text-gray-200">Logs & Audit</span>
                       </button>
                     </>
                   )}
@@ -354,8 +358,81 @@ const POSPage = () => {
               </nav>
             </div>
 
+            {/* Préférences */}
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
+              <div className="px-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Préférences
+              </div>
+
+              {/* Language selector */}
+              <div className="px-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Langue</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setLanguage('fr')}
+                    className={`px-3 py-2 text-sm rounded-lg transition-colors ${
+                      language === 'fr'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Français
+                  </button>
+                  <button
+                    onClick={() => setLanguage('en')}
+                    className={`px-3 py-2 text-sm rounded-lg transition-colors ${
+                      language === 'en'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    English
+                  </button>
+                </div>
+              </div>
+
+              {/* Theme selector */}
+              <div className="px-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    {isDark ? <Moon className="w-4 h-4 text-gray-600 dark:text-gray-300" /> : <Sun className="w-4 h-4 text-gray-600 dark:text-gray-300" />}
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Thème</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setTheme('light')}
+                    className={`px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                      theme === 'light'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <Sun className="w-4 h-4" />
+                    Clair
+                  </button>
+                  <button
+                    onClick={() => setTheme('dark')}
+                    className={`px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                      theme === 'dark'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <Moon className="w-4 h-4" />
+                    Sombre
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Déconnexion en bas */}
-            <div className="p-4 border-t border-gray-200">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => handleMenuAction(handleLogout)}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"

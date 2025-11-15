@@ -4,6 +4,7 @@ import { ArrowUp, ArrowDown, Download, Edit2, Trash2, ArrowLeft, Package } from 
 import Button from '../components/ui/Button';
 import ProductFormModal from '../components/products/ProductFormModal';
 import { useStoreConfig } from '../context/StoreConfigContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   getAllProducts,
   createProduct,
@@ -16,10 +17,11 @@ import api from '../services/api';
 const ProductsPage = () => {
   const navigate = useNavigate();
   const { config } = useStoreConfig();
+  const { t } = useLanguage();
 
   // Construire la liste des catégories dynamiquement depuis la config
   const CATEGORIES = useMemo(() => {
-    const cats = [{ value: '', label: 'Toutes les catégories' }];
+    const cats = [{ value: '', label: t('products.allCategories') }];
 
     if (config.categories && config.categories.length > 0) {
       config.categories.forEach((cat) => {
@@ -40,7 +42,7 @@ const ProductsPage = () => {
     }
 
     return cats;
-  }, [config.categories]);
+  }, [config.categories, t]);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -99,11 +101,11 @@ const ProductsPage = () => {
       link.click();
       link.remove();
 
-      setSuccessMessage('Export CSV réussi !');
+      setSuccessMessage(t('messages.updateSuccess'));
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       console.error('Erreur lors de l\'export CSV:', err);
-      setError('Impossible d\'exporter les produits en CSV');
+      setError(t('messages.updateError'));
       setTimeout(() => setError(null), 5000);
     }
   };
@@ -134,7 +136,7 @@ const ProductsPage = () => {
       console.log('Données envoyées au backend:', formData);
 
       await createProduct(formData);
-      setSuccessMessage('Produit créé avec succès');
+      setSuccessMessage(t('products.created'));
       setIsModalOpen(false);
       setEditingProduct(null);
       await fetchProducts();
@@ -145,7 +147,7 @@ const ProductsPage = () => {
 
       const errorMessage = err.response?.data?.error?.message
         || err.response?.data?.message
-        || 'Erreur lors de la création du produit';
+        || t('messages.createError');
 
       setError(errorMessage);
     } finally {
@@ -159,14 +161,14 @@ const ProductsPage = () => {
       setModalLoading(true);
       setError(null);
       await updateProduct(editingProduct.id, formData);
-      setSuccessMessage('Produit modifié avec succès');
+      setSuccessMessage(t('products.updated'));
       setIsModalOpen(false);
       setEditingProduct(null);
       await fetchProducts();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       console.error('Erreur lors de la modification:', err);
-      setError(err.response?.data?.message || 'Erreur lors de la modification du produit');
+      setError(err.response?.data?.message || t('messages.updateError'));
     } finally {
       setModalLoading(false);
     }
@@ -177,13 +179,13 @@ const ProductsPage = () => {
     try {
       setError(null);
       await deleteProduct(productId);
-      setSuccessMessage('Produit supprimé avec succès');
+      setSuccessMessage(t('products.deleted'));
       setDeleteConfirm(null);
       await fetchProducts();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       console.error('Erreur lors de la suppression:', err);
-      setError(err.response?.data?.message || 'Erreur lors de la suppression du produit');
+      setError(err.response?.data?.message || t('messages.deleteError'));
     }
   };
 
@@ -227,20 +229,20 @@ const ProductsPage = () => {
       ];
 
       await updateProductsOrder(updates);
-      setSuccessMessage('Ordre mis à jour avec succès');
+      setSuccessMessage(t('messages.updateSuccess'));
       setTimeout(() => setSuccessMessage(''), 2000);
     } catch (err) {
       console.error('Erreur lors de la réorganisation:', err);
-      setError('Erreur lors de la mise à jour de l\'ordre');
+      setError(t('messages.updateError'));
       // Reload products to restore correct order
       await fetchProducts();
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
+      <header className="bg-white dark:bg-gray-800 shadow-sm px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-4">
           <Button
             variant="secondary"
@@ -249,15 +251,15 @@ const ProductsPage = () => {
             className="flex items-center gap-2"
           >
             <ArrowLeft size={20} />
-            Retour
+            {t('common.back')}
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
               <Package size={28} />
-              Gestion des Produits
+              {t('products.title')}
             </h1>
-            <p className="text-sm text-gray-600">
-              {filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''}
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              {filteredProducts.length} {filteredProducts.length > 1 ? t('products.products') : t('products.product')}
             </p>
           </div>
         </div>
@@ -269,7 +271,7 @@ const ProductsPage = () => {
             className="flex items-center gap-2"
           >
             <Download size={20} />
-            Exporter CSV
+            {t('products.exportCSV')}
           </Button>
           <Button
             variant="primary"
@@ -279,7 +281,7 @@ const ProductsPage = () => {
               setIsModalOpen(true);
             }}
           >
-            + Nouveau Produit
+            {t('products.newProduct')}
           </Button>
         </div>
       </header>
@@ -287,28 +289,28 @@ const ProductsPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Messages */}
         {error && (
-          <div className="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+          <div className="mb-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg">
             {error}
           </div>
         )}
         {successMessage && (
-          <div className="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+          <div className="mb-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg">
             {successMessage}
           </div>
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
           <div className="flex flex-wrap gap-4 items-center">
             {/* Category filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Catégorie
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t('products.category')}
               </label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>
@@ -327,8 +329,8 @@ const ProductsPage = () => {
                 onChange={(e) => setShowInactive(e.target.checked)}
                 className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
               />
-              <label htmlFor="showInactive" className="text-sm font-medium text-gray-700">
-                Afficher inactifs
+              <label htmlFor="showInactive" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t('products.showInactive')}
               </label>
             </div>
           </div>
@@ -336,67 +338,67 @@ const ProductsPage = () => {
 
         {/* Products Table */}
         {loading ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-500">Chargement des produits...</p>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
+            <p className="text-gray-500 dark:text-gray-400">{t('products.loading')}</p>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-500">Aucun produit trouvé</p>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
+            <p className="text-gray-500 dark:text-gray-400">{t('products.noProducts')}</p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+            <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Produit
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    {t('products.product')}
                   </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Catégorie
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    {t('products.category')}
                   </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Prix
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    {t('products.price')}
                   </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Stock
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    {t('products.stock')}
                   </th>
-                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Statut
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    {t('products.status')}
                   </th>
-                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ordre
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    {t('products.order')}
                   </th>
-                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    {t('products.actions')}
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50">
+                  <tr key={product.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <td className="px-4 py-3">
-                      <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{product.name}</div>
                       {product.description && (
-                        <div className="text-xs text-gray-500 truncate max-w-xs">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">
                           {product.description}
                         </div>
                       )}
                       {product.is_menu && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 mt-1">
-                          Menu
+                          {t('products.menu')}
                         </span>
                       )}
                     </td>
                     <td className="px-3 py-3 whitespace-nowrap">
-                      <span className="text-sm text-gray-900">
+                      <span className="text-sm text-gray-900 dark:text-gray-100">
                         {getCategoryLabel(product.category)}
                       </span>
                     </td>
                     <td className="px-3 py-3 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {calculatePriceTTC(product.price_ht, product.vat_rate)} €
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
                         HT: {parseFloat(product.price_ht).toFixed(2)} € • TVA {product.vat_rate}%
                       </div>
                     </td>
@@ -405,7 +407,7 @@ const ProductsPage = () => {
                         <span className="text-xs text-gray-400 italic">N/A</span>
                       ) : product.is_out_of_stock ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          ⚠️ Rupture
+                          ⚠️ {t('products.outOfStock')}
                         </span>
                       ) : product.is_low_stock ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
@@ -420,23 +422,23 @@ const ProductsPage = () => {
                     <td className="px-3 py-3 whitespace-nowrap text-center">
                       {product.is_active ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Actif
+                          {t('products.active')}
                         </span>
                       ) : (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          Inactif
+                          {t('products.inactive')}
                         </span>
                       )}
                     </td>
                     <td className="px-3 py-3 whitespace-nowrap">
                       <div className="flex items-center justify-center gap-1">
-                        <span className="text-xs text-gray-500 w-6 text-center">{product.display_order}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 w-6 text-center">{product.display_order}</span>
                         <div className="flex flex-col gap-0.5">
                           <button
                             onClick={() => handleMoveProduct(filteredProducts.indexOf(product), 'up')}
                             disabled={filteredProducts.indexOf(product) === 0}
                             className="p-0.5 text-gray-400 hover:text-primary-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                            title="Monter"
+                            title={t('products.moveUp')}
                           >
                             <ArrowUp size={14} />
                           </button>
@@ -444,7 +446,7 @@ const ProductsPage = () => {
                             onClick={() => handleMoveProduct(filteredProducts.indexOf(product), 'down')}
                             disabled={filteredProducts.indexOf(product) === filteredProducts.length - 1}
                             className="p-0.5 text-gray-400 hover:text-primary-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                            title="Descendre"
+                            title={t('products.moveDown')}
                           >
                             <ArrowDown size={14} />
                           </button>
@@ -459,14 +461,14 @@ const ProductsPage = () => {
                             setIsModalOpen(true);
                           }}
                           className="p-1.5 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                          title="Modifier"
+                          title={t('common.edit')}
                         >
                           <Edit2 size={16} />
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(product)}
                           className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Supprimer"
+                          title={t('common.delete')}
                         >
                           <Trash2 size={16} />
                         </button>
@@ -495,15 +497,15 @@ const ProductsPage = () => {
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4">
             <div className="p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
-                Confirmer la suppression
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
+                {t('products.confirmDelete')}
               </h3>
-              <p className="text-gray-600 mb-4">
-                Êtes-vous sûr de vouloir supprimer le produit{' '}
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                {t('messages.confirmDelete')} {' '}
                 <span className="font-semibold">{deleteConfirm.name}</span> ?
-                Cette action est irréversible.
+                {t('messages.confirmDeleteDesc')}
               </p>
               <div className="flex gap-3">
                 <Button
@@ -511,14 +513,14 @@ const ProductsPage = () => {
                   onClick={() => setDeleteConfirm(null)}
                   className="flex-1"
                 >
-                  Annuler
+                  {t('common.cancel')}
                 </Button>
                 <Button
                   variant="primary"
                   onClick={() => handleDeleteProduct(deleteConfirm.id)}
                   className="flex-1 bg-red-600 hover:bg-red-700"
                 >
-                  Supprimer
+                  {t('common.delete')}
                 </Button>
               </div>
             </div>
