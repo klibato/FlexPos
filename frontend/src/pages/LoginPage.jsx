@@ -40,7 +40,7 @@ const LoginPage = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-              Nom d'utilisateur
+              {t('auth.username')}
             </label>
             <input
               id="username"
@@ -56,7 +56,7 @@ const LoginPage = () => {
 
           <div>
             <label htmlFor="pinCode" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-              Code PIN
+              {t('auth.pin')}
             </label>
             <input
               id="pinCode"
@@ -73,7 +73,7 @@ const LoginPage = () => {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
@@ -83,13 +83,13 @@ const LoginPage = () => {
             disabled={loading}
             className="btn btn-primary btn-lg w-full"
           >
-            {loading ? 'Connexion...' : 'Se connecter'}
+            {loading ? t('auth.loggingIn') : t('auth.login')}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-500">
-          <p>Comptes de démo :</p>
-          <p>admin / 1234 ou john / 5678</p>
+        <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+          <p>{t('auth.demoAccounts')}</p>
+          <p>admin / 1234 {t('common.or')} john / 5678</p>
         </div>
       </div>
     </div>

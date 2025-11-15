@@ -9,6 +9,7 @@ import Button from '../components/ui/Button';
 
 const LogsPage = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);

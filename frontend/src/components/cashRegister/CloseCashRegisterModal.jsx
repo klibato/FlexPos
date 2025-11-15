@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { closeCashRegister } from '../../services/cashRegisterService';
 import { useCashRegister } from '../../context/CashRegisterContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 const CloseCashRegisterModal = ({ isOpen, onClose, cashRegister }) => {
   const { closeRegister } = useCashRegister();
+  const { t } = useLanguage();
   const [countedCash, setCountedCash] = useState('');
   const [closingBalance, setClosingBalance] = useState('');
   const [notes, setNotes] = useState('');
@@ -46,7 +48,7 @@ const CloseCashRegisterModal = ({ isOpen, onClose, cashRegister }) => {
       // Fermer le modal
       onClose();
     } catch (err) {
-      setError(err.response?.data?.error?.message || 'Erreur lors de la fermeture de la caisse');
+      setError(err.response?.data?.error?.message || t('cashRegister.closeError'));
     } finally {
       setLoading(false);
     }
@@ -59,25 +61,25 @@ const CloseCashRegisterModal = ({ isOpen, onClose, cashRegister }) => {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="bg-red-600 text-white px-6 py-4 rounded-t-lg sticky top-0">
-          <h2 className="text-xl font-bold">Clôture de caisse</h2>
+          <h2 className="text-xl font-bold">{t("cashRegister.closeTitle")}</h2>
           <p className="text-sm opacity-90 mt-1">{cashRegister.register_name}</p>
         </div>
 
         {/* Body */}
         <form onSubmit={handleSubmit} className="p-6">
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 dark:text-red-200 rounded dark:bg-red-900/30 dark:border-red-800">
               {error}
             </div>
           )}
 
-          {/* Récapitulatif */}
+          {/* {t("cashRegister.summary")} */}
           <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <h3 className="font-semibold text-gray-700 mb-3">Récapitulatif</h3>
+            <h3 className="font-semibold text-gray-700 mb-3">{t("cashRegister.summary")}</h3>
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Fond de caisse:</span>
+                <span className="text-gray-600 dark:text-gray-400">{t("cashRegister.openingBalance")}:</span>
                 <span className="font-medium">{parseFloat(cashRegister.opening_balance).toFixed(2)} €</span>
               </div>
               <div className="flex justify-between">
@@ -89,7 +91,7 @@ const CloseCashRegisterModal = ({ isOpen, onClose, cashRegister }) => {
                 <span className="font-bold text-lg">{expectedBalance.toFixed(2)} €</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Nombre de ventes:</span>
+                <span className="text-gray-600 dark:text-gray-400">{t("cashRegister.salesCount")}:</span>
                 <span className="font-medium">{cashRegister.ticket_count || 0}</span>
               </div>
             </div>
@@ -179,14 +181,14 @@ const CloseCashRegisterModal = ({ isOpen, onClose, cashRegister }) => {
               disabled={loading}
               className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Annuler
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
               disabled={loading}
               className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Fermeture...' : 'Fermer la caisse'}
+              {loading ? '{t("cashRegister.closing")}' : '{t("cashRegister.closeButton")}'}
             </button>
           </div>
         </form>
