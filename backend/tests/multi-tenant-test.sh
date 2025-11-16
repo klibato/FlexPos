@@ -113,7 +113,7 @@ PRODUCT_PIZZA=$(curl -s -X POST $BASE_URL/products \
     "description": "Tomate, mozzarella, basilic",
     "price_ht": 8.33,
     "vat_rate": 20,
-    "category": "pizza",
+    "category": "burgers",
     "type": "simple",
     "track_stock": true,
     "quantity": 100
@@ -140,8 +140,8 @@ echo ""
 PRODUCTS_BENS=$(curl -s -X GET $BASE_URL/products \
   -H "Authorization: Bearer $TOKEN_BENS")
 
-BENS_PRODUCT_COUNT=$(echo "$PRODUCTS_BENS" | jq '.data.products | length')
-BENS_HAS_PIZZA=$(echo "$PRODUCTS_BENS" | jq '.data.products | map(select(.name == "Pizza Margherita")) | length')
+BENS_PRODUCT_COUNT=$(echo "$PRODUCTS_BENS" | jq '.data | length')
+BENS_HAS_PIZZA=$(echo "$PRODUCTS_BENS" | jq '.data | map(select(.name == "Pizza Margherita")) | length')
 
 echo "Nombre de produits BensBurger : $BENS_PRODUCT_COUNT"
 echo "BensBurger voit la Pizza Margherita : $BENS_HAS_PIZZA"
@@ -164,7 +164,7 @@ echo ""
 PRODUCTS_PIZZA=$(curl -s -X GET $BASE_URL/products \
   -H "Authorization: Bearer $TOKEN_PIZZA")
 
-PIZZA_PRODUCT_COUNT=$(echo "$PRODUCTS_PIZZA" | jq '.data.products | length')
+PIZZA_PRODUCT_COUNT=$(echo "$PRODUCTS_PIZZA" | jq '.data | length')
 
 echo "Nombre de produits Pizza Express : $PIZZA_PRODUCT_COUNT"
 
@@ -173,7 +173,7 @@ if [ "$PIZZA_PRODUCT_COUNT" == "1" ]; then
     echo -e "${GREEN}✅ ISOLATION RÉUSSIE : Pizza Express voit uniquement ses propres produits${NC}"
 else
     echo -e "${RED}❌ ÉCHEC : Pizza Express voit un nombre incorrect de produits ($PIZZA_PRODUCT_COUNT au lieu de 1)${NC}"
-    echo "$PRODUCTS_PIZZA" | jq '.data.products[] | .name'
+    echo "$PRODUCTS_PIZZA" | jq '.data[] | .name'
 fi
 
 echo ""
