@@ -38,6 +38,10 @@ const authenticateToken = async (req, res, next) => {
 
     // Attacher l'utilisateur à la requête
     req.user = user;
+
+    // MULTI-TENANT: Injecter organizationId depuis le user
+    req.organizationId = user.organization_id;
+
     next();
   } catch (error) {
     logger.error('Erreur d\'authentification:', error);
@@ -84,11 +88,19 @@ const optionalAuthenticate = async (req, res, next) => {
 
       if (user && user.is_active) {
         req.user = user;
+        // MULTI-TENANT: Injecter organizationId depuis le user
+        req.organizationId = user.organization_id;
       }
     }
   } catch (error) {
     // Ignorer les erreurs et continuer sans utilisateur
     logger.debug('Erreur d\'authentification optionnelle:', error.message);
+  }
+
+  // MULTI-TENANT: Si pas d'auth, utiliser organisation par défaut (dev mode)
+  if (!req.organizationId) {
+    req.organizationId = 1; // BensBurger par défaut
+    logger.warn('No authentication - using default organization (id=1)');
   }
 
   next();
