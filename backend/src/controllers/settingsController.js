@@ -104,6 +104,9 @@ const updateSettings = async (req, res, next) => {
       settings: newSettings,
     });
 
+    // IMPORTANT: Recharger l'organisation pour avoir les données fraîches
+    await req.organization.reload();
+
     logger.info(`Paramètres du commerce mis à jour par ${req.user.username} (org_id=${req.organizationId})`);
 
     // Invalider le cache pour que les services rechargent la config
@@ -112,7 +115,7 @@ const updateSettings = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: newSettings,
+      data: req.organization.settings,
       message: 'Paramètres mis à jour avec succès',
     });
   } catch (error) {
