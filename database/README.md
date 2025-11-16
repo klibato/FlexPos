@@ -6,8 +6,7 @@
 database/
 ├── init.sql              # Schéma initial de la base de données
 ├── seeds.sql             # Données de test (produits, utilisateurs de démo)
-├── all-migrations.sql    # Toutes les migrations consolidées (documentation)
-├── migrations/           # Migrations SQL individuelles (exécutées automatiquement)
+├── migrations/           # Migrations SQL (exécutées automatiquement au démarrage)
 │   ├── 001_update_cash_registers.sql
 │   ├── 008_create_store_settings.sql
 │   ├── 009_add_display_order_image_to_products.sql
@@ -107,10 +106,6 @@ Données de démonstration :
 cd backend
 npm run db:seed
 ```
-
-### `all-migrations.sql`
-Fichier consolidé de toutes les migrations SQL pour documentation.
-**Ne pas exécuter directement** (risque de doublon), utiliser les migrations individuelles.
 
 ## Commandes NPM
 
