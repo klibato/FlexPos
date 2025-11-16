@@ -97,7 +97,11 @@ async function migrateAllSQL() {
     const executedMigrations = await getExecutedMigrations();
 
     // Lister tous les fichiers de migration SQL
-    const migrationsDir = path.join(__dirname, '../../../database/migrations');
+    // En développement local : ../../../database/migrations
+    // En Docker : /database/migrations (volume monté)
+    const migrationsDir = fs.existsSync('/database/migrations')
+      ? '/database/migrations'
+      : path.join(__dirname, '../../../database/migrations');
 
     if (!fs.existsSync(migrationsDir)) {
       logger.warn(`Dossier migrations non trouvé: ${migrationsDir}`);
