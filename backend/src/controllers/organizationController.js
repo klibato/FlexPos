@@ -1,6 +1,6 @@
 const { Organization, User } = require('../models');
 const logger = require('../utils/logger');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { generateSlug } = require('../utils/helpers');
 
 /**
