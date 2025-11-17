@@ -64,22 +64,54 @@ async function markMigrationAsExecuted(migrationName) {
  * Exécuter une migration SQL
  */
 async function runMigration(migrationFile, migrationPath) {
+  const transaction = await sequelize.transaction();
+
   try {
     logger.info(`  📝 Exécution: ${migrationFile}`);
 
     // Lire le fichier SQL
     const sql = fs.readFileSync(migrationPath, 'utf8');
 
-    // Exécuter la migration
-    await sequelize.query(sql);
+    // Exécuter la migration dans une transaction PostgreSQL
+    // Utilise la connexion native PostgreSQL pour supporter les scripts complexes
+    // (fonctions avec $$, triggers, DO blocks, etc.)
+    await sequelize.query(sql, {
+      transaction,
+      raw: true,
+      // Logging désactivé pour éviter le spam de logs
+      logging: false,
+    });
 
-    // Marquer comme exécutée
+    // Commit de la transaction
+    await transaction.commit();
+
+    // Marquer comme exécutée (dans une nouvelle transaction)
     await markMigrationAsExecuted(migrationFile);
 
     logger.info(`  ✅ Migration ${migrationFile} appliquée avec succès`);
     return true;
   } catch (error) {
-    logger.error(`  ❌ Erreur lors de l'exécution de ${migrationFile}:`, error.message);
+    // Rollback de la transaction en cas d'erreur
+    await transaction.rollback();
+
+    // Log détaillé de l'erreur avec stack trace complet
+    logger.error(`  ❌ Erreur lors de l'exécution de ${migrationFile}:`);
+    logger.error(`     Message: ${error.message}`);
+    if (error.original) {
+      logger.error(`     SQL Error: ${error.original.message || error.original}`);
+      if (error.original.detail) {
+        logger.error(`     Detail: ${error.original.detail}`);
+      }
+      if (error.original.hint) {
+        logger.error(`     Hint: ${error.original.hint}`);
+      }
+      if (error.original.position) {
+        logger.error(`     Position: ${error.original.position}`);
+      }
+      if (error.original.code) {
+        logger.error(`     Code: ${error.original.code}`);
+      }
+    }
     // Ne pas bloquer les autres migrations, continuer
     return false;
   }
