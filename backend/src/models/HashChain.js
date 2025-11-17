@@ -82,7 +82,9 @@ HashChain.init(
     tableName: 'hash_chain',
     timestamps: true, // created_at seulement
     updatedAt: false, // Pas de updatedAt (immuable)
+    createdAt: 'created_at', // Map createdAt → created_at (snake_case SQL)
     paranoid: false, // Pas de soft delete (immuable)
+    underscored: true, // Utilise snake_case pour toutes les colonnes auto-générées
     indexes: [
       {
         name: 'idx_hash_chain_org',

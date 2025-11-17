@@ -173,7 +173,9 @@ NF525Archive.init(
     tableName: 'nf525_archives',
     timestamps: true, // created_at seulement
     updatedAt: false, // Pas de updatedAt (archives immuables après création)
+    createdAt: 'created_at', // Map createdAt → created_at (snake_case SQL)
     paranoid: false, // On utilise deleted_at manuel au lieu de paranoid
+    underscored: true, // Utilise snake_case pour toutes les colonnes auto-générées
     indexes: [
       {
         name: 'idx_archives_org',
