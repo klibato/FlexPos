@@ -161,7 +161,6 @@ SELECT
   COUNT(DISTINCT s.cash_register_id) as unique_registers
 FROM sales s
 LEFT JOIN hash_chain hc ON s.id = hc.sale_id
-WHERE s.deleted_at IS NULL
 GROUP BY s.organization_id, DATE(s.created_at);
 
 COMMENT ON VIEW nf525_daily_stats IS 'Statistiques quotidiennes NF525 pour rapports fiscaux';
@@ -332,7 +331,6 @@ INNER JOIN hash_chain hc ON s.id = hc.sale_id
 INNER JOIN organizations o ON s.organization_id = o.id
 LEFT JOIN users u ON s.user_id = u.id
 LEFT JOIN cash_registers cr ON s.cash_register_id = cr.id
-WHERE s.deleted_at IS NULL
 ORDER BY hc.organization_id, hc.sequence_number;
 
 COMMENT ON VIEW nf525_audit_export IS 'Export NF525 pour contrôle fiscal (toutes données nécessaires)';
