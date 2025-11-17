@@ -1147,7 +1147,7 @@ const SettingsPage = () => {
                           type="text"
                           value={settings.email_config?.from_name || ''}
                           onChange={(e) => updateEmailConfig('from_name', e.target.value)}
-                          placeholder="BensBurger"
+                          placeholder="FlexPOS"
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
                         />
                       </div>

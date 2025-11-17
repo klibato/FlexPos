@@ -1,4 +1,4 @@
-# 🍔 BensBurger - Point de Vente (POS) Moderne
+# 🍔 FlexPOS - Point de Vente (POS) Moderne
 
 > Système de caisse enregistreuse moderne pour restauration rapide, développé avec Node.js et React
 
@@ -28,7 +28,7 @@
 
 ## 🎯 Vue d'ensemble
 
-**BensBurger** est un système de point de vente (POS) complet conçu pour la restauration rapide. Il offre une interface intuitive pour gérer les ventes, les produits, les utilisateurs, et les caisses, avec un focus sur la rapidité et la fiabilité.
+**FlexPOS** est un système de point de vente (POS) complet conçu pour la restauration rapide. Il offre une interface intuitive pour gérer les ventes, les produits, les utilisateurs, et les caisses, avec un focus sur la rapidité et la fiabilité.
 
 ### Cas d'usage
 - 🍔 Restaurants fast-food
@@ -142,8 +142,8 @@
 
 ```bash
 # Cloner le repository
-git clone https://github.com/klibato/BENSBURGER.git
-cd BENSBURGER
+git clone https://github.com/klibato/FLEXPOS.git
+cd FLEXPOS
 
 # Copier le fichier d'environnement
 cp .env.example .env
@@ -313,8 +313,8 @@ Les contributions sont les bienvenues ! Voici comment participer :
 
 ### 1. Fork le projet
 ```bash
-git clone https://github.com/klibato/BENSBURGER.git
-cd BENSBURGER
+git clone https://github.com/klibato/FLEXPOS.git
+cd FLEXPOS
 ```
 
 ### 2. Créer une branche
@@ -427,7 +427,7 @@ LOG_LEVEL=info
 ### Frontend (.env)
 ```env
 VITE_API_URL=http://localhost:3000/api
-VITE_APP_NAME=BensBurger POS
+VITE_APP_NAME=FlexPOS POS
 ```
 
 ---
@@ -467,7 +467,7 @@ Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus
 ## 📞 Support & Contact
 
 - **Documentation** : [docs/](docs/)
-- **Issues GitHub** : [github.com/klibato/BENSBURGER/issues](https://github.com/klibato/BENSBURGER/issues)
+- **Issues GitHub** : [github.com/klibato/FLEXPOS/issues](https://github.com/klibato/FLEXPOS/issues)
 
 ---
 
@@ -486,5 +486,5 @@ Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus
 <div align="center">
   <p>Développé avec ❤️ pour la restauration rapide</p>
   <p><strong>Version</strong> : 1.0.0-alpha | <strong>Dernière mise à jour</strong> : 2025-11-15</p>
-  <p>© 2025 BensBurger. Tous droits réservés.</p>
+  <p>© 2025 FlexPOS. Tous droits réservés.</p>
 </div>

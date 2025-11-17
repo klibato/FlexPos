@@ -113,7 +113,7 @@ const optionalAuthenticate = async (req, res, next) => {
 
   // MULTI-TENANT: Si pas d'auth, utiliser organisation par défaut (dev mode)
   if (!req.organizationId) {
-    req.organizationId = 1; // BensBurger par défaut
+    req.organizationId = 1; // FlexPOS par défaut
     logger.warn('No authentication - using default organization (id=1)');
   }
 

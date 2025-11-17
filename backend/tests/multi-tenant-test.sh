@@ -76,9 +76,9 @@ fi
 echo ""
 
 # ============================================
-# 3. LOGIN BENSBURGER (organisation 1)
+# 3. LOGIN FLEXPOS (organisation 1)
 # ============================================
-echo -e "${BLUE}🔐 3. Login admin BensBurger${NC}"
+echo -e "${BLUE}🔐 3. Login admin FlexPOS${NC}"
 echo ""
 
 LOGIN_BENS=$(curl -s -X POST $BASE_URL/auth/login \
@@ -91,9 +91,9 @@ LOGIN_BENS=$(curl -s -X POST $BASE_URL/auth/login \
 TOKEN_BENS=$(echo "$LOGIN_BENS" | jq -r '.data.token')
 
 if [ "$TOKEN_BENS" != "null" ]; then
-    echo -e "${GREEN}✅ Login BensBurger réussi${NC}"
+    echo -e "${GREEN}✅ Login FlexPOS réussi${NC}"
 else
-    echo -e "${RED}❌ Échec login BensBurger${NC}"
+    echo -e "${RED}❌ Échec login FlexPOS${NC}"
     exit 1
 fi
 
@@ -132,9 +132,9 @@ fi
 echo ""
 
 # ============================================
-# 5. TEST ISOLATION : BENSBURGER NE VOIT PAS PIZZA
+# 5. TEST ISOLATION : FLEXPOS NE VOIT PAS PIZZA
 # ============================================
-echo -e "${BLUE}🔒 5. Test isolation : BensBurger essaye de voir les produits${NC}"
+echo -e "${BLUE}🔒 5. Test isolation : FlexPOS essaye de voir les produits${NC}"
 echo ""
 
 PRODUCTS_BENS=$(curl -s -X GET $BASE_URL/products \
@@ -143,20 +143,20 @@ PRODUCTS_BENS=$(curl -s -X GET $BASE_URL/products \
 BENS_PRODUCT_COUNT=$(echo "$PRODUCTS_BENS" | jq '.data | length')
 BENS_HAS_PIZZA=$(echo "$PRODUCTS_BENS" | jq '.data | map(select(.name == "Pizza Margherita")) | length')
 
-echo "Nombre de produits BensBurger : $BENS_PRODUCT_COUNT"
-echo "BensBurger voit la Pizza Margherita : $BENS_HAS_PIZZA"
+echo "Nombre de produits FlexPOS : $BENS_PRODUCT_COUNT"
+echo "FlexPOS voit la Pizza Margherita : $BENS_HAS_PIZZA"
 
 if [ "$BENS_HAS_PIZZA" == "0" ]; then
-    echo -e "${GREEN}✅ ISOLATION RÉUSSIE : BensBurger ne voit pas les produits de Pizza Express${NC}"
+    echo -e "${GREEN}✅ ISOLATION RÉUSSIE : FlexPOS ne voit pas les produits de Pizza Express${NC}"
 else
-    echo -e "${RED}❌ ÉCHEC ISOLATION : BensBurger voit les produits de Pizza Express !${NC}"
+    echo -e "${RED}❌ ÉCHEC ISOLATION : FlexPOS voit les produits de Pizza Express !${NC}"
     exit 1
 fi
 
 echo ""
 
 # ============================================
-# 6. TEST ISOLATION : PIZZA NE VOIT PAS BENSBURGER
+# 6. TEST ISOLATION : PIZZA NE VOIT PAS FLEXPOS
 # ============================================
 echo -e "${BLUE}🔒 6. Test isolation : Pizza Express essaye de voir les produits${NC}"
 echo ""
@@ -207,7 +207,7 @@ echo -e "${GREEN}✅ TOUS LES TESTS MULTI-TENANT RÉUSSIS !${NC}"
 echo "============================"
 echo ""
 echo "📊 Résumé :"
-echo "  - Organisation 1 (BensBurger) : Produits existants"
+echo "  - Organisation 1 (FlexPOS) : Produits existants"
 echo "  - Organisation 2 (Pizza Express) : 1 produit (Pizza Margherita)"
 echo "  - Isolation complète : ✅"
 echo "  - Settings isolés : ✅"

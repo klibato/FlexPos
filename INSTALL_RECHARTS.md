@@ -22,7 +22,7 @@ docker exec -it <container_name> npm install recharts
 ### Option 2 : Rebuild complet du conteneur
 
 ```bash
-cd /home/user/BENSBURGER
+cd /home/user/FLEXPOS
 
 # Arrêter les conteneurs
 docker-compose down
@@ -41,7 +41,7 @@ docker-compose restart frontend
 
 Une fois recharts installé dans le conteneur Docker :
 
-1. Ouvrez `/home/user/BENSBURGER/frontend/src/pages/DashboardPage.jsx`
+1. Ouvrez `/home/user/FLEXPOS/frontend/src/pages/DashboardPage.jsx`
 2. Décommentez les imports recharts (lignes 9-23)
 3. Les 3 graphiques s'afficheront automatiquement :
    - 📈 LineChart : Évolution du CA

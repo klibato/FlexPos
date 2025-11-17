@@ -7,7 +7,7 @@ Système de caisse enregistreuse web moderne pour restaurant de burgers, conçu 
 ## 🏗️ Structure du Projet
 
 ```
-BENSBURGER/
+FLEXPOS/
 ├── docs/                          # Documentation
 │   ├── ARCHITECTURE.md            # Ce fichier
 │   ├── DATABASE_SCHEMA.md         # Schéma détaillé BDD
@@ -456,7 +456,7 @@ SUMUP_API_KEY=your-sumup-key
 ### Frontend (.env)
 ```
 VITE_API_URL=http://localhost:3000/api
-VITE_APP_NAME=BensBurger POS
+VITE_APP_NAME=FlexPOS POS
 ```
 
 ## 🧪 Tests

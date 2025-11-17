@@ -943,7 +943,7 @@ await AuditLog.log({
 | Colonne | Type | Default | Description |
 |---------|------|---------|-------------|
 | id | INTEGER | 1 | PK fixe (singleton) |
-| store_name | STRING(255) | 'BensBurger' | Nom commercial |
+| store_name | STRING(255) | 'FlexPOS' | Nom commercial |
 | store_description | STRING(255) | 'Restaurant Rapide' | Description |
 | address_line1 | STRING(255) | '123 Avenue des Burgers' | Adresse 1 |
 | address_line2 | STRING(255) | null | Adresse 2 |
@@ -1066,7 +1066,7 @@ id: {
 
 **✅ Bonnes pratiques** :
 - Pattern singleton via validation `id = 1`
-- Valeurs par défaut cohérentes (marque Ben's Burger)
+- Valeurs par défaut cohérentes (marque FlexPOS)
 - JSONB pour configurations flexibles (SumUp, imprimante, email)
 - Validation email (isEmail) et website (isUrl)
 - Timestamps activés (traçabilité modifications)

@@ -1,5 +1,5 @@
 -- ============================================
--- BensBurger POS - Database Initialization
+-- FlexPOS POS - Database Initialization
 -- ============================================
 
 -- Créer les extensions nécessaires

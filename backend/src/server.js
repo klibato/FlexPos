@@ -25,7 +25,7 @@ app.use(helmet());
 // CORS
 app.use(cors({
   origin: config.NODE_ENV === 'production'
-    ? ['https://pos.bensburger.com']
+    ? ['https://pos.flexpos.com']
     : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
 }));

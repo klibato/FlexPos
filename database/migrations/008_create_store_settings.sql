@@ -3,7 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS store_settings (
   id INTEGER PRIMARY KEY DEFAULT 1,
-  store_name VARCHAR(255) NOT NULL DEFAULT 'BensBurger',
+  store_name VARCHAR(255) NOT NULL DEFAULT 'FlexPOS',
   store_description VARCHAR(255) DEFAULT 'Restaurant Rapide',
   address_line1 VARCHAR(255) DEFAULT '123 Avenue des Burgers',
   address_line2 VARCHAR(255) DEFAULT NULL,

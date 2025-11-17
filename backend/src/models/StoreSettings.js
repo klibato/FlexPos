@@ -13,7 +13,7 @@ const StoreSettings = sequelize.define('store_settings', {
   store_name: {
     type: DataTypes.STRING(255),
     allowNull: false,
-    defaultValue: 'BensBurger',
+    defaultValue: 'FlexPOS',
   },
   store_description: {
     type: DataTypes.STRING(255),

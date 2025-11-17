@@ -3,7 +3,7 @@
 ## 🔗 URL de Base
 
 - **Développement** : `http://localhost:3000/api`
-- **Production** : `https://pos.bensburger.com/api`
+- **Production** : `https://pos.flexpos.com/api`
 
 ## 🔐 Authentification
 
@@ -505,7 +505,7 @@ Régénérer le ticket de caisse (pour réimpression).
   "success": true,
   "data": {
     "ticket_number": "20250110-0042",
-    "content": "BENSBURGER\n123 Rue...\n\n...",
+    "content": "FLEXPOS\n123 Rue...\n\n...",
     "format": "text/plain"
   }
 }

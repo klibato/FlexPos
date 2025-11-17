@@ -74,7 +74,7 @@ class SettingsCache {
    */
   getDefaultSettings() {
     return {
-      store_name: 'BensBurger',
+      store_name: 'FlexPOS',
       sumup_config: {
         enabled: false,
         api_key: '',

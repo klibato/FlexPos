@@ -148,7 +148,7 @@ const getPublicConfig = async (req, res, next) => {
         currency: settings.currency || 'EUR',
         currency_symbol: settings.currency_symbol || '€',
         logo_url: settings.logo_url || null,
-        store_name: req.organization?.name || settings.store_name || 'BensBurger',
+        store_name: req.organization?.name || settings.store_name || 'FlexPOS',
         language: settings.language || 'fr-FR',
       },
     });

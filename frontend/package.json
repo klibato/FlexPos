@@ -1,7 +1,7 @@
 {
-  "name": "bensburger-pos-frontend",
+  "name": "flexpos-frontend",
   "version": "1.0.0",
-  "description": "Frontend React pour le système de caisse BensBurger",
+  "description": "FlexPOS - Interface React moderne",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,7 +16,7 @@
     "react",
     "vite"
   ],
-  "author": "BensBurger",
+  "author": "FlexPOS Team",
   "license": "PROPRIETARY",
   "dependencies": {
     "axios": "^1.6.2",

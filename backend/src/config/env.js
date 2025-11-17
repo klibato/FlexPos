@@ -33,7 +33,7 @@ module.exports = {
 
   // Configuration app
   app: {
-    businessName: 'BensBurger',
+    businessName: 'FlexPOS',
     businessAddress: '123 Rue de la Paix, 75001 Paris',
     siret: '12345678901234',
     vatNumber: 'FR12345678901',

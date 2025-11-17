@@ -1,7 +1,7 @@
 {
-  "name": "bensburger-pos-backend",
+  "name": "flexpos-backend",
   "version": "1.0.0",
-  "description": "Backend API pour le système de caisse BensBurger",
+  "description": "FlexPOS - Backend API multi-tenant conforme NF525",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -20,7 +20,7 @@
     "express",
     "api"
   ],
-  "author": "BensBurger",
+  "author": "FlexPOS Team",
   "license": "PROPRIETARY",
   "dependencies": {
     "express": "^4.18.2",

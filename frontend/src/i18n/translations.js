@@ -41,7 +41,7 @@ export const translations = {
 
     // POS
     pos: {
-      title: 'BensBurger POS',
+      title: 'FlexPOS POS',
       cashier: 'Caissier',
       cart: 'Panier',
       emptyCart: 'Panier vide',
@@ -499,7 +499,7 @@ export const translations = {
 
     // POS
     pos: {
-      title: 'BensBurger POS',
+      title: 'FlexPOS POS',
       cashier: 'Cashier',
       cart: 'Cart',
       emptyCart: 'Empty cart',

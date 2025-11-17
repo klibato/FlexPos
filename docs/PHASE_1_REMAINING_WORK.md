@@ -442,7 +442,7 @@ docker exec -it pos_postgres psql -U postgres -d pos_burger -c "SELECT id, usern
 ```
 
 **Résultat attendu**:
-- ✅ Table `organizations` créée avec 1 row (BensBurger)
+- ✅ Table `organizations` créée avec 1 row (FlexPOS)
 - ✅ Toutes les tables ont la colonne `organization_id`
 - ✅ Toutes les données existantes ont `organization_id = 1`
 - ✅ Migrations 014 et 015 dans `migrations_history`

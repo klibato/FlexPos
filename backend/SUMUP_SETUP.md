@@ -1,4 +1,4 @@
-# Configuration SumUp pour BensBurger POS
+# Configuration SumUp pour FlexPOS POS
 
 ## Vue d'ensemble
 
@@ -73,7 +73,7 @@ Content-Type: application/json
 {
   "amount": 15.50,
   "reference": "20250112-0001",
-  "description": "BensBurger - Ticket 20250112-0001"
+  "description": "FlexPOS - Ticket 20250112-0001"
 }
 ```
 
@@ -119,7 +119,7 @@ Réponse:
 
 ### Mode de fonctionnement
 
-Le système BensBurger POS supporte deux modes d'intégration SumUp:
+Le système FlexPOS POS supporte deux modes d'intégration SumUp:
 
 #### 1. Mode API (MVP)
 - Création de checkout via l'API REST SumUp

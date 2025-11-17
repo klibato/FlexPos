@@ -307,7 +307,7 @@ if (hasPermission('manage_products')) {
 **State** (supposé) :
 ```javascript
 {
-  store_name: "BensBurger",
+  store_name: "FlexPOS",
   categories: [...],
   vat_rates: [...],
   payment_methods: { cash: true, card: true, ... },

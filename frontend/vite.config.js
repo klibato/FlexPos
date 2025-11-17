@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
-        name: 'BensBurger POS',
-        short_name: 'BensBurger',
-        description: 'Système de caisse pour BensBurger',
+        name: 'FlexPOS POS',
+        short_name: 'FlexPOS',
+        description: 'Système de caisse pour FlexPOS',
         theme_color: '#ff6b35',
         background_color: '#ffffff',
         display: 'standalone',

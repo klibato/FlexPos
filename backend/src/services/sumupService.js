@@ -190,7 +190,7 @@ class SumUpService {
       const checkout = await this.createCheckout({
         amount,
         reference,
-        description: `BensBurger - Ticket ${reference}`,
+        description: `FlexPOS - Ticket ${reference}`,
       });
 
       if (!checkout.success) {

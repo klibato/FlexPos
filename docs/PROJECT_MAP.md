@@ -1,4 +1,4 @@
-# 🗺️ CARTOGRAPHIE COMPLÈTE DU PROJET BENSBURGER POS
+# 🗺️ CARTOGRAPHIE COMPLÈTE DU PROJET FLEXPOS POS
 
 **Date création** : 2025-11-15
 **Date mise à jour** : 2025-11-16
@@ -14,7 +14,7 @@
 
 **Type** : Application POS (Point of Sale) pour restaurant fast-food
 **Architecture** : Full-Stack JavaScript (Node.js + React)
-**État** : Mono-tenant opérationnel (Ben's Burger uniquement)
+**État** : Mono-tenant opérationnel (FlexPOS uniquement)
 **Fichiers totaux** : 128 fichiers (hors node_modules)
 **Fichiers JavaScript/JSX** : 103 fichiers
 **Fichiers SQL** : 12 fichiers (migrations incluses)
@@ -35,7 +35,7 @@
 ## 📁 STRUCTURE GLOBALE
 
 ```
-/home/user/BENSBURGER/
+/home/user/FLEXPOS/
 ├── backend/                        # API Node.js + Express
 │   ├── src/
 │   │   ├── config/                # Configuration (2 fichiers)
