@@ -104,7 +104,6 @@ const DashboardPage = () => {
       card: t('payment.card'),
       meal_voucher: t('payment.mealVoucher'),
       mixed: t('payment.mixed'),
-      sumup: t('payment.sumup'),
     };
     return labels[method] || method;
   };
@@ -125,7 +124,6 @@ const DashboardPage = () => {
     card: CHART_COLORS.secondary,
     meal_voucher: CHART_COLORS.accent,
     mixed: CHART_COLORS.purple,
-    sumup: CHART_COLORS.indigo,
   };
 
   if (!user) return null;

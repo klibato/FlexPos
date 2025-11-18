@@ -93,7 +93,6 @@ const SalesHistoryPage = () => {
       card: 'Carte bancaire',
       meal_voucher: 'Ticket restaurant',
       mixed: 'Mixte',
-      sumup: 'SumUp',
     };
     return labels[method] || method;
   };
@@ -276,7 +275,6 @@ const SalesHistoryPage = () => {
                   <option value="">Tous</option>
                   <option value="cash">Espèces</option>
                   <option value="card">Carte</option>
-                  <option value="sumup">SumUp</option>
                   <option value="meal_voucher">Ticket resto</option>
                   <option value="mixed">Mixte</option>
                 </select>
