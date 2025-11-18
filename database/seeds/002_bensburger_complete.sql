@@ -81,7 +81,6 @@ INSERT INTO organizations (
 INSERT INTO users (
   organization_id,
   username,
-  password_hash,
   pin_code,
   first_name,
   last_name,
@@ -94,7 +93,6 @@ INSERT INTO users (
 ) VALUES (
   2,
   'patrick',
-  '$2a$10$N9qo8uLOickgx2ZMRZoMye1IVI564BbYKlJ6EqLHBk8KrGwv/wC5K', -- "password123"
   '$2a$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa', -- PIN "1234"
   'Patrick',
   'Martin',
@@ -110,7 +108,6 @@ INSERT INTO users (
 INSERT INTO users (
   organization_id,
   username,
-  password_hash,
   pin_code,
   first_name,
   last_name,
@@ -123,7 +120,6 @@ INSERT INTO users (
 ) VALUES (
   2,
   'sophie',
-  '$2a$10$N9qo8uLOickgx2ZMRZoMye1IVI564BbYKlJ6EqLHBk8KrGwv/wC5K', -- "password123"
   '$2a$10$EixZaYVK9S/MEFDDMc0KW.L0YtbZWmLQXw7bH0.PYF.FUxZDR4QlC', -- PIN "5678"
   'Sophie',
   'Dubois',
@@ -139,7 +135,6 @@ INSERT INTO users (
 INSERT INTO users (
   organization_id,
   username,
-  password_hash,
   pin_code,
   first_name,
   last_name,
@@ -152,7 +147,6 @@ INSERT INTO users (
 ) VALUES (
   2,
   'lucas',
-  '$2a$10$N9qo8uLOickgx2ZMRZoMye1IVI564BbYKlJ6EqLHBk8KrGwv/wC5K', -- "password123"
   '$2a$10$FDmvXqj5dVdHp0g7XW9w0uVwWQ0W9q0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0Z0', -- PIN "9012"
   'Lucas',
   'Bernard',
@@ -268,68 +262,12 @@ INSERT INTO subscriptions (
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================
--- 10. STORE SETTINGS (si nécessaire)
+-- 10. STORE SETTINGS
 -- ============================================
--- Les settings sont déjà dans organization.settings (JSONB)
--- Mais si la table store_settings existe encore pour compatibilité :
-
-INSERT INTO store_settings (
-  id,
-  store_name,
-  email,
-  phone,
-  address_line1,
-  city,
-  postal_code,
-  country,
-  siret,
-  vat_number,
-  rcs,
-  currency,
-  currency_symbol,
-  language,
-  timezone,
-  theme_color,
-  categories,
-  vat_rates,
-  payment_methods,
-  created_at,
-  updated_at
-) VALUES (
-  2, -- ID correspondant à l'organisation
-  'Ben''s Burger',
-  'contact@bensburger.fr',
-  '+33612345678',
-  '123 Avenue des Champs-Élysées',
-  'Paris',
-  '75008',
-  'France',
-  '12345678901234',
-  'FR12345678901',
-  'Paris B 123 456 789',
-  'EUR',
-  '€',
-  'fr-FR',
-  'Europe/Paris',
-  '#FF6B35',
-  '["burgers", "sides", "drinks", "desserts", "menus"]'::jsonb,
-  '[
-    {"rate": 5.5, "label": "TVA réduite 5.5%"},
-    {"rate": 10.0, "label": "TVA intermédiaire 10%"},
-    {"rate": 20.0, "label": "TVA normale 20%"}
-  ]'::jsonb,
-  '{
-    "cash": {"enabled": true, "label": "Espèces"},
-    "card": {"enabled": true, "label": "Carte Bancaire"},
-    "meal_voucher": {"enabled": true, "label": "Tickets Restaurant"}
-  }'::jsonb,
-  CURRENT_TIMESTAMP,
-  CURRENT_TIMESTAMP
-) ON CONFLICT (id) DO UPDATE SET
-  store_name = EXCLUDED.store_name,
-  email = EXCLUDED.email,
-  phone = EXCLUDED.phone,
-  updated_at = CURRENT_TIMESTAMP;
+-- NOTE: Les settings sont maintenant stockés dans organization.settings (JSONB).
+-- La table store_settings a une contrainte single_row_settings qui permet une seule ligne.
+-- Cette ligne est déjà créée par init.sql/seeds.sql.
+-- Pas besoin d'insérer ici car Ben's Burger utilise organization.settings.
 
 -- ============================================
 -- RÉSUMÉ DU SEED
