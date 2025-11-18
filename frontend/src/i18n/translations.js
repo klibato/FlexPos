@@ -295,7 +295,6 @@ export const translations = {
       categories: 'Catégories',
       vat: 'Taux de TVA',
       payment: 'Moyens de paiement',
-      sumup: 'SumUp',
       printer: 'Imprimante',
       email: 'Email / SMTP',
       appearance: 'Apparence',
@@ -345,9 +344,6 @@ export const translations = {
       enabled: 'Activé',
       disabled: 'Désactivé',
 
-      // SumUp
-      sumupConfig: 'Configuration SumUp',
-      sumupConfigDesc: 'Configurez votre intégration avec SumUp pour les paiements par carte',
       apiKey: 'API Key',
       merchantCode: 'Merchant Code',
       affiliateKey: 'Affiliate Key (optionnel)',
@@ -404,7 +400,6 @@ export const translations = {
       card: 'Carte bancaire',
       mealVoucher: 'Ticket restaurant',
       mixed: 'Mixte',
-      sumup: 'SumUp',
       // Card payment
       cardPayment: 'Paiement par Carte',
       cardPresent: 'Présentez la carte au terminal de paiement',
@@ -415,14 +410,6 @@ export const translations = {
       mealVoucherPayment: 'Titres Restaurant',
       mealVoucherScan: 'Scannez ou saisissez le(s) titre(s) restaurant',
       mealVoucherLimit: '⚠️ Plafond journalier: 25€ par titre',
-      // SumUp
-      sumupPayment: 'Paiement SumUp',
-      sumupPresent: 'Présentez la carte au terminal SumUp',
-      sumupAutomatic: '⚡ Le paiement sera traité automatiquement',
-      sumupProcessing: 'Traitement du paiement SumUp en cours...',
-      sumupWait: 'Veuillez patienter pendant la communication avec le terminal',
-      sumupStart: 'Lancer le paiement SumUp',
-      sumupError: 'Erreur lors du paiement SumUp',
       // Mixed payment
       totalToPay: 'Total à payer:',
       alreadyPaid: 'Déjà payé:',
@@ -753,7 +740,6 @@ export const translations = {
       categories: 'Categories',
       vat: 'VAT Rates',
       payment: 'Payment Methods',
-      sumup: 'SumUp',
       printer: 'Printer',
       email: 'Email / SMTP',
       appearance: 'Appearance',
@@ -803,9 +789,6 @@ export const translations = {
       enabled: 'Enabled',
       disabled: 'Disabled',
 
-      // SumUp
-      sumupConfig: 'SumUp Configuration',
-      sumupConfigDesc: 'Configure your SumUp integration for card payments',
       apiKey: 'API Key',
       merchantCode: 'Merchant Code',
       affiliateKey: 'Affiliate Key (optional)',
@@ -862,7 +845,6 @@ export const translations = {
       card: 'Card',
       mealVoucher: 'Meal voucher',
       mixed: 'Mixed',
-      sumup: 'SumUp',
       // Card payment
       cardPayment: 'Card Payment',
       cardPresent: 'Present the card to the payment terminal',
@@ -873,14 +855,6 @@ export const translations = {
       mealVoucherPayment: 'Meal Vouchers',
       mealVoucherScan: 'Scan or enter the meal voucher(s)',
       mealVoucherLimit: '⚠️ Daily limit: 25€ per voucher',
-      // SumUp
-      sumupPayment: 'SumUp Payment',
-      sumupPresent: 'Present the card to the SumUp terminal',
-      sumupAutomatic: '⚡ Payment will be processed automatically',
-      sumupProcessing: 'Processing SumUp payment...',
-      sumupWait: 'Please wait while communicating with the terminal',
-      sumupStart: 'Start SumUp payment',
-      sumupError: 'Error during SumUp payment',
       // Mixed payment
       totalToPay: 'Total to pay:',
       alreadyPaid: 'Already paid:',
