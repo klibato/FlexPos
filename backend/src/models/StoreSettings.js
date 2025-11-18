@@ -133,17 +133,6 @@ const StoreSettings = sequelize.define('store_settings', {
     allowNull: true,
     defaultValue: 'Europe/Paris',
   },
-  // Configuration SumUp
-  sumup_config: {
-    type: DataTypes.JSONB,
-    allowNull: true,
-    defaultValue: {
-      enabled: false,
-      api_key: '',
-      merchant_code: '',
-      affiliate_key: '',
-    },
-  },
   // Configuration imprimante ESC/POS
   printer_config: {
     type: DataTypes.JSONB,

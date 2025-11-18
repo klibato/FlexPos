@@ -52,7 +52,6 @@ const updateSettings = async (req, res, next) => {
       theme_color,
       language,
       timezone,
-      sumup_config,
       printer_config,
       email_config,
     } = req.body;
@@ -84,7 +83,6 @@ const updateSettings = async (req, res, next) => {
       theme_color,
       language,
       timezone,
-      sumup_config,
       printer_config,
       email_config,
     };
