@@ -98,7 +98,7 @@ const requireAdminPermission = (permission) => {
         success: false,
         error: {
           code: 'INSUFFICIENT_PERMISSIONS',
-          message: \`Permission requise: \${permission}\`,
+          message: `Permission requise: ${permission}`,
         },
       });
     }
