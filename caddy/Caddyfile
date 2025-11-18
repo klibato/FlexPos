@@ -26,7 +26,7 @@ http://www.flexpos.app, http://flexpos.app {
     encode gzip
 
     # Reverse proxy vers frontend-landing
-    reverse_proxy frontend-landing:80 {
+    reverse_proxy frontend-landing:5174 {
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
         header_up X-Forwarded-Proto {scheme}
@@ -92,7 +92,7 @@ http://admin.flexpos.app {
     encode gzip
 
     # Reverse proxy vers frontend-admin
-    reverse_proxy frontend-admin:80 {
+    reverse_proxy frontend-admin:5175 {
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
         header_up X-Forwarded-Proto {scheme}
