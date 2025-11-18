@@ -26,11 +26,6 @@ module.exports = {
     port: parseInt(process.env.PRINTER_PORT, 10) || 9100,
   },
 
-  // SumUp API
-  sumup: {
-    apiKey: process.env.SUMUP_API_KEY || '',
-  },
-
   // Configuration app
   app: {
     businessName: 'FlexPOS',
