@@ -6,6 +6,17 @@
 # ==============================================
 
 # ==============================================
+# GLOBAL OPTIONS (doit être en premier)
+# ==============================================
+{
+    # Email pour Let's Encrypt
+    email admin@flexpos.app
+
+    # Admin API (désactivé en production)
+    admin off
+}
+
+# ==============================================
 # LANDING PAGE - www.flexpos.app
 # ==============================================
 www.flexpos.app, flexpos.app {
@@ -140,27 +151,4 @@ api.flexpos.app {
         output file /var/log/caddy/api.log
         format json
     }
-}
-
-# ==============================================
-# GLOBAL OPTIONS
-# ==============================================
-{
-    # Email pour Let's Encrypt
-    email admin@flexpos.app
-
-    # Serveur ACME (Let's Encrypt production)
-    # acme_ca https://acme-v02.api.letsencrypt.org/directory
-
-    # Serveur ACME (Let's Encrypt staging - pour tests)
-    # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
-
-    # Logs globaux
-    log {
-        output file /var/log/caddy/access.log
-        format json
-    }
-
-    # Admin API (désactivé en production)
-    admin off
 }

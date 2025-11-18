@@ -17,7 +17,7 @@ const sendEmail = async ({ to, subject, htmlContent, textContent = null }) => {
 
   try {
     const response = await axios.post(
-      \`\${BREVO_API_URL}/smtp/email\`,
+      `${BREVO_API_URL}/smtp/email`,
       {
         sender: { email: FROM_EMAIL, name: FROM_NAME },
         to: [{ email: to }],
@@ -33,7 +33,7 @@ const sendEmail = async ({ to, subject, htmlContent, textContent = null }) => {
       }
     );
 
-    logger.info(\`Email sent to \${to}: \${subject}\`);
+    logger.info(`Email sent to ${to}: ${subject}`);
 
     return { success: true, messageId: response.data.messageId };
   } catch (error) {
@@ -46,14 +46,14 @@ const sendEmail = async ({ to, subject, htmlContent, textContent = null }) => {
  * Envoyer email de bienvenue
  */
 const sendWelcomeEmail = async (organization) => {
-  const htmlContent = \`
+  const htmlContent = `
     <h1>Bienvenue sur FlexPOS !</h1>
-    <p>Bonjour <strong>\${organization.name}</strong>,</p>
+    <p>Bonjour <strong>${organization.name}</strong>,</p>
     <p>Votre compte FlexPOS a été créé avec succès.</p>
-    <p>Vous bénéficiez de 14 jours d'essai gratuit du plan <strong>\${organization.plan}</strong>.</p>
+    <p>Vous bénéficiez de 14 jours d'essai gratuit du plan <strong>${organization.plan}</strong>.</p>
     <p>Connectez-vous dès maintenant : <a href="https://app.flexpos.app">https://app.flexpos.app</a></p>
     <p>Besoin d'aide ? Contactez-nous : support@flexpos.app</p>
-  \`;
+  `;
 
   return await sendEmail({
     to: organization.email,
@@ -66,17 +66,17 @@ const sendWelcomeEmail = async (organization) => {
  * Envoyer email de rappel fin de trial
  */
 const sendTrialEndingEmail = async (organization, daysLeft) => {
-  const htmlContent = \`
+  const htmlContent = `
     <h1>Votre essai gratuit se termine bientôt</h1>
-    <p>Bonjour <strong>\${organization.name}</strong>,</p>
-    <p>Il vous reste <strong>\${daysLeft} jours</strong> d'essai gratuit.</p>
+    <p>Bonjour <strong>${organization.name}</strong>,</p>
+    <p>Il vous reste <strong>${daysLeft} jours</strong> d'essai gratuit.</p>
     <p>Pour continuer à utiliser FlexPOS, passez à un plan payant.</p>
     <p><a href="https://app.flexpos.app/settings/billing">Gérer mon abonnement</a></p>
-  \`;
+  `;
 
   return await sendEmail({
     to: organization.email,
-    subject: \`Votre essai FlexPOS se termine dans \${daysLeft} jours\`,
+    subject: `Votre essai FlexPOS se termine dans ${daysLeft} jours`,
     htmlContent,
   });
 };
