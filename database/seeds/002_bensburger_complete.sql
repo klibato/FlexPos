@@ -86,9 +86,7 @@ INSERT INTO users (
   last_name,
   role,
   email,
-  phone,
   is_active,
-  permissions,
   created_at
 ) VALUES (
   2,
@@ -98,9 +96,7 @@ INSERT INTO users (
   'Martin',
   'admin',
   'patrick@bensburger.fr',
-  '+33612345678',
   true,
-  '["products:read","products:write","sales:read","sales:write","users:read","users:write","settings:read","settings:write","cash_register:read","cash_register:write","dashboard:read"]'::jsonb,
   CURRENT_TIMESTAMP
 ) ON CONFLICT DO NOTHING;
 
@@ -113,9 +109,7 @@ INSERT INTO users (
   last_name,
   role,
   email,
-  phone,
   is_active,
-  permissions,
   created_at
 ) VALUES (
   2,
@@ -125,9 +119,7 @@ INSERT INTO users (
   'Dubois',
   'cashier',
   'sophie@bensburger.fr',
-  '+33623456789',
   true,
-  '["sales:read","sales:write","cash_register:read","cash_register:write"]'::jsonb,
   CURRENT_TIMESTAMP
 ) ON CONFLICT DO NOTHING;
 
@@ -140,9 +132,7 @@ INSERT INTO users (
   last_name,
   role,
   email,
-  phone,
   is_active,
-  permissions,
   created_at
 ) VALUES (
   2,
@@ -152,9 +142,7 @@ INSERT INTO users (
   'Bernard',
   'cashier',
   'lucas@bensburger.fr',
-  '+33634567890',
   true,
-  '["sales:read","sales:write","cash_register:read","cash_register:write"]'::jsonb,
   CURRENT_TIMESTAMP
 ) ON CONFLICT DO NOTHING;
 
@@ -162,54 +150,54 @@ INSERT INTO users (
 -- 3. PRODUITS - BURGERS
 -- ============================================
 
-INSERT INTO products (organization_id, name, price_ht, vat_rate, category, is_active, stock_enabled, stock_quantity, image_url, description) VALUES
-(2, 'Classic Burger', 8.33, 10.00, 'burgers', true, false, 0, '/images/classic-burger.jpg', 'Steak, salade, tomate, oignons'),
-(2, 'Cheese Burger', 9.17, 10.00, 'burgers', true, false, 0, '/images/cheese-burger.jpg', 'Steak, cheddar, salade, tomate'),
-(2, 'Bacon Burger', 10.00, 10.00, 'burgers', true, false, 0, '/images/bacon-burger.jpg', 'Steak, bacon croustillant, cheddar'),
-(2, 'Veggie Burger', 8.33, 10.00, 'burgers', true, false, 0, '/images/veggie-burger.jpg', 'Galette végétale, salade, tomate'),
-(2, 'Big Ben Burger', 12.50, 10.00, 'burgers', true, false, 0, '/images/big-ben.jpg', 'Double steak, double cheddar, sauce spéciale'),
-(2, 'Chicken Burger', 8.75, 10.00, 'burgers', true, false, 0, '/images/chicken-burger.jpg', 'Poulet pané, salade, sauce mayo')
+INSERT INTO products (organization_id, name, price_ht, vat_rate, category, is_active, quantity, image_url, description) VALUES
+(2, 'Classic Burger', 8.33, 10.00, 'burgers', true, 0, '/images/classic-burger.jpg', 'Steak, salade, tomate, oignons'),
+(2, 'Cheese Burger', 9.17, 10.00, 'burgers', true, 0, '/images/cheese-burger.jpg', 'Steak, cheddar, salade, tomate'),
+(2, 'Bacon Burger', 10.00, 10.00, 'burgers', true, 0, '/images/bacon-burger.jpg', 'Steak, bacon croustillant, cheddar'),
+(2, 'Veggie Burger', 8.33, 10.00, 'burgers', true, 0, '/images/veggie-burger.jpg', 'Galette végétale, salade, tomate'),
+(2, 'Big Ben Burger', 12.50, 10.00, 'burgers', true, 0, '/images/big-ben.jpg', 'Double steak, double cheddar, sauce spéciale'),
+(2, 'Chicken Burger', 8.75, 10.00, 'burgers', true, 0, '/images/chicken-burger.jpg', 'Poulet pané, salade, sauce mayo')
 ON CONFLICT DO NOTHING;
 
 -- ============================================
 -- 4. PRODUITS - ACCOMPAGNEMENTS
 -- ============================================
 
-INSERT INTO products (organization_id, name, price_ht, vat_rate, category, is_active, stock_enabled, stock_quantity, image_url, description) VALUES
-(2, 'Frites classiques', 2.73, 10.00, 'sides', true, false, 0, '/images/frites.jpg', 'Portion moyenne'),
-(2, 'Frites XXL', 3.64, 10.00, 'sides', true, false, 0, '/images/frites-xxl.jpg', 'Grande portion'),
-(2, 'Nuggets (x6)', 4.55, 10.00, 'sides', true, false, 0, '/images/nuggets.jpg', '6 nuggets de poulet'),
-(2, 'Nuggets (x9)', 6.36, 10.00, 'sides', true, false, 0, '/images/nuggets-9.jpg', '9 nuggets de poulet'),
-(2, 'Onion Rings', 3.18, 10.00, 'sides', true, false, 0, '/images/onion-rings.jpg', 'Rondelles d''oignon panées'),
-(2, 'Salad Bowl', 5.45, 10.00, 'sides', true, false, 0, '/images/salad.jpg', 'Salade composée')
+INSERT INTO products (organization_id, name, price_ht, vat_rate, category, is_active, quantity, image_url, description) VALUES
+(2, 'Frites classiques', 2.73, 10.00, 'sides', true, 0, '/images/frites.jpg', 'Portion moyenne'),
+(2, 'Frites XXL', 3.64, 10.00, 'sides', true, 0, '/images/frites-xxl.jpg', 'Grande portion'),
+(2, 'Nuggets (x6)', 4.55, 10.00, 'sides', true, 0, '/images/nuggets.jpg', '6 nuggets de poulet'),
+(2, 'Nuggets (x9)', 6.36, 10.00, 'sides', true, 0, '/images/nuggets-9.jpg', '9 nuggets de poulet'),
+(2, 'Onion Rings', 3.18, 10.00, 'sides', true, 0, '/images/onion-rings.jpg', 'Rondelles d''oignon panées'),
+(2, 'Salad Bowl', 5.45, 10.00, 'sides', true, 0, '/images/salad.jpg', 'Salade composée')
 ON CONFLICT DO NOTHING;
 
 -- ============================================
 -- 5. PRODUITS - BOISSONS
 -- ============================================
 
-INSERT INTO products (organization_id, name, price_ht, vat_rate, category, is_active, stock_enabled, stock_quantity, image_url, description) VALUES
-(2, 'Coca-Cola 33cl', 2.27, 10.00, 'drinks', true, true, 100, '/images/coca.jpg', 'Canette 33cl'),
-(2, 'Coca-Cola 50cl', 3.18, 10.00, 'drinks', true, true, 80, '/images/coca-50.jpg', 'Bouteille 50cl'),
-(2, 'Sprite 33cl', 2.27, 10.00, 'drinks', true, true, 100, '/images/sprite.jpg', 'Canette 33cl'),
-(2, 'Fanta Orange 33cl', 2.27, 10.00, 'drinks', true, true, 80, '/images/fanta.jpg', 'Canette 33cl'),
-(2, 'Eau minérale 50cl', 1.82, 10.00, 'drinks', true, true, 150, '/images/eau.jpg', 'Bouteille 50cl'),
-(2, 'Jus d''orange 25cl', 2.73, 10.00, 'drinks', true, true, 50, '/images/jus-orange.jpg', 'Jus pressé 25cl'),
-(2, 'Milkshake vanille', 4.09, 10.00, 'drinks', true, false, 0, '/images/milkshake-vanille.jpg', 'Milkshake fait maison'),
-(2, 'Milkshake chocolat', 4.09, 10.00, 'drinks', true, false, 0, '/images/milkshake-chocolat.jpg', 'Milkshake fait maison'),
-(2, 'Milkshake fraise', 4.09, 10.00, 'drinks', true, false, 0, '/images/milkshake-fraise.jpg', 'Milkshake fait maison')
+INSERT INTO products (organization_id, name, price_ht, vat_rate, category, is_active, quantity, image_url, description) VALUES
+(2, 'Coca-Cola 33cl', 2.27, 10.00, 'drinks', true, 100, '/images/coca.jpg', 'Canette 33cl'),
+(2, 'Coca-Cola 50cl', 3.18, 10.00, 'drinks', true, 80, '/images/coca-50.jpg', 'Bouteille 50cl'),
+(2, 'Sprite 33cl', 2.27, 10.00, 'drinks', true, 100, '/images/sprite.jpg', 'Canette 33cl'),
+(2, 'Fanta Orange 33cl', 2.27, 10.00, 'drinks', true, 80, '/images/fanta.jpg', 'Canette 33cl'),
+(2, 'Eau minérale 50cl', 1.82, 10.00, 'drinks', true, 150, '/images/eau.jpg', 'Bouteille 50cl'),
+(2, 'Jus d''orange 25cl', 2.73, 10.00, 'drinks', true, 50, '/images/jus-orange.jpg', 'Jus pressé 25cl'),
+(2, 'Milkshake vanille', 4.09, 10.00, 'drinks', true, 0, '/images/milkshake-vanille.jpg', 'Milkshake fait maison'),
+(2, 'Milkshake chocolat', 4.09, 10.00, 'drinks', true, 0, '/images/milkshake-chocolat.jpg', 'Milkshake fait maison'),
+(2, 'Milkshake fraise', 4.09, 10.00, 'drinks', true, 0, '/images/milkshake-fraise.jpg', 'Milkshake fait maison')
 ON CONFLICT DO NOTHING;
 
 -- ============================================
 -- 6. PRODUITS - DESSERTS
 -- ============================================
 
-INSERT INTO products (organization_id, name, price_ht, vat_rate, category, is_active, stock_enabled, stock_quantity, image_url, description) VALUES
-(2, 'Brownie', 3.64, 10.00, 'desserts', true, false, 0, '/images/brownie.jpg', 'Brownie chocolat'),
-(2, 'Cookie', 2.27, 10.00, 'desserts', true, false, 0, '/images/cookie.jpg', 'Cookie pépites chocolat'),
-(2, 'Muffin', 2.73, 10.00, 'desserts', true, false, 0, '/images/muffin.jpg', 'Muffin myrtilles'),
-(2, 'Donut', 2.27, 10.00, 'desserts', true, false, 0, '/images/donut.jpg', 'Donut glacé'),
-(2, 'Tarte aux pommes', 3.64, 10.00, 'desserts', true, false, 0, '/images/tarte.jpg', 'Part de tarte maison')
+INSERT INTO products (organization_id, name, price_ht, vat_rate, category, is_active, quantity, image_url, description) VALUES
+(2, 'Brownie', 3.64, 10.00, 'desserts', true, 0, '/images/brownie.jpg', 'Brownie chocolat'),
+(2, 'Cookie', 2.27, 10.00, 'desserts', true, 0, '/images/cookie.jpg', 'Cookie pépites chocolat'),
+(2, 'Muffin', 2.73, 10.00, 'desserts', true, 0, '/images/muffin.jpg', 'Muffin myrtilles'),
+(2, 'Donut', 2.27, 10.00, 'desserts', true, 0, '/images/donut.jpg', 'Donut glacé'),
+(2, 'Tarte aux pommes', 3.64, 10.00, 'desserts', true, 0, '/images/tarte.jpg', 'Part de tarte maison')
 ON CONFLICT DO NOTHING;
 
 -- ============================================
