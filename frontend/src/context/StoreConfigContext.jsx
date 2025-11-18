@@ -68,7 +68,7 @@ export const StoreConfigProvider = ({ children }) => {
     currency: 'EUR',
     currency_symbol: '€',
     logo_url: null,
-    store_name: 'BensBurger',
+    store_name: 'FlexPOS',
     language: 'fr-FR',
   });
   const [loading, setLoading] = useState(true);

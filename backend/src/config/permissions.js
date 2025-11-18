@@ -1,5 +1,5 @@
 /**
- * Définition des permissions par rôle pour le système POS BensBurger
+ * Définition des permissions par rôle pour le système POS FlexPOS
  */
 
 const PERMISSIONS = {

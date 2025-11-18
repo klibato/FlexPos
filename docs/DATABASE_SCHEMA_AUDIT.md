@@ -322,7 +322,7 @@ All remaining migrations are necessary and functional:
 | Column | Type | Constraints | Source |
 |--------|------|-------------|--------|
 | id | INTEGER | PRIMARY KEY DEFAULT 1 | migration 008 |
-| store_name | VARCHAR(255) | NOT NULL DEFAULT 'BensBurger' | migration 008 |
+| store_name | VARCHAR(255) | NOT NULL DEFAULT 'FlexPOS' | migration 008 |
 | store_description | VARCHAR(255) | DEFAULT 'Restaurant Rapide' | migration 008 |
 | address_line1 | VARCHAR(255) | DEFAULT '123 Avenue des Burgers' | migration 008 |
 | address_line2 | VARCHAR(255) | | migration 008 |

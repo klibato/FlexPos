@@ -18,7 +18,7 @@ Chaque restaurant/commerce pourra avoir son propre "espace" avec:
 
 ### Cas d'usage
 ```
-Organisation 1: Ben's Burger (Paris)
+Organisation 1: FlexPOS (Paris)
 - Users: admin_paris, cashier_paris_1, cashier_paris_2
 - Products: 30 burgers/sides/drinks
 - Sales: Toutes les ventes Paris
@@ -44,9 +44,9 @@ Organisation 2: Pizza Express (Lyon)
 ```sql
 CREATE TABLE organizations (
   id SERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,                    -- "Ben's Burger Paris"
+  name VARCHAR(255) NOT NULL,                    -- "FlexPOS Paris"
   slug VARCHAR(100) NOT NULL UNIQUE,             -- "bens-burger-paris" (pour subdomain)
-  domain VARCHAR(255) UNIQUE,                    -- "bensburger.com" (domaine personnalisé)
+  domain VARCHAR(255) UNIQUE,                    -- "flexpos.com" (domaine personnalisé)
 
   -- Informations de contact
   email VARCHAR(255),
@@ -379,7 +379,7 @@ const logger = require('../utils/logger');
  * Middleware d'isolation multi-tenant
  *
  * Détecte l'organisation depuis:
- * 1. Sous-domaine (tenant.bensburger.com)
+ * 1. Sous-domaine (tenant.flexpos.com)
  * 2. Domaine personnalisé (restaurant.com)
  * 3. Header X-Organization-ID (pour API/admin)
  * 4. req.user.organization_id (après auth)
@@ -401,12 +401,12 @@ const tenantIsolation = async (req, res, next) => {
       organizationId = parseInt(req.headers['x-organization-id'], 10);
     }
 
-    // Stratégie 3: Sous-domaine (tenant.bensburger.com)
+    // Stratégie 3: Sous-domaine (tenant.flexpos.com)
     else if (req.hostname) {
       const subdomain = req.hostname.split('.')[0];
 
       // Si ce n'est pas "localhost", "www", ou le domaine principal
-      if (subdomain !== 'localhost' && subdomain !== 'www' && subdomain !== 'bensburger') {
+      if (subdomain !== 'localhost' && subdomain !== 'www' && subdomain !== 'flexpos') {
         organization = await Organization.findOne({
           where: { slug: subdomain },
         });
@@ -430,7 +430,7 @@ const tenantIsolation = async (req, res, next) => {
 
     // Si aucune organisation trouvée, utiliser organisation par défaut (dev mode)
     if (!organizationId) {
-      organizationId = 1; // Ben's Burger par défaut
+      organizationId = 1; // FlexPOS par défaut
       logger.warn('No organization detected, using default (id=1)');
     }
 
@@ -775,7 +775,7 @@ const register = async (req, res) => {
 ### Compatibilité
 
 1. **Données existantes**
-   - Migration 014: Crée organisation "Ben's Burger" (id=1)
+   - Migration 014: Crée organisation "FlexPOS" (id=1)
    - Migration 015: Associe toutes les données existantes à org id=1
    - ✅ Rétrocompatibilité garantie
 

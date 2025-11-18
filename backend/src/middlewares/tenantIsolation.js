@@ -7,7 +7,7 @@ const logger = require('../utils/logger');
  * Détecte l'organisation depuis:
  * 1. req.user.organization_id (après authenticateToken) - PRIORITÉ
  * 2. Header X-Organization-ID (pour admin/tests)
- * 3. Sous-domaine (tenant.bensburger.com)
+ * 3. Sous-domaine (tenant.flexpos.com)
  * 4. Domaine personnalisé (restaurant.com)
  * 5. Fallback: Organisation par défaut (id=1) en dev
  *
@@ -56,7 +56,7 @@ const tenantIsolation = async (req, res, next) => {
     // ============================================
     // STRATÉGIE 3: Sous-domaine
     // ============================================
-    // Format: tenant.bensburger.com
+    // Format: tenant.flexpos.com
     // tenant.slug sera cherché dans organizations
     else if (req.hostname && req.hostname !== 'localhost') {
       const parts = req.hostname.split('.');
@@ -84,7 +84,7 @@ const tenantIsolation = async (req, res, next) => {
     // ============================================
     // Format: restaurant.com
     // Cherche dans organizations.domain
-    if (!organizationId && req.hostname !== 'localhost' && !req.hostname.includes('bensburger')) {
+    if (!organizationId && req.hostname !== 'localhost' && !req.hostname.includes('flexpos')) {
       organization = await Organization.findOne({
         where: { domain: req.hostname },
       });
@@ -101,7 +101,7 @@ const tenantIsolation = async (req, res, next) => {
     if (!organizationId) {
       // En développement, utiliser l'organisation par défaut
       if (process.env.NODE_ENV === 'development' || req.hostname === 'localhost') {
-        organizationId = 1; // Ben's Burger par défaut
+        organizationId = 1; // FlexPOS par défaut
         logger.warn(`Tenant detection: Using default organization (org_id=1) - DEV MODE`);
       } else {
         // En production, si aucune organisation trouvée, erreur

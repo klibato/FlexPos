@@ -21,7 +21,7 @@
 ## 🎯 VUE D'ENSEMBLE
 
 ### Objectif Global
-Effectuer un audit complet du système BensBurger POS, documenter exhaustivement l'architecture, et corriger tous les bugs critiques avant d'entamer la transformation multi-tenant (PHASE 1).
+Effectuer un audit complet du système FlexPOS POS, documenter exhaustivement l'architecture, et corriger tous les bugs critiques avant d'entamer la transformation multi-tenant (PHASE 1).
 
 ### Résultat
 ✅ **SUCCÈS TOTAL** - Application 100% fonctionnelle, documentée, et prête pour PHASE 1.
@@ -520,7 +520,7 @@ database/migrations/
 
 **Tâches**:
 1. ✏️ Script de migration de données
-   - Créer organization par défaut "BensBurger"
+   - Créer organization par défaut "FlexPOS"
    - Associer toutes les données existantes
    - Vérification intégrité
 
@@ -681,7 +681,7 @@ Request → tenantIsolation middleware → req.organizationId
 ```
 
 **Stratégie d'identification du tenant**:
-1. Subdomain: `tenant1.bensburger.com` → organization.slug = "tenant1"
+1. Subdomain: `tenant1.flexpos.com` → organization.slug = "tenant1"
 2. Domain personnalisé: `restaurant.com` → organization.domain = "restaurant.com"
 3. Header: `X-Organization-ID: 123` → organization.id = 123
 4. Path: `/api/org/:orgId/...` → organization.id = :orgId
@@ -692,6 +692,6 @@ Request → tenantIsolation middleware → req.organizationId
 
 **Document généré le**: 2025-11-16
 **Auteur**: Claude (Anthropic)
-**Projet**: BensBurger POS - Audit & Transformation Multi-Tenant
+**Projet**: FlexPOS POS - Audit & Transformation Multi-Tenant
 **Statut PHASE 0**: ✅ **100% TERMINÉE**
 **Prochaine étape**: 🔜 **PHASE 1 - MULTI-TENANT**

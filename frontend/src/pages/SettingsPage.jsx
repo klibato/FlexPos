@@ -5,7 +5,7 @@ import { useStoreConfig } from '../context/StoreConfigContext';
 import { useLanguage } from '../context/LanguageContext';
 import { getSettings, updateSettings } from '../services/settingsService';
 import Button from '../components/ui/Button';
-import { ArrowLeft, Save, Store, Package, Percent, CreditCard, Palette, Plus, Trash2, Smartphone, Printer, Mail } from 'lucide-react';
+import { ArrowLeft, Save, Store, Package, Percent, CreditCard, Palette, Plus, Trash2, Printer, Mail } from 'lucide-react';
 
 const SettingsPage = () => {
   const { user, isAuthenticated } = useAuth();
@@ -39,12 +39,6 @@ const SettingsPage = () => {
     categories: [],
     vat_rates: [],
     payment_methods: {},
-    sumup_config: {
-      enabled: false,
-      api_key: '',
-      merchant_code: '',
-      affiliate_key: '',
-    },
     printer_config: {
       enabled: false,
       type: 'epson',
@@ -101,12 +95,6 @@ const SettingsPage = () => {
         currency_symbol: response.data.currency_symbol || '€',
         language: response.data.language || 'fr-FR',
         timezone: response.data.timezone || 'Europe/Paris',
-        sumup_config: response.data.sumup_config || {
-          enabled: false,
-          api_key: '',
-          merchant_code: '',
-          affiliate_key: '',
-        },
         printer_config: response.data.printer_config || {
           enabled: false,
           type: 'epson',
@@ -271,17 +259,6 @@ const SettingsPage = () => {
     });
   };
 
-  // Gestion configuration SumUp
-  const updateSumUpConfig = (field, value) => {
-    setSettings((prev) => ({
-      ...prev,
-      sumup_config: {
-        ...(prev.sumup_config || {}),
-        [field]: value,
-      },
-    }));
-  };
-
   // Gestion configuration imprimante
   const updatePrinterConfig = (field, value) => {
     setSettings((prev) => ({
@@ -309,7 +286,6 @@ const SettingsPage = () => {
     { id: 'categories', label: t('settings.categories'), icon: Package },
     { id: 'vat', label: t('settings.vat'), icon: Percent },
     { id: 'payment', label: t('settings.payment'), icon: CreditCard },
-    { id: 'sumup', label: t('settings.sumup'), icon: Smartphone },
     { id: 'printer', label: t('settings.printer'), icon: Printer },
     { id: 'email', label: t('settings.email'), icon: Mail },
     { id: 'appearance', label: t('settings.appearance'), icon: Palette },
@@ -811,89 +787,6 @@ const SettingsPage = () => {
                 </div>
               )}
 
-              {/* Tab: SumUp */}
-              {activeTab === 'sumup' && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-                        {t('settings.sumupConfig')}
-                      </h2>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        {t('settings.sumupConfigDesc')}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => updateSumUpConfig('enabled', !settings.sumup_config?.enabled)}
-                      className={`relative w-14 h-7 rounded-full transition-colors ${
-                        settings.sumup_config?.enabled ? 'bg-green-500' : 'bg-gray-300'
-                      }`}
-                    >
-                      <span
-                        className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${
-                          settings.sumup_config?.enabled ? 'transform translate-x-7' : ''
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                        {t('settings.apiKey')} *
-                      </label>
-                      <input
-                        type="password"
-                        value={settings.sumup_config?.api_key || ''}
-                        onChange={(e) => updateSumUpConfig('api_key', e.target.value)}
-                        placeholder="Votre clé API SumUp"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
-                      />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Disponible dans votre espace développeur SumUp
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                        {t('settings.merchantCode')}
-                      </label>
-                      <input
-                        type="text"
-                        value={settings.sumup_config?.merchant_code || ''}
-                        onChange={(e) => updateSumUpConfig('merchant_code', e.target.value)}
-                        placeholder="Code marchand SumUp"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                        {t('settings.affiliateKey')}
-                      </label>
-                      <input
-                        type="text"
-                        value={settings.sumup_config?.affiliate_key || ''}
-                        onChange={(e) => updateSumUpConfig('affiliate_key', e.target.value)}
-                        placeholder="Clé affilié SumUp"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
-
-                    <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-indigo-900 mb-2">📱 Obtenir vos identifiants SumUp</h4>
-                      <ol className="text-sm text-indigo-700 space-y-1 list-decimal list-inside">
-                        <li>Connectez-vous à votre compte SumUp</li>
-                        <li>Accédez à "Développeurs" {'>'} "API Keys"</li>
-                        <li>Créez une nouvelle clé API ou copiez votre clé existante</li>
-                        <li>Collez la clé ci-dessus et sauvegardez</li>
-                      </ol>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {/* Tab: Imprimante */}
               {activeTab === 'printer' && (
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
@@ -1147,7 +1040,7 @@ const SettingsPage = () => {
                           type="text"
                           value={settings.email_config?.from_name || ''}
                           onChange={(e) => updateEmailConfig('from_name', e.target.value)}
-                          placeholder="BensBurger"
+                          placeholder="FlexPOS"
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500"
                         />
                       </div>

@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS organizations (
   id SERIAL PRIMARY KEY,
 
   -- Identification
-  name VARCHAR(255) NOT NULL,                    -- "Ben's Burger Paris"
-  slug VARCHAR(100) NOT NULL UNIQUE,             -- "bens-burger-paris" (subdomain)
-  domain VARCHAR(255) UNIQUE,                    -- "bensburger.com" (custom domain)
+  name VARCHAR(255) NOT NULL,                    -- "FlexPOS Paris"
+  slug VARCHAR(100) NOT NULL UNIQUE,             -- "flexpos-paris" (subdomain)
+  domain VARCHAR(255) UNIQUE,                    -- "flexpos.com" (custom domain)
 
   -- Contact
   email VARCHAR(255),
@@ -49,7 +49,7 @@ CREATE INDEX IF NOT EXISTS idx_organizations_active ON organizations(status, del
 -- ============================================
 -- MIGRATION DES DONNÉES EXISTANTES
 -- ============================================
--- Créer organisation par défaut "Ben's Burger" depuis store_settings
+-- Créer organisation par défaut "FlexPOS" depuis store_settings
 INSERT INTO organizations (
   id,
   name,
@@ -65,8 +65,8 @@ INSERT INTO organizations (
 )
 SELECT
   1 AS id,
-  COALESCE(store_name, 'BensBurger') AS name,
-  'bens-burger' AS slug,
+  COALESCE(store_name, 'FlexPOS') AS name,
+  'flexpos' AS slug,
   email,
   phone,
   jsonb_build_object(
@@ -105,7 +105,7 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Si store_settings n'existe pas ou est vide, créer organisation par défaut simple
 INSERT INTO organizations (id, name, slug, plan, status, max_users, max_products)
-SELECT 1, 'BensBurger', 'bens-burger', 'premium', 'active', 999, 999
+SELECT 1, 'FlexPOS', 'flexpos', 'premium', 'active', 999, 999
 WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE id = 1);
 
 -- ============================================
@@ -120,8 +120,8 @@ EXECUTE FUNCTION update_updated_at_column();
 -- COMMENTAIRES
 -- ============================================
 COMMENT ON TABLE organizations IS 'Organisations/commerces multi-tenant - chaque restaurant a son propre espace';
-COMMENT ON COLUMN organizations.slug IS 'Slug unique pour sous-domaine (ex: bens-burger.app.com)';
-COMMENT ON COLUMN organizations.domain IS 'Domaine personnalisé optionnel (ex: bensburger.com)';
+COMMENT ON COLUMN organizations.slug IS 'Slug unique pour sous-domaine (ex: flexpos.app.com)';
+COMMENT ON COLUMN organizations.domain IS 'Domaine personnalisé optionnel (ex: flexpos.com)';
 COMMENT ON COLUMN organizations.settings IS 'Paramètres métier (adresse, infos légales, configs)';
 COMMENT ON COLUMN organizations.plan IS 'Plan SaaS: free (3 users, 50 products), starter, premium, enterprise';
 COMMENT ON COLUMN organizations.status IS 'Statut: active, suspended (paiement), cancelled';

@@ -33,7 +33,11 @@ const LoginPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary-500 to-primary-700 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">🍔 BensBurger</h1>
+          <h1 className="text-4xl font-bold mb-2">
+            <span className="text-blue-600">Flex</span>
+            <span className="text-gray-800 dark:text-gray-100">POS</span>
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">Solution de caisse moderne</p>
           <p className="text-gray-600 dark:text-gray-400">  {t('pos.title')}</p>
         </div>
 

@@ -7,8 +7,15 @@ const { hasPermission, hasAnyPermission } = require('../config/permissions');
 // Middleware pour vérifier le token JWT
 const authenticateToken = async (req, res, next) => {
   try {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    // Sécurité NF525: Lire le token depuis le cookie httpOnly (prioritaire)
+    // Sinon, fallback sur Authorization header (rétrocompatibilité)
+    let token = req.cookies?.token; // Cookie httpOnly (sécurisé)
+
+    if (!token) {
+      // Fallback: Authorization header (ancien système, moins sécurisé)
+      const authHeader = req.headers['authorization'];
+      token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    }
 
     if (!token) {
       return res.status(401).json({
@@ -93,8 +100,14 @@ const authenticateToken = async (req, res, next) => {
 // Middleware d'authentification optionnelle (n'empêche pas l'accès)
 const optionalAuthenticate = async (req, res, next) => {
   try {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    // Sécurité NF525: Lire le token depuis le cookie httpOnly (prioritaire)
+    let token = req.cookies?.token;
+
+    if (!token) {
+      // Fallback: Authorization header (rétrocompatibilité)
+      const authHeader = req.headers['authorization'];
+      token = authHeader && authHeader.split(' ')[1];
+    }
 
     if (token) {
       const decoded = jwt.verify(token, config.jwt.secret);
@@ -113,7 +126,7 @@ const optionalAuthenticate = async (req, res, next) => {
 
   // MULTI-TENANT: Si pas d'auth, utiliser organisation par défaut (dev mode)
   if (!req.organizationId) {
-    req.organizationId = 1; // BensBurger par défaut
+    req.organizationId = 1; // FlexPOS par défaut
     logger.warn('No authentication - using default organization (id=1)');
   }
 

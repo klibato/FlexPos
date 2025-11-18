@@ -52,9 +52,12 @@ const Header = ({ onOpenCloseCashModal, onOpenSwitchCashierModal }) => {
         <div className="flex items-center justify-between px-4 py-3">
           {/* Logo / Nom commerce */}
           <div className="flex items-center gap-3">
-            <div className="text-2xl">🍔</div>
+            <div className="text-2xl">💳</div>
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-gray-800">BensBurger</h1>
+              <h1 className="text-xl font-bold">
+                <span className="text-blue-600">Flex</span>
+                <span className="text-gray-800">POS</span>
+              </h1>
               {activeCashRegister && (
                 <p className="text-xs text-gray-500">
                   {activeCashRegister.register_name}

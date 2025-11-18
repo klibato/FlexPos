@@ -1,5 +1,5 @@
 -- ============================================
--- BensBurger POS - Seed Data (Données de Démo)
+-- FlexPOS POS - Seed Data (Données de Démo)
 -- ============================================
 
 -- ATTENTION : Ce script insère des données de test

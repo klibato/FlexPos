@@ -3,7 +3,7 @@ const logger = require('./logger');
 
 /**
  * Cache des paramètres du commerce
- * Permet aux services (printer, sumup, email) de lire la config depuis la BDD
+ * Permet aux services (printer, email) de lire la config depuis la BDD
  * au lieu de process.env
  */
 class SettingsCache {
@@ -74,13 +74,7 @@ class SettingsCache {
    */
   getDefaultSettings() {
     return {
-      store_name: 'BensBurger',
-      sumup_config: {
-        enabled: false,
-        api_key: '',
-        merchant_code: '',
-        affiliate_key: '',
-      },
+      store_name: 'FlexPOS',
       printer_config: {
         enabled: false,
         type: 'epson',

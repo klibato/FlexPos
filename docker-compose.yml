@@ -58,7 +58,7 @@ services:
     container_name: pos_frontend
     environment:
       VITE_API_URL: http://localhost:3000/api
-      VITE_APP_NAME: BensBurger POS
+      VITE_APP_NAME: FlexPOS POS
     ports:
       - "5173:5173"
     volumes:

@@ -21,7 +21,7 @@ users.forEach(user => {
   const hash = bcrypt.hashSync(user.pin, 10);
   const firstName = user.username.charAt(0).toUpperCase() + user.username.slice(1);
   const lastName = user.role === 'admin' ? 'Principal' : user.username === 'john' ? 'Doe' : 'Martin';
-  const email = `${user.username}@bensburger.com`;
+  const email = `${user.username}@flexpos.com`;
 
   console.log(`('${user.username}', '${hash}', '${user.role}', '${firstName}', '${lastName}', '${email}', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),`);
 });

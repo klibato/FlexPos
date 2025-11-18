@@ -13,7 +13,7 @@ const StoreSettings = sequelize.define('store_settings', {
   store_name: {
     type: DataTypes.STRING(255),
     allowNull: false,
-    defaultValue: 'BensBurger',
+    defaultValue: 'FlexPOS',
   },
   store_description: {
     type: DataTypes.STRING(255),
@@ -132,17 +132,6 @@ const StoreSettings = sequelize.define('store_settings', {
     type: DataTypes.STRING(50),
     allowNull: true,
     defaultValue: 'Europe/Paris',
-  },
-  // Configuration SumUp
-  sumup_config: {
-    type: DataTypes.JSONB,
-    allowNull: true,
-    defaultValue: {
-      enabled: false,
-      api_key: '',
-      merchant_code: '',
-      affiliate_key: '',
-    },
   },
   // Configuration imprimante ESC/POS
   printer_config: {

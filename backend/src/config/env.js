@@ -26,14 +26,9 @@ module.exports = {
     port: parseInt(process.env.PRINTER_PORT, 10) || 9100,
   },
 
-  // SumUp API
-  sumup: {
-    apiKey: process.env.SUMUP_API_KEY || '',
-  },
-
   // Configuration app
   app: {
-    businessName: 'BensBurger',
+    businessName: 'FlexPOS',
     businessAddress: '123 Rue de la Paix, 75001 Paris',
     siret: '12345678901234',
     vatNumber: 'FR12345678901',

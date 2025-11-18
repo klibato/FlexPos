@@ -52,7 +52,6 @@ const updateSettings = async (req, res, next) => {
       theme_color,
       language,
       timezone,
-      sumup_config,
       printer_config,
       email_config,
     } = req.body;
@@ -84,7 +83,6 @@ const updateSettings = async (req, res, next) => {
       theme_color,
       language,
       timezone,
-      sumup_config,
       printer_config,
       email_config,
     };
@@ -148,7 +146,7 @@ const getPublicConfig = async (req, res, next) => {
         currency: settings.currency || 'EUR',
         currency_symbol: settings.currency_symbol || '€',
         logo_url: settings.logo_url || null,
-        store_name: req.organization?.name || settings.store_name || 'BensBurger',
+        store_name: req.organization?.name || settings.store_name || 'FlexPOS',
         language: settings.language || 'fr-FR',
       },
     });

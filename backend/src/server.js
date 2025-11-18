@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 
 const config = require('./config/env');
 const { testConnection } = require('./config/database');
@@ -25,7 +26,7 @@ app.use(helmet());
 // CORS
 app.use(cors({
   origin: config.NODE_ENV === 'production'
-    ? ['https://pos.bensburger.com']
+    ? ['https://pos.flexpos.com']
     : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
 }));
@@ -36,6 +37,9 @@ app.use(compression());
 // Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Cookie parser (NF525: Pour lire les cookies httpOnly sécurisés)
+app.use(cookieParser());
 
 // Rate limiting (plus strict pour l'auth)
 const authLimiter = rateLimit({
@@ -93,7 +97,6 @@ app.use('/api/dashboard', apiLimiter, require('./routes/dashboard'));
 app.use('/api/users', apiLimiter, require('./routes/users'));
 app.use('/api/settings', apiLimiter, require('./routes/settings'));
 app.use('/api/printer', apiLimiter, require('./routes/printer'));
-app.use('/api/sumup', apiLimiter, require('./routes/sumup'));
 app.use('/api/logs', apiLimiter, require('./routes/logs'));
 
 // ============================================
@@ -127,10 +130,6 @@ const startServer = async () => {
     // Initialiser l'imprimante thermique
     const printerService = require('./services/printerService');
     await printerService.initialize();
-
-    // Tester la connexion SumUp
-    const sumupService = require('./services/sumupService');
-    await sumupService.testConnection();
 
     // Démarrer le serveur
     app.listen(config.PORT, () => {

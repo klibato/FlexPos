@@ -36,7 +36,7 @@ const generateTicketPDF = (sale, cashRegister, user, settings) => {
 
   // Header - Logo et nom
   doc.fontSize(20).font('Helvetica-Bold');
-  centerText(settings.store_name || 'BensBurger', doc.y);
+  centerText(settings.store_name || 'FlexPOS', doc.y);
 
   doc.moveDown(0.5);
   doc.fontSize(10).font('Helvetica');
@@ -227,7 +227,7 @@ const generateTicketPDF = (sale, cashRegister, user, settings) => {
   doc.fontSize(8).fillColor('#666666');
   centerText('Merci de votre visite !', doc.y);
   doc.moveDown(0.3);
-  centerText(`À bientôt chez ${settings.store_name || 'BensBurger'}`, doc.y);
+  centerText(`À bientôt chez ${settings.store_name || 'FlexPOS'}`, doc.y);
 
   doc.moveDown(1);
 

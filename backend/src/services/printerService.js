@@ -133,7 +133,7 @@ class PrinterService {
       this.printer.alignCenter();
       this.printer.setTextDoubleHeight();
       this.printer.bold(true);
-      this.printer.println(settings.store_name || 'BensBurger');
+      this.printer.println(settings.store_name || 'FlexPOS');
       this.printer.bold(false);
       this.printer.setTextNormal();
       this.printer.newLine();
@@ -290,7 +290,7 @@ class PrinterService {
       this.printer.setTextNormal();
       this.printer.newLine();
 
-      this.printer.println(settings.commerce_name || 'BensBurger');
+      this.printer.println(settings.commerce_name || 'FlexPOS');
       this.printer.drawLine();
 
       this.printer.alignLeft();
@@ -356,7 +356,7 @@ class PrinterService {
       this.printer.setTextNormal();
       this.printer.newLine();
 
-      this.printer.println(settings.commerce_name || 'BensBurger');
+      this.printer.println(settings.commerce_name || 'FlexPOS');
       this.printer.drawLine();
 
       this.printer.alignLeft();
@@ -436,7 +436,7 @@ class PrinterService {
       this.printer.bold(false);
       this.printer.setTextNormal();
       this.printer.newLine();
-      this.printer.println('BensBurger POS');
+      this.printer.println('FlexPOS POS');
       this.printer.println(new Date().toLocaleString('fr-FR'));
       this.printer.newLine();
       this.printer.println('Imprimante fonctionnelle !');

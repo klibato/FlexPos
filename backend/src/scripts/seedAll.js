@@ -77,7 +77,7 @@ async function seedUsers() {
         role: 'admin',
         first_name: 'Admin',
         last_name: 'Principal',
-        email: 'admin@bensburger.com',
+        email: 'admin@flexpos.com',
         is_active: true,
       },
       {
@@ -86,7 +86,7 @@ async function seedUsers() {
         role: 'cashier',
         first_name: 'John',
         last_name: 'Doe',
-        email: 'john@bensburger.com',
+        email: 'john@flexpos.com',
         is_active: true,
       },
       {
@@ -95,7 +95,7 @@ async function seedUsers() {
         role: 'cashier',
         first_name: 'Marie',
         last_name: 'Martin',
-        email: 'marie@bensburger.com',
+        email: 'marie@flexpos.com',
         is_active: true,
       },
     ], {

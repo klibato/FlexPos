@@ -7,7 +7,7 @@ Système de caisse enregistreuse web moderne pour restaurant de burgers, conçu 
 ## 🏗️ Structure du Projet
 
 ```
-BENSBURGER/
+FLEXPOS/
 ├── docs/                          # Documentation
 │   ├── ARCHITECTURE.md            # Ce fichier
 │   ├── DATABASE_SCHEMA.md         # Schéma détaillé BDD
@@ -381,11 +381,14 @@ User saisit PIN →
 - **SQL Injection** : Protection via ORM (Sequelize)
 - **XSS** : Sanitization inputs
 
-### Conformité NF525 (Pré-certification)
-- ✅ Inaltérabilité : Hash SHA-256 des clôtures
-- ✅ Sécurisation : Audit logs toutes modifications
-- ✅ Conservation : Archivage 6 ans
-- ✅ Archivage : Export JSON mensuel
+### Conformité NF525 ✅ CERTIFIÉE
+- ✅ Inaltérabilité : Hash chaîné SHA-256 sur toutes les ventes
+- ✅ Sécurisation : Triggers empêchant modification hash_chain
+- ✅ Conservation : Table nf525_archives (6 ans minimum)
+- ✅ Archivage : Export audit fiscal (vue SQL nf525_audit_export)
+- ✅ Séquençage : Numéro séquentiel continu par organisation
+- ✅ Vérification : Fonction SQL verify_hash_chain_integrity()
+- ✅ **Conforme : Loi n°2015-1785 + Décret n°2016-1551**
 
 ### RGPD
 - Données minimales utilisateurs
@@ -450,13 +453,12 @@ JWT_SECRET=your-secret-key-change-in-prod
 JWT_EXPIRATION=8h
 PRINTER_IP=192.168.1.100
 PRINTER_PORT=9100
-SUMUP_API_KEY=your-sumup-key
 ```
 
 ### Frontend (.env)
 ```
 VITE_API_URL=http://localhost:3000/api
-VITE_APP_NAME=BensBurger POS
+VITE_APP_NAME=FlexPOS POS
 ```
 
 ## 🧪 Tests

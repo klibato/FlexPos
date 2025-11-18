@@ -80,7 +80,7 @@ Le ticket est divisé en 8 sections :
 #### 1. En-tête - Informations commerce (lignes 38-61)
 ```javascript
 doc.fontSize(20).font('Helvetica-Bold');
-centerText(settings.store_name || 'BensBurger', doc.y);
+centerText(settings.store_name || 'FlexPOS', doc.y);
 
 // Adresse, téléphone, etc.
 if (settings.address_line1) centerText(settings.address_line1, doc.y + 12);
@@ -200,7 +200,7 @@ Montant payé                    85.75€
 ```javascript
 doc.fontSize(8).fillColor('#666666');
 centerText('Merci de votre visite !', doc.y);
-centerText(`À bientôt chez ${settings.store_name || 'BensBurger'}`, doc.y);
+centerText(`À bientôt chez ${settings.store_name || 'FlexPOS'}`, doc.y);
 ```
 
 #### 8. Mentions légales (lignes 234-251)
@@ -215,7 +215,7 @@ if (settings.rcs) centerText(`RCS ${settings.rcs}`, doc.y);
 
 **Exemple** :
 ```
-SARL BensBurger - Capital: 10000€
+SARL FlexPOS - Capital: 10000€
 SIRET: 123 456 789 00010
 TVA: FR12345678901
 RCS Paris B 123 456 789
@@ -460,7 +460,7 @@ async printSaleTicket(sale, settings)
 this.printer.alignCenter();
 this.printer.setTextDoubleHeight();
 this.printer.bold(true);
-this.printer.println(settings.commerce_name || 'BensBurger');
+this.printer.println(settings.commerce_name || 'FlexPOS');
 
 // 2. Infos commerce
 if (settings.address) this.printer.println(settings.address);
@@ -506,7 +506,7 @@ await this.printer.execute();
 
 **⚠️ Problème détecté** (ligne 136) :
 ```javascript
-this.printer.println(settings.commerce_name || 'BensBurger');
+this.printer.println(settings.commerce_name || 'FlexPOS');
 ```
 **Incohérence** : Utilise `settings.commerce_name` alors que partout ailleurs c'est `settings.store_name`.
 👉 **Bug mineur** : devrait être `settings.store_name`.
@@ -534,7 +534,7 @@ async printXReport(report, settings)
         TICKET X
   RAPPORT INTERMEDIAIRE
 
-BensBurger
+FlexPOS
 --------------------------------
 Date: 15/11/2025 14:30:15
 Caissier: Jean Dupont
@@ -580,7 +580,7 @@ async printZReport(cashRegister, settings)
         TICKET Z
    CLOTURE DE CAISSE
 
-BensBurger
+FlexPOS
 --------------------------------
 Ouverture: 15/11/2025 08:00:00
 Cloture:   15/11/2025 20:00:00
@@ -625,7 +625,7 @@ async printTestTicket() {
     this.printer.println('TEST IMPRIMANTE');
     this.printer.bold(false);
     this.printer.setTextNormal();
-    this.printer.println('BensBurger POS');
+    this.printer.println('FlexPOS POS');
     this.printer.println(new Date().toLocaleString('fr-FR'));
     this.printer.println('Imprimante fonctionnelle !');
     this.printer.cut();
@@ -938,7 +938,7 @@ async processPayment({ amount, reference }) {
     const checkout = await this.createCheckout({
       amount,
       reference,
-      description: `BensBurger - Ticket ${reference}`,
+      description: `FlexPOS - Ticket ${reference}`,
     });
 
     if (!checkout.success) {
@@ -989,7 +989,7 @@ async processPayment({ amount, reference }) {
   merchant: {
     merchant_code: 'MXXX123',
     merchant_profile: {
-      business_name: 'BensBurger SARL',
+      business_name: 'FlexPOS SARL',
       // ... autres infos
     }
   }
