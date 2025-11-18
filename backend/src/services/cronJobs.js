@@ -30,7 +30,7 @@ const checkTrialsExpiring = cron.schedule('0 9 * * *', async () => {
       await sendTrialEndingEmail(org, daysLeft);
     }
 
-    logger.info(\`Cron job: \${expiringOrgs.length} trial expiring emails sent\`);
+    logger.info(`Cron job: ${expiringOrgs.length} trial expiring emails sent`);
   } catch (error) {
     logger.error('Cron job error (checkTrialsExpiring):', error);
   }
@@ -72,11 +72,11 @@ const generateMonthlyInvoices = cron.schedule('0 0 1 * *', async () => {
 
         invoicesCreated++;
       } catch (error) {
-        logger.error(\`Failed to create invoice for subscription \${subscription.id}:\`, error);
+        logger.error(`Failed to create invoice for subscription ${subscription.id}:`, error);
       }
     }
 
-    logger.info(\`Cron job: \${invoicesCreated} monthly invoices created\`);
+    logger.info(`Cron job: ${invoicesCreated} monthly invoices created`);
   } catch (error) {
     logger.error('Cron job error (generateMonthlyInvoices):', error);
   }
