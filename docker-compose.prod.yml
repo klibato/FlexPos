@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # ==============================================
   # CADDY - Reverse Proxy + SSL automatique
@@ -38,6 +36,8 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01_init.sql
+      - ./database:/database
       - ./backups:/backups
     ports:
       - "5432:5432"
