@@ -11,12 +11,10 @@ const request = require('supertest');
 const express = require('express');
 const { Product, Organization, User, sequelize } = require('../../src/models');
 const productController = require('../../src/controllers/productController');
-const { tenantIsolation, organizationContext } = require('../../src/middlewares/multiTenant');
-const { authenticate } = require('../../src/middlewares/auth');
+const tenantIsolation = require('../../src/middlewares/tenantIsolation');
 
-// Mock des middlewares d'authentification
-jest.mock('../../src/middlewares/auth');
-jest.mock('../../src/middlewares/multiTenant');
+// Mock des middlewares
+jest.mock('../../src/middlewares/tenantIsolation');
 
 describe('ProductController - Isolation Multi-Tenant', () => {
   let app;
@@ -113,20 +111,10 @@ describe('ProductController - Isolation Multi-Tenant', () => {
 
   describe('🔒 TEST 1: getProductsByCategory - Isolation Multi-Tenant', () => {
     beforeEach(() => {
-      // Mock du middleware d'authentification pour Org1
-      authenticate.mockImplementation((req, res, next) => {
-        req.user = { id: user1.id, organization_id: org1.id };
-        next();
-      });
-
-      // Mock du middleware organizationContext
-      organizationContext.mockImplementation((req, res, next) => {
-        req.organizationId = org1.id;
-        next();
-      });
-
-      // Mock du middleware tenantIsolation
+      // Mock du middleware tenantIsolation pour Org1
       tenantIsolation.mockImplementation((req, res, next) => {
+        req.organizationId = org1.id;
+        req.organization = org1;
         next();
       });
     });
@@ -148,13 +136,9 @@ describe('ProductController - Isolation Multi-Tenant', () => {
 
     test('Org2 ne doit voir QUE ses propres burgers', async () => {
       // Changer le context pour Org2
-      organizationContext.mockImplementation((req, res, next) => {
+      tenantIsolation.mockImplementation((req, res, next) => {
         req.organizationId = org2.id;
-        next();
-      });
-
-      authenticate.mockImplementation((req, res, next) => {
-        req.user = { id: user2.id, organization_id: org2.id };
+        req.organization = org2;
         next();
       });
 
@@ -184,14 +168,10 @@ describe('ProductController - Isolation Multi-Tenant', () => {
 
   describe('🔒 TEST 2: updateProductsOrder - Isolation Multi-Tenant', () => {
     beforeEach(() => {
-      // Mock pour Org1
-      authenticate.mockImplementation((req, res, next) => {
-        req.user = { id: user1.id, organization_id: org1.id };
-        next();
-      });
-
-      organizationContext.mockImplementation((req, res, next) => {
+      // Mock tenantIsolation pour Org1
+      tenantIsolation.mockImplementation((req, res, next) => {
         req.organizationId = org1.id;
+        req.organization = org1;
         next();
       });
     });
@@ -251,14 +231,10 @@ describe('ProductController - Isolation Multi-Tenant', () => {
 
   describe('🔒 TEST 3: exportProductsCSV - Isolation Multi-Tenant', () => {
     beforeEach(() => {
-      // Mock pour Org1
-      authenticate.mockImplementation((req, res, next) => {
-        req.user = { id: user1.id, organization_id: org1.id };
-        next();
-      });
-
-      organizationContext.mockImplementation((req, res, next) => {
+      // Mock tenantIsolation pour Org1
+      tenantIsolation.mockImplementation((req, res, next) => {
         req.organizationId = org1.id;
+        req.organization = org1;
         next();
       });
     });
@@ -299,13 +275,9 @@ describe('ProductController - Isolation Multi-Tenant', () => {
 
     test('🚨 CRITIQUE: Org2 n\'exporte PAS les produits de Org1', async () => {
       // Changer le context pour Org2
-      organizationContext.mockImplementation((req, res, next) => {
+      tenantIsolation.mockImplementation((req, res, next) => {
         req.organizationId = org2.id;
-        next();
-      });
-
-      authenticate.mockImplementation((req, res, next) => {
-        req.user = { id: user2.id, organization_id: org2.id };
+        req.organization = org2;
         next();
       });
 
