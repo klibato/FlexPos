@@ -1,0 +1,153 @@
+# ==============================================
+# FLEXPOS - Caddyfile Production
+# ==============================================
+# Configuration Caddy pour reverse proxy + SSL auto
+# 4 sous-domaines : www, app, admin, api
+# ==============================================
+
+# ==============================================
+# GLOBAL OPTIONS (doit être en premier)
+# ==============================================
+{
+    # Email pour Let's Encrypt
+    email admin@flexpos.app
+
+    # Admin API (désactivé en production)
+    admin off
+}
+
+# ==============================================
+# LANDING PAGE - www.flexpos.app
+# ==============================================
+www.flexpos.app, flexpos.app {
+    encode gzip
+
+    # Reverse proxy vers frontend-landing
+    reverse_proxy frontend-landing:80 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Headers de sécurité
+    header {
+        # Sécurité
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+
+        # Cache
+        Cache-Control "public, max-age=3600"
+
+        # Retirer header Server
+        -Server
+    }
+
+    # Logs
+    log {
+        output file /var/log/caddy/landing.log
+        format json
+    }
+}
+
+# ==============================================
+# APPLICATION POS - app.flexpos.app
+# ==============================================
+app.flexpos.app {
+    encode gzip
+
+    # Reverse proxy vers frontend (React POS)
+    reverse_proxy frontend:80 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Headers de sécurité (plus strict pour l'app)
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "no-referrer"
+        Content-Security-Policy "default-src 'self'; connect-src 'self' https://api.flexpos.app; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' data: https://fonts.gstatic.com;"
+        -Server
+    }
+
+    log {
+        output file /var/log/caddy/app.log
+        format json
+    }
+}
+
+# ==============================================
+# DASHBOARD ADMIN - admin.flexpos.app
+# ==============================================
+admin.flexpos.app {
+    encode gzip
+
+    # Reverse proxy vers frontend-admin
+    reverse_proxy frontend-admin:80 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Headers de sécurité maximale
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "no-referrer"
+        Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+        -Server
+    }
+
+    log {
+        output file /var/log/caddy/admin.log
+        format json
+    }
+}
+
+# ==============================================
+# API BACKEND - api.flexpos.app
+# ==============================================
+api.flexpos.app {
+    encode gzip
+
+    # Reverse proxy vers backend Node.js
+    reverse_proxy backend:3000 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+
+        # Timeout plus long pour les requêtes API
+        transport http {
+            read_timeout 30s
+            write_timeout 30s
+        }
+    }
+
+    # CORS géré par Express, pas besoin ici
+
+    # Headers de sécurité
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        -Server
+    }
+
+    # Rate limiting (optionnel, déjà géré par Express)
+    # @api_limit {
+    #     path /api/*
+    # }
+    # rate_limit @api_limit 100/m
+
+    log {
+        output file /var/log/caddy/api.log
+        format json
+    }
+}

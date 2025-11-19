@@ -16,6 +16,10 @@ require('./models');
 // Créer l'application Express
 const app = express();
 
+// Trust proxy (PRODUCTION: Caddy reverse proxy envoie X-Forwarded-For)
+// Requis pour express-rate-limit et CORS en production
+app.set('trust proxy', true);
+
 // ============================================
 // MIDDLEWARES GLOBAUX
 // ============================================
@@ -26,7 +30,12 @@ app.use(helmet());
 // CORS
 app.use(cors({
   origin: config.NODE_ENV === 'production'
-    ? ['https://pos.flexpos.com']
+    ? [
+        'https://app.flexpos.app',      // POS Application
+        'https://admin.flexpos.app',    // Admin Dashboard
+        'https://www.flexpos.app',      // Landing Page
+        'https://flexpos.app'           // Landing sans www
+      ]
     : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
 }));
@@ -52,6 +61,7 @@ const authLimiter = rateLimit({
       message: 'Trop de tentatives de connexion, réessayez dans 15 minutes',
     },
   },
+  validate: { trustProxy: false }, // Désactiver validation trust proxy (reverse proxy Caddy)
 });
 
 const apiLimiter = rateLimit({
@@ -64,6 +74,7 @@ const apiLimiter = rateLimit({
       message: 'Trop de requêtes, ralentissez',
     },
   },
+  validate: { trustProxy: false }, // Désactiver validation trust proxy (reverse proxy Caddy)
 });
 
 // Logger des requêtes en dev
@@ -87,8 +98,11 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Routes API
-app.use('/api/auth', require('./routes/auth'));
+// Routes API (Public - Inscription sans authentification)
+app.use('/api/public', apiLimiter, require('./routes/public'));
+
+// Routes API (POS)
+app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/organizations', require('./routes/organizations')); // MULTI-TENANT: Gestion des organisations
 app.use('/api/products', apiLimiter, require('./routes/products'));
 app.use('/api/sales', apiLimiter, require('./routes/sales'));
@@ -98,6 +112,9 @@ app.use('/api/users', apiLimiter, require('./routes/users'));
 app.use('/api/settings', apiLimiter, require('./routes/settings'));
 app.use('/api/printer', apiLimiter, require('./routes/printer'));
 app.use('/api/logs', apiLimiter, require('./routes/logs'));
+
+// Routes API (Admin - Super-Admin Dashboard)
+app.use('/api/admin', apiLimiter, require('./routes/admin'));
 
 // ============================================
 // GESTION DES ERREURS
@@ -130,6 +147,13 @@ const startServer = async () => {
     // Initialiser l'imprimante thermique
     const printerService = require('./services/printerService');
     await printerService.initialize();
+
+    // Démarrer les cron jobs (SaaS: Facturation & Trials)
+    if (config.NODE_ENV === 'production') {
+      const { startCronJobs } = require('./services/cronJobs');
+      startCronJobs();
+      logger.info('✅ Cron jobs SaaS démarrés (facturation, trials)');
+    }
 
     // Démarrer le serveur
     app.listen(config.PORT, () => {
