@@ -26,7 +26,12 @@ app.use(helmet());
 // CORS
 app.use(cors({
   origin: config.NODE_ENV === 'production'
-    ? ['https://pos.flexpos.com']
+    ? [
+        'https://app.flexpos.app',      // POS Application
+        'https://admin.flexpos.app',    // Admin Dashboard
+        'https://www.flexpos.app',      // Landing Page
+        'https://flexpos.app'           // Landing sans www
+      ]
     : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
 }));
