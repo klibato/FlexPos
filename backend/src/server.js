@@ -24,8 +24,10 @@ app.set('trust proxy', true);
 // MIDDLEWARES GLOBAUX
 // ============================================
 
-// Sécurité
-app.use(helmet());
+// Sécurité - Helmet avec CSP désactivée (gérée par Caddy)
+app.use(helmet({
+  contentSecurityPolicy: false, // CSP gérée par Caddy (reverse proxy)
+}));
 
 // CORS
 app.use(cors({
