@@ -32,7 +32,7 @@ const { PERMISSIONS } = require('../config/permissions');
 router.get(
   '/verify-integrity',
   authenticateToken,
-  requirePermission(PERMISSIONS.ADMIN),
+  requirePermission(PERMISSIONS.AUDIT_LOGS_VIEW),
   nf525Controller.verifyIntegrity
 );
 
@@ -53,7 +53,7 @@ router.get(
 router.get(
   '/stats',
   authenticateToken,
-  requirePermission(PERMISSIONS.ADMIN),
+  requirePermission(PERMISSIONS.AUDIT_LOGS_VIEW),
   nf525Controller.getStats
 );
 
@@ -77,7 +77,7 @@ router.get(
 router.get(
   '/export',
   authenticateToken,
-  requirePermission(PERMISSIONS.ADMIN),
+  requirePermission(PERMISSIONS.AUDIT_LOGS_VIEW),
   nf525Controller.exportArchive
 );
 
