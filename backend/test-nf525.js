@@ -57,12 +57,12 @@ async function testNF525Endpoints() {
       pin_code: '1234'
     });
 
-    if (loginRes.status !== 200 || !loginRes.body.token) {
+    if (loginRes.status !== 200 || !loginRes.body.data || !loginRes.body.data.token) {
       console.log('❌ Login échoué:', loginRes);
       return;
     }
 
-    const token = loginRes.body.token;
+    const token = loginRes.body.data.token;
     console.log('✅ Login réussi');
     console.log('   Token:', token.substring(0, 30) + '...');
 
