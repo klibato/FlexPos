@@ -21,7 +21,7 @@ const LoginPage = () => {
     const result = await login(username, pinCode);
 
     if (result.success) {
-      navigate('/');
+      navigate('/pos');
     } else {
       setError(result.error);
     }

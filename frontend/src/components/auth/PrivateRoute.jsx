@@ -26,7 +26,7 @@ const PrivateRoute = ({ children, requiredRole }) => {
     // Admin a toujours accès
     if (user.role !== 'admin' && !allowedRoles.includes(user.role)) {
       // Rediriger vers POS si accès refusé
-      return <Navigate to="/" replace />;
+      return <Navigate to="/pos" replace />;
     }
   }
 

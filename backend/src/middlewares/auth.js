@@ -61,6 +61,34 @@ const authenticateToken = async (req, res, next) => {
         },
       });
     }
+
+    // Vérifier si l'organisation est suspendue ou annulée
+    if (organization.status === 'suspended') {
+      logger.warn(`Access denied: Organization ${organization.id} is suspended`);
+      const suspensionMessage = organization.suspension_reason
+        ? `Votre organisation a été suspendue. Raison: ${organization.suspension_reason}`
+        : 'Votre organisation a été suspendue. Contactez le support.';
+
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'ORGANIZATION_SUSPENDED',
+          message: suspensionMessage,
+        },
+      });
+    }
+
+    if (organization.status === 'cancelled') {
+      logger.warn(`Access denied: Organization ${organization.id} is cancelled`);
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'ORGANIZATION_CANCELLED',
+          message: 'Votre organisation a été annulée. Contactez le support.',
+        },
+      });
+    }
+
     req.organization = organization;
 
     next();
@@ -169,6 +197,31 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+// Middleware pour vérifier le super admin (accès cross-tenant)
+const requireSuperAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Authentification requise',
+      },
+    });
+  }
+
+  if (!req.user.is_super_admin) {
+    logger.warn(`User ${req.user.id} (${req.user.username}) attempted super admin access`);
+    return res.status(403).json({
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'Accès réservé aux super administrateurs',
+      },
+    });
+  }
+  next();
+};
+
 /**
  * Middleware pour vérifier une permission spécifique
  * @param {string} permission - La permission requise
@@ -241,6 +294,7 @@ module.exports = {
   authenticateToken,
   optionalAuthenticate,
   requireAdmin,
+  requireSuperAdmin,
   requirePermission,
   requireAnyPermission,
 };

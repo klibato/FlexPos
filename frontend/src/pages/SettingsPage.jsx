@@ -72,7 +72,7 @@ const SettingsPage = () => {
     }
 
     if (user?.role !== 'admin') {
-      navigate('/');
+      navigate('/pos');
       return;
     }
 
@@ -303,7 +303,7 @@ const SettingsPage = () => {
           <Button
             variant="secondary"
             size="md"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/pos')}
             className="flex items-center gap-2"
           >
             <ArrowLeft size={20} />

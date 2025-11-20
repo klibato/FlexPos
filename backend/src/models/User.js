@@ -50,6 +50,11 @@ const User = sequelize.define('users', {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
+  is_super_admin: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    comment: 'Super admin ayant accès à toutes les organisations',
+  },
   organization_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -93,7 +98,7 @@ User.prototype.validatePinCode = async function (pin) {
 
 // Méthode d'instance pour obtenir les infos publiques (sans PIN)
 User.prototype.toPublicJSON = function () {
-  const { id, username, role, first_name, last_name, email, is_active } = this;
+  const { id, username, role, first_name, last_name, email, is_active, is_super_admin } = this;
   return {
     id,
     username,
@@ -102,6 +107,7 @@ User.prototype.toPublicJSON = function () {
     last_name,
     email,
     is_active,
+    is_super_admin,
   };
 };
 

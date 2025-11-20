@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { PermissionsProvider } from './context/PermissionsContext';
 import { CartProvider } from './context/CartContext';
@@ -27,12 +27,13 @@ function App() {
                 <CartProvider>
                   <Router>
                     <Routes>
-                      {/* Route publique */}
+                      {/* Routes publiques */}
+                      <Route path="/" element={<LoginPage />} />
                       <Route path="/login" element={<LoginPage />} />
 
                       {/* Routes protégées - Accessibles par tous les utilisateurs authentifiés */}
                       <Route
-                        path="/"
+                        path="/pos"
                         element={
                           <PrivateRoute>
                             <POSPage />

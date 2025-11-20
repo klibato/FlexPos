@@ -43,6 +43,20 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     }
+
+    if (error.response?.status === 403) {
+      // Organisation suspendue ou annulée
+      const errorMessage = error.response?.data?.error?.message || 'Accès refusé';
+
+      // Nettoyer les données locales
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+
+      // Afficher le message d'erreur et rediriger vers login
+      alert(errorMessage);
+      window.location.href = '/login';
+    }
+
     return Promise.reject(error);
   }
 );
