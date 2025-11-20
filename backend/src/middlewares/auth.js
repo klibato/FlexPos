@@ -169,6 +169,31 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+// Middleware pour vérifier le super admin (accès cross-tenant)
+const requireSuperAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Authentification requise',
+      },
+    });
+  }
+
+  if (!req.user.is_super_admin) {
+    logger.warn(`User ${req.user.id} (${req.user.username}) attempted super admin access`);
+    return res.status(403).json({
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'Accès réservé aux super administrateurs',
+      },
+    });
+  }
+  next();
+};
+
 /**
  * Middleware pour vérifier une permission spécifique
  * @param {string} permission - La permission requise
@@ -241,6 +266,7 @@ module.exports = {
   authenticateToken,
   optionalAuthenticate,
   requireAdmin,
+  requireSuperAdmin,
   requirePermission,
   requireAnyPermission,
 };
