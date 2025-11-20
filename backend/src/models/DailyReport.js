@@ -1,4 +1,4 @@
-const { Model, DataTypes } = require('sequelize');
+const { Model, DataTypes, Op } = require('sequelize');
 const { sequelize } = require('../config/database');
 
 /**
@@ -271,8 +271,8 @@ DailyReport.generateForDate = async function (organizationId, reportDate, userId
     where: {
       organization_id: organizationId,
       created_at: {
-        [sequelize.Op.gte]: `${reportDate} 00:00:00`,
-        [sequelize.Op.lt]: `${reportDate} 23:59:59`,
+        [Op.gte]: `${reportDate} 00:00:00`,
+        [Op.lt]: `${reportDate} 23:59:59`,
       },
       status: 'completed',
     },
@@ -377,11 +377,11 @@ DailyReport.getReports = async function (organizationId, options = {}) {
     where.report_date = {};
 
     if (options.startDate) {
-      where.report_date[sequelize.Op.gte] = options.startDate;
+      where.report_date[Op.gte] = options.startDate;
     }
 
     if (options.endDate) {
-      where.report_date[sequelize.Op.lte] = options.endDate;
+      where.report_date[Op.lte] = options.endDate;
     }
   }
 
