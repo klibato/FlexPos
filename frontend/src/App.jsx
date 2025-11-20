@@ -7,6 +7,7 @@ import { StoreConfigProvider } from './context/StoreConfigContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider } from './context/ThemeContext';
 import PrivateRoute from './components/auth/PrivateRoute';
+import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import POSPage from './pages/POSPage';
 import SalesHistoryPage from './pages/SalesHistoryPage';
@@ -27,12 +28,13 @@ function App() {
                 <CartProvider>
                   <Router>
                     <Routes>
-                      {/* Route publique */}
+                      {/* Routes publiques */}
+                      <Route path="/" element={<LandingPage />} />
                       <Route path="/login" element={<LoginPage />} />
 
                       {/* Routes protégées - Accessibles par tous les utilisateurs authentifiés */}
                       <Route
-                        path="/"
+                        path="/pos"
                         element={
                           <PrivateRoute>
                             <POSPage />
