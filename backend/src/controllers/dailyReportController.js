@@ -122,18 +122,16 @@ const getAllDailyReports = async (req, res, next) => {
       organization_id: organizationId,
     };
 
-    if (start_date) {
-      where.report_date = {
-        ...where.report_date,
-        [require('sequelize').Op.gte]: start_date,
-      };
-    }
+    if (start_date || end_date) {
+      where.report_date = {};
 
-    if (end_date) {
-      where.report_date = {
-        ...where.report_date,
-        [require('sequelize').Op.lte]: end_date,
-      };
+      if (start_date) {
+        where.report_date[require('sequelize').Op.gte] = start_date;
+      }
+
+      if (end_date) {
+        where.report_date[require('sequelize').Op.lte] = end_date;
+      }
     }
 
     const total = await DailyReport.count({ where });
