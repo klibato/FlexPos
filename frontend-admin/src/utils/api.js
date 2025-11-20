@@ -24,10 +24,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Déconnexion automatique si 401
+      // Déconnexion automatique si 401 (sauf si déjà sur /login)
       localStorage.removeItem('admin_token');
       localStorage.removeItem('admin_user');
-      window.location.href = '/login';
+
+      // Ne rediriger que si on n'est pas déjà sur /login
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
