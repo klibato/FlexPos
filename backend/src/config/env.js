@@ -19,6 +19,7 @@ module.exports = {
     secret: process.env.JWT_SECRET || 'dev-secret-key',
     expiration: process.env.JWT_EXPIRATION || '8h',
   },
+  jwtSecret: process.env.JWT_SECRET || 'dev-secret-key', // Alias pour compatibilité admin
 
   // Imprimante
   printer: {
