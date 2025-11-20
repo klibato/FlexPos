@@ -28,7 +28,7 @@ function App() {
                   <Router>
                     <Routes>
                       {/* Routes publiques */}
-                      <Route path="/" element={<Navigate to="/login" replace />} />
+                      <Route path="/" element={<LoginPage />} />
                       <Route path="/login" element={<LoginPage />} />
 
                       {/* Routes protégées - Accessibles par tous les utilisateurs authentifiés */}
