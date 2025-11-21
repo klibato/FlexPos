@@ -105,9 +105,9 @@ const Header = ({ onOpenCloseCashModal, onOpenSwitchCashierModal }) => {
         </div>
       </header>
 
-      {/* Menu burger slide-in */}
+      {/* Menu burger slide-in - responsive */}
       <div
-        className={`fixed top-0 right-0 h-full w-80 max-w-full bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 ${
+        className={`fixed top-0 right-0 h-full w-full sm:w-80 sm:max-w-full bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -252,8 +252,8 @@ const Header = ({ onOpenCloseCashModal, onOpenSwitchCashierModal }) => {
         />
       )}
 
-      {/* Spacer pour compenser le header fixe */}
-      <div className="h-14 sm:h-16" />
+      {/* Spacer pour compenser le header fixe + barre mobile */}
+      <div className="h-24 sm:h-16" />
     </>
   );
 };
