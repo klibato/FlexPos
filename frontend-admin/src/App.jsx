@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import OrganizationsPage from './pages/OrganizationsPage';
 import OrganizationDetailsPage from './pages/OrganizationDetailsPage';
+import InvoicesPage from './pages/InvoicesPage';
 import { Loader } from 'lucide-react';
 
 // Protected Route Component
@@ -80,6 +81,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <OrganizationDetailsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/invoices"
+        element={
+          <ProtectedRoute>
+            <InvoicesPage />
           </ProtectedRoute>
         }
       />

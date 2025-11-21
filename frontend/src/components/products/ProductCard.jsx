@@ -60,10 +60,19 @@ const ProductCard = React.memo(({ product, onClick }) => {
             src={image_url}
             alt={name}
             className="w-full h-full object-cover rounded-lg"
+            onError={(e) => {
+              // Si l'image ne charge pas, afficher l'icône de catégorie
+              e.target.style.display = 'none';
+              e.target.nextElementSibling.style.display = 'inline';
+            }}
           />
-        ) : (
-          <span className="text-5xl">{getCategoryIcon()}</span>
-        )}
+        ) : null}
+        <span
+          className="text-5xl"
+          style={{ display: image_url ? 'none' : 'inline' }}
+        >
+          {getCategoryIcon()}
+        </span>
       </div>
 
       {/* Nom du produit */}

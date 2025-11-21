@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   getOrganizationById,
   suspendOrganization,
   activateOrganization,
+  getOrganizationSales,
+  getOrganizationUsers,
+  getOrganizationInvoices,
+  updateOrganizationSubscription,
+  changeUserPassword,
 } from '../utils/api';
 import {
   Building2,
@@ -16,6 +21,12 @@ import {
   XCircle,
   Ban,
   PlayCircle,
+  ShoppingCart,
+  FileText,
+  CreditCard,
+  Key,
+  Edit,
+  Clock,
 } from 'lucide-react';
 
 function OrganizationDetailsPage() {
@@ -25,10 +36,35 @@ function OrganizationDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('info');
+
+  // Data states
+  const [users, setUsers] = useState([]);
+  const [sales, setSales] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [salesPagination, setSalesPagination] = useState({ total: 0, limit: 20, offset: 0 });
+  const [invoicesPagination, setInvoicesPagination] = useState({ total: 0, limit: 20, offset: 0 });
+
+  // Modal states
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [newPinCode, setNewPinCode] = useState('');
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [subscriptionForm, setSubscriptionForm] = useState({ plan: '', billing_interval: '' });
 
   useEffect(() => {
     loadOrganization();
   }, [id]);
+
+  useEffect(() => {
+    if (activeTab === 'users' && users.length === 0) {
+      loadUsers();
+    } else if (activeTab === 'sales' && sales.length === 0) {
+      loadSales();
+    } else if (activeTab === 'invoices' && invoices.length === 0) {
+      loadInvoices();
+    }
+  }, [activeTab]);
 
   const loadOrganization = async () => {
     try {
@@ -45,6 +81,47 @@ function OrganizationDetailsPage() {
       setError(err.response?.data?.error?.message || 'Erreur lors du chargement');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const response = await getOrganizationUsers(id);
+      if (response.success) {
+        setUsers(response.data.users);
+      }
+    } catch (err) {
+      console.error('Erreur chargement users:', err);
+    }
+  };
+
+  const loadSales = async () => {
+    try {
+      const response = await getOrganizationSales(id, {
+        limit: salesPagination.limit,
+        offset: salesPagination.offset,
+      });
+      if (response.success) {
+        setSales(response.data.sales);
+        setSalesPagination((prev) => ({ ...prev, total: response.data.pagination.total }));
+      }
+    } catch (err) {
+      console.error('Erreur chargement sales:', err);
+    }
+  };
+
+  const loadInvoices = async () => {
+    try {
+      const response = await getOrganizationInvoices(id, {
+        limit: invoicesPagination.limit,
+        offset: invoicesPagination.offset,
+      });
+      if (response.success) {
+        setInvoices(response.data.invoices);
+        setInvoicesPagination((prev) => ({ ...prev, total: response.data.pagination.total }));
+      }
+    } catch (err) {
+      console.error('Erreur chargement invoices:', err);
     }
   };
 
@@ -83,9 +160,41 @@ function OrganizationDetailsPage() {
         loadOrganization();
       }
     } catch (err) {
-      alert(err.response?.data?.error?.message || 'Erreur lors de l\'activation');
+      alert(err.response?.data?.error?.message || "Erreur lors de l'activation");
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (!selectedUser) return;
+
+    try {
+      const response = await changeUserPassword(selectedUser.id, newPinCode);
+      if (response.success) {
+        alert('Mot de passe modifié avec succès');
+        setShowPasswordModal(false);
+        setSelectedUser(null);
+        setNewPinCode('');
+      }
+    } catch (err) {
+      alert(err.response?.data?.error?.message || 'Erreur lors du changement de mot de passe');
+    }
+  };
+
+  const handleUpdateSubscription = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await updateOrganizationSubscription(id, subscriptionForm);
+      if (response.success) {
+        alert('Abonnement mis à jour avec succès');
+        setShowSubscriptionModal(false);
+        loadOrganization();
+      }
+    } catch (err) {
+      alert(err.response?.data?.error?.message || "Erreur lors de la mise à jour de l'abonnement");
     }
   };
 
@@ -136,6 +245,37 @@ function OrganizationDetailsPage() {
     );
   };
 
+  const getInvoiceStatusBadge = (status) => {
+    const badges = {
+      paid: { bg: 'bg-green-100', text: 'text-green-800', label: 'Payée', icon: CheckCircle },
+      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'En attente', icon: Clock },
+      failed: { bg: 'bg-red-100', text: 'text-red-800', label: 'Échouée', icon: XCircle },
+      cancelled: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Annulée', icon: XCircle },
+    };
+
+    const badge = badges[status] || badges.pending;
+    const Icon = badge.icon;
+
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
+        <Icon className="w-3 h-3" />
+        {badge.label}
+      </span>
+    );
+  };
+
+  const formatAmount = (cents) => {
+    return (cents / 100).toFixed(2) + ' €';
+  };
+
+  const tabs = [
+    { id: 'info', label: 'Informations', icon: Building2 },
+    { id: 'users', label: 'Utilisateurs', icon: Users },
+    { id: 'sales', label: 'Ventes', icon: ShoppingCart },
+    { id: 'invoices', label: 'Factures', icon: FileText },
+    { id: 'subscription', label: 'Abonnement', icon: CreditCard },
+  ];
+
   return (
     <div>
       <button
@@ -184,7 +324,7 @@ function OrganizationDetailsPage() {
         )}
       </div>
 
-      {/* Info Grid */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <div className="flex items-center gap-3 mb-4">
@@ -218,87 +358,370 @@ function OrganizationDetailsPage() {
         </div>
       </div>
 
-      {/* Details */}
-      <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mb-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Informations</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-gray-500">Email</p>
-            <p className="text-gray-900 font-medium">{organization.email || 'N/A'}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Téléphone</p>
-            <p className="text-gray-900 font-medium">{organization.phone || 'N/A'}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Créée le</p>
-            <p className="text-gray-900 font-medium">
-              {new Date(organization.created_at).toLocaleDateString('fr-FR')}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Dernière modification</p>
-            <p className="text-gray-900 font-medium">
-              {new Date(organization.updated_at).toLocaleDateString('fr-FR')}
-            </p>
-          </div>
+      {/* Tabs */}
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+        <div className="border-b border-gray-200">
+          <nav className="flex -mb-px">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        <div className="p-6">
+          {/* Info Tab */}
+          {activeTab === 'info' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-500">Email</p>
+                <p className="text-gray-900 font-medium">{organization.email || 'N/A'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Téléphone</p>
+                <p className="text-gray-900 font-medium">{organization.phone || 'N/A'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Créée le</p>
+                <p className="text-gray-900 font-medium">
+                  {new Date(organization.created_at).toLocaleDateString('fr-FR')}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Dernière modification</p>
+                <p className="text-gray-900 font-medium">
+                  {new Date(organization.updated_at).toLocaleDateString('fr-FR')}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Users Tab */}
+          {activeTab === 'users' && (
+            <div>
+              {users.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Loader className="w-8 h-8 mx-auto mb-3 animate-spin" />
+                  <p>Chargement des utilisateurs...</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Utilisateur
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Rôle
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Statut
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {users.map((user) => (
+                        <tr key={user.id}>
+                          <td className="px-6 py-4">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{user.username}</div>
+                              <div className="text-sm text-gray-500">
+                                {user.first_name} {user.last_name}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="px-3 py-1 inline-flex text-sm font-semibold rounded-full bg-blue-100 text-blue-800">
+                              {user.role}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            {user.is_active ? (
+                              <span className="inline-flex items-center gap-1 text-sm text-green-600">
+                                <CheckCircle className="w-4 h-4" />
+                                Actif
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-sm text-red-600">
+                                <XCircle className="w-4 h-4" />
+                                Inactif
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setShowPasswordModal(true);
+                              }}
+                              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-900"
+                            >
+                              <Key className="w-4 h-4" />
+                              Changer PIN
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Sales Tab */}
+          {activeTab === 'sales' && (
+            <div>
+              {sales.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Loader className="w-8 h-8 mx-auto mb-3 animate-spin" />
+                  <p>Chargement des ventes...</p>
+                </div>
+              ) : (
+                <div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            ID
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Montant TTC
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Paiement
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Caissier
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Date
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {sales.map((sale) => (
+                          <tr key={sale.id}>
+                            <td className="px-6 py-4 text-sm text-gray-900">#{sale.id}</td>
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                              {parseFloat(sale.total_ttc || 0).toFixed(2)} €
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-500">{sale.payment_method}</td>
+                            <td className="px-6 py-4 text-sm text-gray-500">
+                              {sale.user?.username || 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-500">
+                              {new Date(sale.created_at).toLocaleDateString('fr-FR')}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Invoices Tab */}
+          {activeTab === 'invoices' && (
+            <div>
+              {invoices.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Loader className="w-8 h-8 mx-auto mb-3 animate-spin" />
+                  <p>Chargement des factures...</p>
+                </div>
+              ) : (
+                <div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Numéro
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Montant
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Statut
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Date
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {invoices.map((invoice) => (
+                          <tr key={invoice.id}>
+                            <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                              {invoice.invoice_number}
+                            </td>
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                              {formatAmount(invoice.total_cents)}
+                            </td>
+                            <td className="px-6 py-4">
+                              {getInvoiceStatusBadge(invoice.status)}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-500">
+                              {new Date(invoice.created_at).toLocaleDateString('fr-FR')}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Subscription Tab */}
+          {activeTab === 'subscription' && (
+            <div>
+              <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Plan actuel</h3>
+                <p className="text-2xl font-bold text-blue-600 capitalize mb-2">{organization.plan}</p>
+                <p className="text-sm text-gray-600">
+                  {organization.trial_ends_at && new Date(organization.trial_ends_at) > new Date()
+                    ? `Période d'essai jusqu'au ${new Date(organization.trial_ends_at).toLocaleDateString('fr-FR')}`
+                    : 'Abonnement actif'}
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  setSubscriptionForm({ plan: organization.plan, billing_interval: 'monthly' });
+                  setShowSubscriptionModal(true);
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                <Edit className="w-4 h-4" />
+                Modifier l'abonnement
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Users List */}
-      {organization.users && organization.users.length > 0 && (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900">Utilisateurs</h2>
+      {/* Password Change Modal */}
+      {showPasswordModal && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Changer le code PIN - {selectedUser.username}
+            </h2>
+            <form onSubmit={handleChangePassword}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nouveau code PIN (4-6 chiffres)
+                </label>
+                <input
+                  type="text"
+                  value={newPinCode}
+                  onChange={(e) => setNewPinCode(e.target.value)}
+                  pattern="[0-9]{4,6}"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Entrez le nouveau PIN"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                >
+                  Confirmer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPasswordModal(false);
+                    setSelectedUser(null);
+                    setNewPinCode('');
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+                >
+                  Annuler
+                </button>
+              </div>
+            </form>
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Utilisateur
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Rôle
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Statut
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {organization.users.map((user) => (
-                  <tr key={user.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{user.username}</div>
-                        <div className="text-sm text-gray-500">
-                          {user.first_name} {user.last_name}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                        {user.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {user.is_active ? (
-                        <span className="inline-flex items-center gap-1 text-sm text-green-600">
-                          <CheckCircle className="w-4 h-4" />
-                          Actif
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-sm text-red-600">
-                          <XCircle className="w-4 h-4" />
-                          Inactif
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        </div>
+      )}
+
+      {/* Subscription Modal */}
+      {showSubscriptionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Modifier l'abonnement</h2>
+            <form onSubmit={handleUpdateSubscription}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Plan</label>
+                <select
+                  value={subscriptionForm.plan}
+                  onChange={(e) => setSubscriptionForm({ ...subscriptionForm, plan: e.target.value })}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Sélectionner un plan</option>
+                  <option value="starter">Starter (29€)</option>
+                  <option value="pro">Pro (89€)</option>
+                  <option value="business">Business (199€)</option>
+                  <option value="enterprise">Enterprise (Sur devis)</option>
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Période de facturation
+                </label>
+                <select
+                  value={subscriptionForm.billing_interval}
+                  onChange={(e) =>
+                    setSubscriptionForm({ ...subscriptionForm, billing_interval: e.target.value })
+                  }
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Sélectionner une période</option>
+                  <option value="monthly">Mensuel</option>
+                  <option value="yearly">Annuel</option>
+                </select>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                >
+                  Confirmer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowSubscriptionModal(false)}
+                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+                >
+                  Annuler
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -89,4 +89,42 @@ export const activateOrganization = async (id) => {
   return response.data;
 };
 
+export const getOrganizationSales = async (id, params = {}) => {
+  const response = await api.get(`/organizations/${id}/sales`, { params });
+  return response.data;
+};
+
+export const getOrganizationUsers = async (id) => {
+  const response = await api.get(`/organizations/${id}/users`);
+  return response.data;
+};
+
+export const getOrganizationInvoices = async (id, params = {}) => {
+  const response = await api.get(`/organizations/${id}/invoices`, { params });
+  return response.data;
+};
+
+export const updateOrganizationSubscription = async (id, data) => {
+  const response = await api.put(`/organizations/${id}/subscription`, data);
+  return response.data;
+};
+
+// ============================================
+// USERS
+// ============================================
+
+export const changeUserPassword = async (userId, newPinCode) => {
+  const response = await api.put(`/users/${userId}/password`, { new_pin_code: newPinCode });
+  return response.data;
+};
+
+// ============================================
+// INVOICES
+// ============================================
+
+export const getInvoices = async (params = {}) => {
+  const response = await api.get('/invoices', { params });
+  return response.data;
+};
+
 export default api;

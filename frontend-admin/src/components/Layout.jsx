@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard,
   Building2,
+  FileText,
   LogOut,
   Menu,
   X,
@@ -24,6 +25,7 @@ function Layout({ children }) {
   const menuItems = [
     { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/organizations', icon: Building2, label: 'Organisations' },
+    { path: '/invoices', icon: FileText, label: 'Factures' },
   ];
 
   const isActivePath = (path) => {
