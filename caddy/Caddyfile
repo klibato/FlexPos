@@ -123,6 +123,7 @@ api.flexpos.app {
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
         header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
 
         # Timeout plus long pour les requêtes API
         transport http {
@@ -131,7 +132,15 @@ api.flexpos.app {
         }
     }
 
-    # CORS géré par Express, pas besoin ici
+    # CORS pour les images uploadées (permettre app.flexpos.app et admin.flexpos.app)
+    @uploads {
+        path /uploads/*
+    }
+    header @uploads {
+        Access-Control-Allow-Origin "*"
+        Access-Control-Allow-Methods "GET, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type"
+    }
 
     # Headers de sécurité
     header {
