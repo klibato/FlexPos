@@ -27,6 +27,16 @@ router.get('/organizations', authenticateAdmin, requireAdminPermission('organiza
 router.get('/organizations/:id', authenticateAdmin, requireAdminPermission('organizations:read'), adminOrganizationsController.getOrganizationById);
 router.put('/organizations/:id/suspend', authenticateAdmin, requireSuperAdmin, adminOrganizationsController.suspendOrganization);
 router.put('/organizations/:id/activate', authenticateAdmin, requireSuperAdmin, adminOrganizationsController.activateOrganization);
+router.get('/organizations/:id/sales', authenticateAdmin, requireAdminPermission('organizations:read'), adminOrganizationsController.getOrganizationSales);
+router.get('/organizations/:id/users', authenticateAdmin, requireAdminPermission('organizations:read'), adminOrganizationsController.getOrganizationUsers);
+router.get('/organizations/:id/invoices', authenticateAdmin, requireAdminPermission('organizations:read'), adminOrganizationsController.getOrganizationInvoices);
+router.put('/organizations/:id/subscription', authenticateAdmin, requireSuperAdmin, adminOrganizationsController.updateOrganizationSubscription);
+
+// Users
+router.put('/users/:id/password', authenticateAdmin, requireSuperAdmin, adminOrganizationsController.changeUserPassword);
+
+// Invoices
+router.get('/invoices', authenticateAdmin, requireAdminPermission('invoices:read'), adminOrganizationsController.getAllInvoices);
 
 // Analytics
 router.get('/analytics/dashboard', authenticateAdmin, requireAdminPermission('analytics:read'), adminAnalyticsController.getDashboard);
