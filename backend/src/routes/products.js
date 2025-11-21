@@ -12,10 +12,12 @@ router.get('/', optionalAuthenticate, productController.getAllProducts);
 router.get('/export/csv', authenticateToken, requirePermission(PERMISSIONS.PRODUCTS_VIEW), productController.exportProductsCSV);
 
 // GET /api/products/category/:category - Produits par catégorie
-router.get('/category/:category', productController.getProductsByCategory);
+// MULTI-TENANT: optionalAuthenticate requis pour obtenir organizationId
+router.get('/category/:category', optionalAuthenticate, productController.getProductsByCategory);
 
 // GET /api/products/:id - Récupérer un produit
-router.get('/:id', productController.getProductById);
+// MULTI-TENANT: optionalAuthenticate requis pour obtenir organizationId
+router.get('/:id', optionalAuthenticate, productController.getProductById);
 
 // POST /api/products - Créer un produit
 router.post('/', authenticateToken, requirePermission(PERMISSIONS.PRODUCTS_CREATE), productController.createProduct);

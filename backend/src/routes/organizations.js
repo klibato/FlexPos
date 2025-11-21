@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const organizationController = require('../controllers/organizationController');
-const { authenticateToken, requirePermission } = require('../middlewares/auth');
+const { authenticateToken, requirePermission, requireSuperAdmin } = require('../middlewares/auth');
 const { PERMISSIONS } = require('../config/permissions');
 
 /**
@@ -14,12 +14,12 @@ router.post('/register', organizationController.registerOrganization);
 /**
  * @route   GET /api/organizations
  * @desc    Récupérer toutes les organisations
- * @access  Super Admin (future)
+ * @access  Super Admin uniquement
  */
 router.get(
   '/',
   authenticateToken,
-  // TODO: Add requireSuperAdmin middleware when implementing super admin role
+  requireSuperAdmin,
   organizationController.getAllOrganizations
 );
 
@@ -45,12 +45,12 @@ router.put(
 /**
  * @route   DELETE /api/organizations/:id
  * @desc    Supprimer une organisation (soft delete)
- * @access  Super Admin (future)
+ * @access  Super Admin uniquement
  */
 router.delete(
   '/:id',
   authenticateToken,
-  // TODO: Add requireSuperAdmin middleware
+  requireSuperAdmin,
   organizationController.deleteOrganization
 );
 
