@@ -468,9 +468,11 @@ const exportCashRegistersCSV = async (req, res, next) => {
       };
     }
 
-    // Récupérer toutes les caisses
+    // Récupérer toutes les caisses (MAX 10,000 pour éviter OutOfMemory)
+    const MAX_EXPORT_LIMIT = 10000;
     const cashRegisters = await CashRegister.findAll({
       where,
+      limit: MAX_EXPORT_LIMIT,
       order: [['opened_at', 'DESC']],
       include: [
         {
@@ -485,6 +487,10 @@ const exportCashRegistersCSV = async (req, res, next) => {
         },
       ],
     });
+
+    // Vérifier si limite atteinte
+    const totalCount = await CashRegister.count({ where });
+    const limitReached = totalCount > MAX_EXPORT_LIMIT;
 
     // Formater en CSV
     const csvRows = [];
@@ -589,7 +595,18 @@ const exportCashRegistersCSV = async (req, res, next) => {
     res.write('\ufeff');
     res.end(csvContent);
 
-    logger.info(`Export CSV clôtures généré par ${req.user.username}: ${cashRegisters.length} clôtures`);
+    logger.info(
+      `Export CSV clôtures généré par ${req.user.username}: ${cashRegisters.length} clôtures${
+        limitReached ? ` (LIMITE ATTEINTE: ${totalCount} clôtures au total)` : ''
+      }`
+    );
+
+    // Log warning si limite atteinte
+    if (limitReached) {
+      logger.warn(
+        `Export CSV clôtures limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} clôtures au total). Utilisez des filtres de date pour exporter le reste.`
+      );
+    }
   } catch (error) {
     logger.error('Erreur lors de l\'export CSV clôtures:', error);
     next(error);

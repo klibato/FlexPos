@@ -7,7 +7,11 @@ const { Op } = require('sequelize');
  */
 const getAllUsers = async (req, res, next) => {
   try {
-    const { include_inactive = 'false' } = req.query;
+    const {
+      include_inactive = 'false',
+      limit = 50,
+      offset = 0,
+    } = req.query;
 
     const where = {
       organization_id: req.organizationId, // MULTI-TENANT: Filtrer par organisation
@@ -19,8 +23,10 @@ const getAllUsers = async (req, res, next) => {
       where.is_active = true;
     }
 
-    const users = await User.findAll({
+    const { count, rows: users } = await User.findAndCountAll({
       where,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
       attributes: { exclude: ['pin_code'] }, // Ne pas exposer les PIN hashés
       order: [
         ['role', 'ASC'],
@@ -31,7 +37,15 @@ const getAllUsers = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: users,
+      data: {
+        users,
+        pagination: {
+          total: count,
+          limit: parseInt(limit),
+          offset: parseInt(offset),
+          has_more: count > parseInt(offset) + parseInt(limit),
+        },
+      },
     });
   } catch (error) {
     logger.error('Erreur lors de la récupération des utilisateurs:', error);

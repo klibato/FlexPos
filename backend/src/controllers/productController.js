@@ -11,6 +11,8 @@ const getAllProducts = async (req, res, next) => {
       category,
       is_menu,
       include_inactive = 'false',
+      limit = 100,
+      offset = 0,
     } = req.query;
 
     // Construire les filtres
@@ -32,9 +34,11 @@ const getAllProducts = async (req, res, next) => {
       where.is_active = true;
     }
 
-    // Récupérer les produits
-    const products = await Product.findAll({
+    // Récupérer les produits avec pagination
+    const { count, rows: products } = await Product.findAndCountAll({
       where,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
       order: [
         ['category', 'ASC'],
         ['display_order', 'ASC'],
@@ -57,7 +61,15 @@ const getAllProducts = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: productsWithImageUrls,
+      data: {
+        products: productsWithImageUrls,
+        pagination: {
+          total: count,
+          limit: parseInt(limit),
+          offset: parseInt(offset),
+          has_more: count > parseInt(offset) + parseInt(limit),
+        },
+      },
     });
   } catch (error) {
     next(error);
@@ -394,9 +406,11 @@ const exportProductsCSV = async (req, res, next) => {
       where.is_active = true;
     }
 
-    // Récupérer tous les produits
+    // Récupérer tous les produits (MAX 10,000 pour éviter OutOfMemory)
+    const MAX_EXPORT_LIMIT = 10000;
     const products = await Product.findAll({
       where,
+      limit: MAX_EXPORT_LIMIT,
       order: [
         ['category', 'ASC'],
         ['display_order', 'ASC'],
@@ -404,6 +418,10 @@ const exportProductsCSV = async (req, res, next) => {
       ],
       paranoid: include_inactive !== 'true', // Si on veut les supprimés
     });
+
+    // Vérifier si limite atteinte
+    const totalCount = await Product.count({ where });
+    const limitReached = totalCount > MAX_EXPORT_LIMIT;
 
     // Formater en CSV
     const csvRows = [];
@@ -460,7 +478,18 @@ const exportProductsCSV = async (req, res, next) => {
     res.write('\ufeff');
     res.end(csvContent);
 
-    logger.info(`Export CSV produits généré par ${req.user.username}: ${products.length} produits`);
+    logger.info(
+      `Export CSV produits généré par ${req.user.username}: ${products.length} produits${
+        limitReached ? ` (LIMITE ATTEINTE: ${totalCount} produits au total)` : ''
+      }`
+    );
+
+    // Log warning si limite atteinte
+    if (limitReached) {
+      logger.warn(
+        `Export CSV produits limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} produits au total). Utilisez des filtres pour exporter le reste.`
+      );
+    }
   } catch (error) {
     logger.error('Erreur lors de l\'export CSV produits:', error);
     next(error);

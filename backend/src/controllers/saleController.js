@@ -651,9 +651,11 @@ const exportSalesCSV = async (req, res, next) => {
       where.status = status;
     }
 
-    // Récupérer toutes les ventes (pas de limit pour l'export)
+    // Récupérer toutes les ventes (MAX 10,000 pour éviter OutOfMemory)
+    const MAX_EXPORT_LIMIT = 10000;
     const sales = await Sale.findAll({
       where,
+      limit: MAX_EXPORT_LIMIT,
       order: [['created_at', 'DESC']],
       include: [
         {
@@ -667,6 +669,10 @@ const exportSalesCSV = async (req, res, next) => {
         },
       ],
     });
+
+    // Vérifier si limite atteinte
+    const totalCount = await Sale.count({ where });
+    const limitReached = totalCount > MAX_EXPORT_LIMIT;
 
     // Formater en CSV
     const csvRows = [];
@@ -750,7 +756,18 @@ const exportSalesCSV = async (req, res, next) => {
     res.write('\ufeff');
     res.end(csvContent);
 
-    logger.info(`Export CSV généré par ${req.user.username}: ${sales.length} ventes`);
+    logger.info(
+      `Export CSV ventes généré par ${req.user.username}: ${sales.length} ventes${
+        limitReached ? ` (LIMITE ATTEINTE: ${totalCount} ventes au total)` : ''
+      }`
+    );
+
+    // Log warning si limite atteinte
+    if (limitReached) {
+      logger.warn(
+        `Export CSV ventes limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} ventes au total). Utilisez des filtres de date pour exporter le reste.`
+      );
+    }
   } catch (error) {
     logger.error('Erreur lors de l\'export CSV:', error);
     next(error);

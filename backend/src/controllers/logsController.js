@@ -211,9 +211,11 @@ const exportLogsCSV = async (req, res, next) => {
       where.entity_type = entity_type;
     }
 
-    // Récupérer tous les logs (pas de limit pour l'export)
+    // Récupérer tous les logs (MAX 10,000 pour éviter OutOfMemory)
+    const MAX_EXPORT_LIMIT = 10000;
     const logs = await AuditLog.findAll({
       where,
+      limit: MAX_EXPORT_LIMIT,
       order: [['created_at', 'DESC']],
       include: [
         {
@@ -223,6 +225,10 @@ const exportLogsCSV = async (req, res, next) => {
         },
       ],
     });
+
+    // Vérifier si limite atteinte
+    const totalCount = await AuditLog.count({ where });
+    const limitReached = totalCount > MAX_EXPORT_LIMIT;
 
     // Formater en CSV
     const csvRows = [];
@@ -287,7 +293,18 @@ const exportLogsCSV = async (req, res, next) => {
     res.write('\ufeff');
     res.end(csvContent);
 
-    logger.info(`Export CSV logs généré par ${req.user.username}: ${logs.length} logs`);
+    logger.info(
+      `Export CSV logs généré par ${req.user.username}: ${logs.length} logs${
+        limitReached ? ` (LIMITE ATTEINTE: ${totalCount} logs au total)` : ''
+      }`
+    );
+
+    // Log warning si limite atteinte
+    if (limitReached) {
+      logger.warn(
+        `Export CSV logs limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} logs au total). Utilisez des filtres de date pour exporter le reste.`
+      );
+    }
   } catch (error) {
     logger.error('Erreur lors de l\'export CSV logs:', error);
     next(error);
