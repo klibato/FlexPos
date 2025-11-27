@@ -1,6 +1,7 @@
 const { Product, MenuComposition } = require('../models');
 const { Op } = require('sequelize');
 const logger = require('../utils/logger');
+const { sendCsvResponse, formatAmountForCsv, formatBooleanForCsv } = require('../utils/csvHelper');
 
 /**
  * Récupérer tous les produits (avec filtres optionnels)
@@ -421,75 +422,43 @@ const exportProductsCSV = async (req, res, next) => {
 
     // Vérifier si limite atteinte
     const totalCount = await Product.count({ where });
-    const limitReached = totalCount > MAX_EXPORT_LIMIT;
 
-    // Formater en CSV
-    const csvRows = [];
-
-    // Header
-    csvRows.push([
-      'ID',
-      'Nom',
-      'Description',
-      'Catégorie',
-      'Prix HT (€)',
-      'Prix TTC (€)',
-      'TVA (%)',
-      'Type',
-      'Actif',
-      'Ordre',
-      'Image URL',
-    ].join(';'));
-
-    // Lignes de données
-    products.forEach((product) => {
-      const priceHT = parseFloat(product.price_ht).toFixed(2);
-      const priceTTC = parseFloat(product.price_ttc).toFixed(2);
-      const vatRate = parseFloat(product.vat_rate).toFixed(2);
-      const type = product.is_menu ? 'Menu' : 'Produit';
-      const isActive = product.is_active ? 'Oui' : 'Non';
-
-      csvRows.push([
+    // Utiliser le helper CSV réutilisable
+    sendCsvResponse({
+      res,
+      data: products,
+      columns: [
+        'ID',
+        'Nom',
+        'Description',
+        'Catégorie',
+        'Prix HT (€)',
+        'Prix TTC (€)',
+        'TVA (%)',
+        'Type',
+        'Actif',
+        'Ordre',
+        'Image URL',
+      ],
+      rowMapper: (product) => [
         product.id,
-        `"${product.name}"`,
-        `"${product.description || ''}"`,
+        product.name,
+        product.description || '',
         product.category,
-        priceHT,
-        priceTTC,
-        vatRate,
-        type,
-        isActive,
+        formatAmountForCsv(product.price_ht),
+        formatAmountForCsv(product.price_ttc),
+        formatAmountForCsv(product.vat_rate),
+        product.is_menu ? 'Menu' : 'Produit',
+        formatBooleanForCsv(product.is_active),
         product.display_order,
-        `"${product.image_url || ''}"`,
-      ].join(';'));
+        product.image_url || '',
+      ],
+      filename: 'produits',
+      logger,
+      user: req.user,
+      totalCount,
+      maxLimit: MAX_EXPORT_LIMIT,
     });
-
-    const csvContent = csvRows.join('\n');
-
-    // Générer le nom de fichier avec la date du jour
-    const today = new Date().toISOString().split('T')[0];
-    const filename = `produits_${today}.csv`;
-
-    // Headers pour le téléchargement CSV
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-
-    // Ajouter le BOM UTF-8 pour Excel
-    res.write('\ufeff');
-    res.end(csvContent);
-
-    logger.info(
-      `Export CSV produits généré par ${req.user.username}: ${products.length} produits${
-        limitReached ? ` (LIMITE ATTEINTE: ${totalCount} produits au total)` : ''
-      }`,
-    );
-
-    // Log warning si limite atteinte
-    if (limitReached) {
-      logger.warn(
-        `Export CSV produits limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} produits au total). Utilisez des filtres pour exporter le reste.`,
-      );
-    }
   } catch (error) {
     logger.error('Erreur lors de l\'export CSV produits:', error);
     next(error);
