@@ -74,7 +74,7 @@ const generateTicketPDF = (sale, cashRegister, user, settings) => {
   doc.text(`Ticket N°: ${sale.ticket_number}`, 20);
   doc.text(
     `Date: ${new Date(sale.created_at).toLocaleString('fr-FR')}`,
-    20
+    20,
   );
   doc.text(`Caisse: ${cashRegister.register_name}`, 20);
   doc.text(`Caissier: ${user.first_name} ${user.last_name}`, 20);
@@ -102,7 +102,7 @@ const generateTicketPDF = (sale, cashRegister, user, settings) => {
       `${item.quantity}x ${item.product_name}`,
       20,
       doc.y,
-      { width: contentWidth * 0.7, align: 'left' }
+      { width: contentWidth * 0.7, align: 'left' },
     );
 
     // Prix total de la ligne (aligné à droite)
@@ -118,7 +118,7 @@ const generateTicketPDF = (sale, cashRegister, user, settings) => {
       doc.text(
         `  (${formatPrice(item.unit_price_ht)} HT × ${item.quantity})`,
         20,
-        doc.y
+        doc.y,
       );
       doc.fillColor('#000000').fontSize(9);
     }
@@ -146,13 +146,13 @@ const generateTicketPDF = (sale, cashRegister, user, settings) => {
       lineText(
         `TVA ${rate}%`,
         `${formatPrice(details.base_ht)} HT`,
-        doc.y
+        doc.y,
       );
       doc.moveDown(0.2);
       lineText(
         `  Montant TVA`,
         `${formatPrice(details.amount_vat)}`,
-        doc.y
+        doc.y,
       );
       doc.moveDown(0.3);
     });
@@ -199,7 +199,7 @@ const generateTicketPDF = (sale, cashRegister, user, settings) => {
     sale.payment_details.payments.forEach((p) => {
       doc.text(
         `  - ${paymentLabels[p.method]}: ${formatPrice(p.amount)}`,
-        20
+        20,
       );
     });
     doc.fontSize(9);

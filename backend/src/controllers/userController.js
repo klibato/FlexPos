@@ -227,12 +227,12 @@ const updateUser = async (req, res, next) => {
     // Préparer les données à mettre à jour
     const updateData = {};
 
-    if (username !== undefined) updateData.username = username;
-    if (first_name !== undefined) updateData.first_name = first_name;
-    if (last_name !== undefined) updateData.last_name = last_name;
-    if (email !== undefined) updateData.email = email || null;
-    if (role !== undefined) updateData.role = role;
-    if (is_active !== undefined) updateData.is_active = is_active;
+    if (username !== undefined) {updateData.username = username;}
+    if (first_name !== undefined) {updateData.first_name = first_name;}
+    if (last_name !== undefined) {updateData.last_name = last_name;}
+    if (email !== undefined) {updateData.email = email || null;}
+    if (role !== undefined) {updateData.role = role;}
+    if (is_active !== undefined) {updateData.is_active = is_active;}
 
     // Si un nouveau PIN est fourni, l'ajouter aux données
     // Note: Le PIN sera hashé automatiquement par le hook beforeUpdate du modèle User

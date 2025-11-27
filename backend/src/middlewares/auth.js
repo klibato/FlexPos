@@ -241,7 +241,7 @@ const requirePermission = (permission) => {
 
     if (!hasPermission(req.user.role, permission)) {
       logger.warn(
-        `User ${req.user.id} (${req.user.role}) denied access: missing permission ${permission}`
+        `User ${req.user.id} (${req.user.role}) denied access: missing permission ${permission}`,
       );
       return res.status(403).json({
         success: false,
@@ -275,7 +275,7 @@ const requireAnyPermission = (permissions) => {
 
     if (!hasAnyPermission(req.user.role, permissions)) {
       logger.warn(
-        `User ${req.user.id} (${req.user.role}) denied access: missing any of ${permissions.join(', ')}`
+        `User ${req.user.id} (${req.user.role}) denied access: missing any of ${permissions.join(', ')}`,
       );
       return res.status(403).json({
         success: false,

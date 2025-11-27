@@ -111,7 +111,7 @@ const anonymizeOldAuditLogs = cron.schedule('0 2 * * *', async () => {
             [Op.ne]: '0.0.0.0', // Ne pas anonymiser ce qui l'est déjà
           },
         },
-      }
+      },
     );
 
     logger.info(`Cron job: ${result[0]} audit logs anonymized (older than 3 months)`);

@@ -95,7 +95,7 @@ const registerOrganization = async (req, res, next) => {
             },
           },
         },
-        { transaction }
+        { transaction },
       );
 
       // Créer l'utilisateur administrateur
@@ -110,7 +110,7 @@ const registerOrganization = async (req, res, next) => {
           role: 'admin',
           is_active: true,
         },
-        { transaction }
+        { transaction },
       );
 
       // Commit si tout OK
@@ -194,8 +194,8 @@ const getAllOrganizations = async (req, res, next) => {
     const { status, plan, limit = 50, offset = 0 } = req.query;
 
     const where = {};
-    if (status) where.status = status;
-    if (plan) where.plan = plan;
+    if (status) {where.status = status;}
+    if (plan) {where.plan = plan;}
 
     const { count, rows: organizations } = await Organization.findAndCountAll({
       where,
@@ -329,10 +329,10 @@ const updateOrganization = async (req, res, next) => {
     const { name, email, phone, status } = req.body;
 
     const updateData = {};
-    if (name) updateData.name = name;
-    if (email) updateData.email = email;
-    if (phone) updateData.phone = phone;
-    if (status && req.user.role === 'super_admin') updateData.status = status;
+    if (name) {updateData.name = name;}
+    if (email) {updateData.email = email;}
+    if (phone) {updateData.phone = phone;}
+    if (status && req.user.role === 'super_admin') {updateData.status = status;}
 
     await organization.update(updateData);
 

@@ -23,7 +23,7 @@ const sequelize = new Sequelize(
       underscored: false,
       freezeTableName: true,
     },
-  }
+  },
 );
 
 // Fonction pour tester la connexion

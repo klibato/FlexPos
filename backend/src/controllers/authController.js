@@ -70,7 +70,7 @@ const login = async (req, res, next) => {
         organization_id: user.organization_id, // MULTI-TENANT: Important pour tenantIsolation
       },
       config.jwt.secret,
-      { expiresIn: config.jwt.expiration }
+      { expiresIn: config.jwt.expiration },
     );
 
     logger.info(`Utilisateur ${username} connecté`);
@@ -233,7 +233,7 @@ const switchCashier = async (req, res, next) => {
         organization_id: newUser.organization_id, // MULTI-TENANT: Important pour tenantIsolation
       },
       config.jwt.secret,
-      { expiresIn: config.jwt.expiration }
+      { expiresIn: config.jwt.expiration },
     );
 
     logger.info(`Changement de caissier: ${req.user.username} -> ${newUser.username}`);
@@ -475,9 +475,9 @@ const exportUserData = async (req, res, next) => {
         {
           model: Organization,
           as: 'organization',
-          attributes: ['id', 'name', 'slug', 'email', 'phone', 'plan', 'created_at']
-        }
-      ]
+          attributes: ['id', 'name', 'slug', 'email', 'phone', 'plan', 'created_at'],
+        },
+      ],
     });
 
     if (!user) {
@@ -665,7 +665,7 @@ const deleteUserData = async (req, res, next) => {
       {
         where: { user_id: userId },
         transaction,
-      }
+      },
     );
 
     // Note: Les ventes sont conservées pour conformité NF525 (6 ans légal)

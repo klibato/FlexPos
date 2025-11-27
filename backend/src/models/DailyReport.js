@@ -191,7 +191,7 @@ DailyReport.init(
       },
     ],
     comment: 'Rapports Z (clôture journalière) - Conformité NF525',
-  }
+  },
 );
 
 /**
@@ -232,7 +232,7 @@ DailyReport.beforeUpdate((report) => {
     throw new Error(
       `NF525 Compliance: Daily reports are immutable. ` +
         `Cannot modify: ${forbiddenChanges.join(', ')}. ` +
-        `Only status can be updated.`
+        `Only status can be updated.`,
     );
   }
 });
@@ -262,7 +262,7 @@ DailyReport.generateForDate = async function (organizationId, reportDate, userId
 
   if (existingReport) {
     throw new Error(
-      `Daily report already exists for ${reportDate} (ID: ${existingReport.id})`
+      `Daily report already exists for ${reportDate} (ID: ${existingReport.id})`,
     );
   }
 
@@ -294,10 +294,10 @@ DailyReport.generateForDate = async function (organizationId, reportDate, userId
     totalAmountTTC += ttc;
     totalAmountHT += ht;
 
-    if (sale.payment_method === 'cash') totalCash += ttc;
-    else if (sale.payment_method === 'card') totalCard += ttc;
-    else if (sale.payment_method === 'meal_voucher') totalMealVoucher += ttc;
-    else if (sale.payment_method === 'mixed') totalMixed += ttc;
+    if (sale.payment_method === 'cash') {totalCash += ttc;}
+    else if (sale.payment_method === 'card') {totalCard += ttc;}
+    else if (sale.payment_method === 'meal_voucher') {totalMealVoucher += ttc;}
+    else if (sale.payment_method === 'mixed') {totalMixed += ttc;}
   });
 
   const totalTax = totalAmountTTC - totalAmountHT;

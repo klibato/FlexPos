@@ -361,10 +361,10 @@ const updateProductsOrder = async (req, res, next) => {
         {
           where: {
             id: item.id,
-            organization_id: req.organizationId // MULTI-TENANT: Sécurité cross-org
-          }
-        }
-      )
+            organization_id: req.organizationId, // MULTI-TENANT: Sécurité cross-org
+          },
+        },
+      ),
     );
 
     await Promise.all(updatePromises);
@@ -481,13 +481,13 @@ const exportProductsCSV = async (req, res, next) => {
     logger.info(
       `Export CSV produits généré par ${req.user.username}: ${products.length} produits${
         limitReached ? ` (LIMITE ATTEINTE: ${totalCount} produits au total)` : ''
-      }`
+      }`,
     );
 
     // Log warning si limite atteinte
     if (limitReached) {
       logger.warn(
-        `Export CSV produits limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} produits au total). Utilisez des filtres pour exporter le reste.`
+        `Export CSV produits limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} produits au total). Utilisez des filtres pour exporter le reste.`,
       );
     }
   } catch (error) {
@@ -553,7 +553,7 @@ const uploadProductImage = async (req, res, next) => {
     });
 
     logger.info(
-      `Image uploadée pour produit ${product.name} (ID: ${id}) par ${req.user.username}`
+      `Image uploadée pour produit ${product.name} (ID: ${id}) par ${req.user.username}`,
     );
 
     res.json({
@@ -620,7 +620,7 @@ const deleteProductImage = async (req, res, next) => {
     });
 
     logger.info(
-      `Image supprimée pour produit ${product.name} (ID: ${id}) par ${req.user.username}`
+      `Image supprimée pour produit ${product.name} (ID: ${id}) par ${req.user.username}`,
     );
 
     res.json({

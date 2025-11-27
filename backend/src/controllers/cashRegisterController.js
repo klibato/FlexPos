@@ -160,7 +160,7 @@ const openCashRegister = async (req, res, next) => {
         status: 'open',
         notes,
       },
-      { transaction }
+      { transaction },
     );
 
     await transaction.commit();
@@ -181,7 +181,7 @@ const openCashRegister = async (req, res, next) => {
     });
 
     logger.info(
-      `Caisse ouverte: ${register_name} par ${req.user.username} - Fond: ${opening_balance}€`
+      `Caisse ouverte: ${register_name} par ${req.user.username} - Fond: ${opening_balance}€`,
     );
 
     // Logger l'action dans audit_logs
@@ -326,7 +326,7 @@ const closeCashRegister = async (req, res, next) => {
         total_cash_collected: cashCollected,
         notes: notes || cashRegister.notes,
       },
-      { transaction }
+      { transaction },
     );
 
     await transaction.commit();
@@ -352,7 +352,7 @@ const closeCashRegister = async (req, res, next) => {
     });
 
     logger.info(
-      `Caisse fermée: ${cashRegister.register_name} par ${req.user.username} - Différence: ${difference}€`
+      `Caisse fermée: ${cashRegister.register_name} par ${req.user.username} - Différence: ${difference}€`,
     );
 
     // Logger l'action dans audit_logs
@@ -527,12 +527,12 @@ const exportCashRegistersCSV = async (req, res, next) => {
 
       const dateClosed = register.closed_at
         ? new Date(register.closed_at).toLocaleString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          })
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
         : '';
 
       const openedBy = register.openedByUser
@@ -598,13 +598,13 @@ const exportCashRegistersCSV = async (req, res, next) => {
     logger.info(
       `Export CSV clôtures généré par ${req.user.username}: ${cashRegisters.length} clôtures${
         limitReached ? ` (LIMITE ATTEINTE: ${totalCount} clôtures au total)` : ''
-      }`
+      }`,
     );
 
     // Log warning si limite atteinte
     if (limitReached) {
       logger.warn(
-        `Export CSV clôtures limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} clôtures au total). Utilisez des filtres de date pour exporter le reste.`
+        `Export CSV clôtures limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} clôtures au total). Utilisez des filtres de date pour exporter le reste.`,
       );
     }
   } catch (error) {

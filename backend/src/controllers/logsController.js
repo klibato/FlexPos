@@ -296,13 +296,13 @@ const exportLogsCSV = async (req, res, next) => {
     logger.info(
       `Export CSV logs généré par ${req.user.username}: ${logs.length} logs${
         limitReached ? ` (LIMITE ATTEINTE: ${totalCount} logs au total)` : ''
-      }`
+      }`,
     );
 
     // Log warning si limite atteinte
     if (limitReached) {
       logger.warn(
-        `Export CSV logs limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} logs au total). Utilisez des filtres de date pour exporter le reste.`
+        `Export CSV logs limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} logs au total). Utilisez des filtres de date pour exporter le reste.`,
       );
     }
   } catch (error) {

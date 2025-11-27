@@ -129,7 +129,7 @@ Subscription.prototype.isActive = function () {
  * @returns {boolean}
  */
 Subscription.prototype.isTrialing = function () {
-  if (!this.trial_ends_at) return false;
+  if (!this.trial_ends_at) {return false;}
   return new Date() < new Date(this.trial_ends_at) && this.status === 'trialing';
 };
 

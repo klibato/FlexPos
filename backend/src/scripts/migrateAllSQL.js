@@ -52,7 +52,7 @@ async function markMigrationAsExecuted(migrationName) {
       VALUES (:migrationName)
       ON CONFLICT (migration_name) DO NOTHING;
     `, {
-      replacements: { migrationName }
+      replacements: { migrationName },
     });
   } catch (error) {
     logger.error(`Erreur lors de l'enregistrement de la migration ${migrationName}:`, error);
@@ -146,7 +146,7 @@ async function migrateAllSQL() {
 
     // Filtrer les migrations non exécutées
     const pendingMigrations = migrationFiles.filter(
-      file => !executedMigrations.includes(file)
+      file => !executedMigrations.includes(file),
     );
 
     if (pendingMigrations.length === 0) {

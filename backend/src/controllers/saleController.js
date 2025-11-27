@@ -108,9 +108,9 @@ const createSale = async (req, res, next) => {
         const amount = parseFloat(p.amount || 0);
         totalPaid += amount;
 
-        if (p.method === 'cash') cashAmount += amount;
-        else if (p.method === 'card') cardAmount += amount;
-        else if (p.method === 'meal_voucher') mealVoucherAmount += amount;
+        if (p.method === 'cash') {cashAmount += amount;}
+        else if (p.method === 'card') {cardAmount += amount;}
+        else if (p.method === 'meal_voucher') {mealVoucherAmount += amount;}
       });
 
       // Vérifier que le montant total payé est suffisant
@@ -197,7 +197,7 @@ const createSale = async (req, res, next) => {
         discount_amount: discountAmount,
         status: 'completed',
       },
-      { transaction }
+      { transaction },
     );
 
     // Créer les lignes de vente
@@ -292,7 +292,7 @@ const createSale = async (req, res, next) => {
         total_cash_collected: parseFloat(activeCashRegister.total_cash_collected || 0) + cashCollected,
         ticket_count: parseInt(activeCashRegister.ticket_count || 0) + 1,
       },
-      { transaction }
+      { transaction },
     );
 
     // ============================================
@@ -307,7 +307,7 @@ const createSale = async (req, res, next) => {
 
       logger.info(
         `✅ NF525: Hash #${hashEntry.sequence_number} créé pour vente ${sale.ticket_number} ` +
-          `(hash: ${hashEntry.current_hash.substring(0, 16)}...)`
+          `(hash: ${hashEntry.current_hash.substring(0, 16)}...)`,
       );
     } catch (nf525Error) {
       // Si échec NF525, rollback TOUTE la transaction (critère bloquant)
@@ -348,7 +348,7 @@ const createSale = async (req, res, next) => {
     });
 
     logger.info(
-      `Vente créée: ${completeSale.ticket_number} - ${totalTTC}€ (${payment_method}) par ${req.user.username}`
+      `Vente créée: ${completeSale.ticket_number} - ${totalTTC}€ (${payment_method}) par ${req.user.username}`,
     );
 
     // Logger l'action dans audit_logs
@@ -591,7 +591,7 @@ const generateTicketPDFEndpoint = async (req, res, next) => {
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="ticket-${sale.ticket_number}.pdf"`
+      `attachment; filename="ticket-${sale.ticket_number}.pdf"`,
     );
 
     // Streamer le PDF vers la réponse
@@ -759,13 +759,13 @@ const exportSalesCSV = async (req, res, next) => {
     logger.info(
       `Export CSV ventes généré par ${req.user.username}: ${sales.length} ventes${
         limitReached ? ` (LIMITE ATTEINTE: ${totalCount} ventes au total)` : ''
-      }`
+      }`,
     );
 
     // Log warning si limite atteinte
     if (limitReached) {
       logger.warn(
-        `Export CSV ventes limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} ventes au total). Utilisez des filtres de date pour exporter le reste.`
+        `Export CSV ventes limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} ventes au total). Utilisez des filtres de date pour exporter le reste.`,
       );
     }
   } catch (error) {

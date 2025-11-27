@@ -126,7 +126,7 @@ const Sale = sequelize.define('sales', {
       // Générer le ticket_number si non fourni
       if (!sale.ticket_number || sale.ticket_number === '') {
         const [result] = await sequelize.query(
-          `SELECT TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || '-' || LPAD(nextval('ticket_number_seq')::TEXT, 4, '0') AS ticket_number`
+          `SELECT TO_CHAR(CURRENT_DATE, 'YYYYMMDD') || '-' || LPAD(nextval('ticket_number_seq')::TEXT, 4, '0') AS ticket_number`,
         );
         sale.ticket_number = result[0].ticket_number;
       }
@@ -136,7 +136,7 @@ const Sale = sequelize.define('sales', {
       // Conforme au décret n°2016-1551 (article 286 du CGI)
       throw new Error(
         'NF525 Compliance: Sales are immutable. UPDATE operations are not allowed. ' +
-        'Fiscal data cannot be modified after creation (Décret n°2016-1551).'
+        'Fiscal data cannot be modified after creation (Décret n°2016-1551).',
       );
     },
   },

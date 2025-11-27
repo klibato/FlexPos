@@ -34,7 +34,7 @@ router.post(
   authenticateToken,
   requirePermission(PERMISSIONS.PRODUCTS_UPDATE),
   uploadSingleImage,
-  productController.uploadProductImage
+  productController.uploadProductImage,
 );
 
 // DELETE /api/products/:id/image - Supprimer l'image d'un produit
@@ -42,7 +42,7 @@ router.delete(
   '/:id/image',
   authenticateToken,
   requirePermission(PERMISSIONS.PRODUCTS_DELETE),
-  productController.deleteProductImage
+  productController.deleteProductImage,
 );
 
 // DELETE /api/products/:id - Supprimer un produit

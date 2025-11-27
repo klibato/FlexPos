@@ -50,7 +50,7 @@ const generateDailyReport = async (req, res, next) => {
     }
 
     logger.info(
-      `Génération rapport Z pour org ${organizationId} date ${report_date} par ${req.user.username}`
+      `Génération rapport Z pour org ${organizationId} date ${report_date} par ${req.user.username}`,
     );
 
     // Générer le rapport
@@ -66,7 +66,7 @@ const generateDailyReport = async (req, res, next) => {
     });
 
     logger.info(
-      `✅ Rapport Z généré: ID ${report.id}, ${report.total_sales_count} ventes, ${report.total_amount_ttc}€`
+      `✅ Rapport Z généré: ID ${report.id}, ${report.total_sales_count} ventes, ${report.total_amount_ttc}€`,
     );
 
     res.status(201).json({
@@ -237,8 +237,8 @@ const exportDailyReportsCSV = async (req, res, next) => {
     const organizationId = req.organizationId;
 
     const options = {};
-    if (start_date) options.startDate = start_date;
-    if (end_date) options.endDate = end_date;
+    if (start_date) {options.startDate = start_date;}
+    if (end_date) {options.endDate = end_date;}
 
     const reports = await DailyReport.getReports(organizationId, options);
 
