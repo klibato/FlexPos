@@ -1,5 +1,5 @@
 const cron = require('node-cron');
-const { Organization, Subscription, Invoice } = require('../models');
+const { Organization, Subscription, Invoice, AuditLog } = require('../models');
 const { Op } = require('sequelize');
 const logger = require('../utils/logger');
 const { sendTrialEndingEmail } = require('./emailService');
@@ -85,12 +85,51 @@ const generateMonthlyInvoices = cron.schedule('0 0 1 * *', async () => {
 });
 
 /**
+ * RGPD: Anonymiser les logs d'audit de plus de 3 mois
+ * Exécuté tous les jours à 2h du matin
+ */
+const anonymizeOldAuditLogs = cron.schedule('0 2 * * *', async () => {
+  try {
+    logger.info('Cron job: Anonymizing audit logs older than 3 months...');
+
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+    const result = await AuditLog.update(
+      {
+        ip_address: '0.0.0.0',
+        user_agent: 'ANONYMIZED',
+        old_values: null,
+        new_values: null,
+      },
+      {
+        where: {
+          created_at: {
+            [Op.lt]: threeMonthsAgo,
+          },
+          ip_address: {
+            [Op.ne]: '0.0.0.0', // Ne pas anonymiser ce qui l'est déjà
+          },
+        },
+      }
+    );
+
+    logger.info(`Cron job: ${result[0]} audit logs anonymized (older than 3 months)`);
+  } catch (error) {
+    logger.error('Cron job error (anonymizeOldAuditLogs):', error);
+  }
+}, {
+  scheduled: false,
+});
+
+/**
  * Démarrer tous les cron jobs
  */
 const startCronJobs = () => {
   logger.info('Starting cron jobs...');
   checkTrialsExpiring.start();
   generateMonthlyInvoices.start();
+  anonymizeOldAuditLogs.start();
   logger.info('Cron jobs started successfully');
 };
 
@@ -101,6 +140,7 @@ const stopCronJobs = () => {
   logger.info('Stopping cron jobs...');
   checkTrialsExpiring.stop();
   generateMonthlyInvoices.stop();
+  anonymizeOldAuditLogs.stop();
   logger.info('Cron jobs stopped');
 };
 
