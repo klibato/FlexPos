@@ -217,36 +217,68 @@ const createSale = async (req, res, next) => {
 
     await SaleItem.bulkCreate(saleItemsData, { transaction });
 
-    // Décrémenter les stocks des produits vendus
+    // Décrémenter les stocks des produits vendus (OPTIMISATION: Batch query)
+    // Charger tous les produits en une seule requête pour éviter N+1
+    const productIds = items.map(item => item.product_id);
+    const products = await Product.findAll({
+      where: {
+        id: productIds,
+        organization_id: req.organizationId, // MULTI-TENANT
+      },
+      transaction,
+    });
+
+    // Créer Map pour accès O(1)
+    const productMap = new Map(products.map(p => [p.id, p]));
+
+    // Vérifier stock et collecter updates
+    const stockUpdates = [];
     for (const item of items) {
-      try {
-        const product = await Product.findOne({
-          where: {
-            id: item.product_id,
-            organization_id: req.organizationId, // MULTI-TENANT: Vérifier l'organisation
+      const product = productMap.get(item.product_id);
+
+      if (!product) {
+        await transaction.rollback();
+        return res.status(422).json({
+          success: false,
+          error: {
+            code: 'PRODUCT_NOT_FOUND',
+            message: `Produit ID ${item.product_id} introuvable`,
           },
-          transaction,
         });
+      }
 
-        if (!product) {
-          logger.warn(`Produit non trouvé pour décrémentation stock: ID ${item.product_id}`);
-          continue;
-        }
-
-        // Décrémenter le stock (cette méthode gère les menus automatiquement)
-        await product.decrementStock(item.quantity);
-
-        logger.info(`Stock décrémenté: ${product.name} - Quantité: ${item.quantity}, Nouveau stock: ${product.quantity}`);
-      } catch (error) {
-        // Si erreur de stock insuffisant, on rollback toute la transaction
+      // Vérifier stock disponible (skip pour menus)
+      if (!product.is_menu && product.quantity < item.quantity) {
         await transaction.rollback();
         return res.status(422).json({
           success: false,
           error: {
             code: 'INSUFFICIENT_STOCK',
-            message: error.message || `Stock insuffisant pour un ou plusieurs produits`,
+            message: `Stock insuffisant pour ${product.name}. Disponible: ${product.quantity}, Demandé: ${item.quantity}`,
           },
         });
+      }
+
+      // Collecter updates (skip menus)
+      if (!product.is_menu) {
+        stockUpdates.push({
+          id: product.id,
+          quantity: item.quantity,
+          name: product.name,
+        });
+      }
+    }
+
+    // Appliquer décréments en batch (1 seule requête UPDATE)
+    if (stockUpdates.length > 0) {
+      for (const update of stockUpdates) {
+        await Product.decrement('quantity', {
+          by: update.quantity,
+          where: { id: update.id },
+          transaction,
+        });
+
+        logger.info(`Stock décrémenté: ${update.name} - Quantité: ${update.quantity}`);
       }
     }
 
