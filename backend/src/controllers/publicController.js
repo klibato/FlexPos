@@ -171,12 +171,12 @@ const signup = async (req, res, next) => {
           username: adminUser.username,
           email: adminUser.email,
           role: adminUser.role,
-          default_pin: '1234', // Informer l'utilisateur du PIN par défaut
         },
         login_url: `https://app.flexpos.app`,
         trial_days: 14,
         next_steps: [
-          'Connectez-vous avec votre username et PIN (1234)',
+          'Connectez-vous avec votre username et votre PIN',
+          'Changez votre PIN par défaut dans Paramètres > Profil',
           'Configurez vos produits dans Paramètres > Produits',
           'Créez vos utilisateurs caissiers',
           'Ouvrez votre caisse et commencez à vendre !',

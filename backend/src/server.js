@@ -92,9 +92,22 @@ if (config.NODE_ENV === 'development') {
 // ============================================
 const path = require('path');
 
-// CORS pour les images (permettre à app.flexpos.app et admin.flexpos.app de charger les images)
+// CORS pour les images (permettre uniquement aux domaines FlexPOS de charger les images)
 app.use('/uploads', (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  const allowedOrigins = config.NODE_ENV === 'production'
+    ? [
+        'https://app.flexpos.app',
+        'https://admin.flexpos.app',
+        'https://www.flexpos.app',
+        'https://flexpos.app'
+      ]
+    : ['http://localhost:5173', 'http://localhost:3000'];
+
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+
   res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   res.header('Cross-Origin-Resource-Policy', 'cross-origin');
