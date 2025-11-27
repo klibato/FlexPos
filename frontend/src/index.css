@@ -80,11 +80,11 @@ body {
     min-height: 64px;
   }
 
-  /* Cartes produits tactiles */
+  /* Cartes produits tactiles - responsive amélioré */
   .product-card {
-    @apply bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-4 cursor-pointer transition-all active:scale-95 hover:border-primary-400 dark:hover:border-primary-500;
-    min-width: 120px;
-    min-height: 120px;
+    @apply bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-3 sm:p-4 cursor-pointer transition-all active:scale-95 hover:border-primary-400 dark:hover:border-primary-500;
+    min-width: 0; /* Permet au grid de contrôler la taille */
+    min-height: 100px;
     touch-action: manipulation;
   }
 

@@ -72,7 +72,7 @@ app.flexpos.app {
         X-Frame-Options "DENY"
         X-XSS-Protection "1; mode=block"
         Referrer-Policy "no-referrer"
-        Content-Security-Policy "default-src 'self'; connect-src 'self' https://api.flexpos.app; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' data: https://fonts.gstatic.com;"
+        Content-Security-Policy "default-src 'self'; connect-src 'self' https://api.flexpos.app; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://api.flexpos.app; font-src 'self' data: https://fonts.gstatic.com;"
         -Server
     }
 
@@ -102,7 +102,7 @@ admin.flexpos.app {
         X-Frame-Options "DENY"
         X-XSS-Protection "1; mode=block"
         Referrer-Policy "no-referrer"
-        Content-Security-Policy "default-src 'self'; connect-src 'self' https://api.flexpos.app; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+        Content-Security-Policy "default-src 'self'; connect-src 'self' https://api.flexpos.app; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://api.flexpos.app;"
         -Server
     }
 
@@ -123,6 +123,7 @@ api.flexpos.app {
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
         header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
 
         # Timeout plus long pour les requêtes API
         transport http {
@@ -131,7 +132,16 @@ api.flexpos.app {
         }
     }
 
-    # CORS géré par Express, pas besoin ici
+    # CORS pour les images uploadées (permettre app.flexpos.app et admin.flexpos.app)
+    @uploads {
+        path /uploads/*
+    }
+    header @uploads {
+        Access-Control-Allow-Origin "*"
+        Access-Control-Allow-Methods "GET, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type"
+        Cross-Origin-Resource-Policy "cross-origin"
+    }
 
     # Headers de sécurité
     header {

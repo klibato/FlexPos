@@ -88,6 +88,28 @@ if (config.NODE_ENV === 'development') {
 }
 
 // ============================================
+// SERVIR LES FICHIERS STATIQUES (Images produits)
+// ============================================
+const path = require('path');
+
+// CORS pour les images (permettre à app.flexpos.app et admin.flexpos.app de charger les images)
+app.use('/uploads', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+
+  // Gérer les requêtes preflight OPTIONS
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// ============================================
 // ROUTES
 // ============================================
 
@@ -115,6 +137,7 @@ app.use('/api/settings', apiLimiter, require('./routes/settings'));
 app.use('/api/printer', apiLimiter, require('./routes/printer'));
 app.use('/api/logs', apiLimiter, require('./routes/logs'));
 app.use('/api/nf525', apiLimiter, require('./routes/nf525')); // NF525: Conformité fiscale française
+app.use('/api/daily-reports', apiLimiter, require('./routes/dailyReports')); // NF525: Rapports Z (clôture journalière)
 
 // Routes API (Admin - Super-Admin Dashboard)
 app.use('/api/admin', apiLimiter, require('./routes/admin'));

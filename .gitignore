@@ -39,8 +39,10 @@ coverage/
 *.sql.backup
 backup*.sql
 
-# Uploads
-uploads/
+# Uploads (ignorer le contenu, garder la structure)
+uploads/**/*
+!uploads/**/.gitkeep
+!uploads/.gitkeep
 images/product_*
 
 # Temporary files

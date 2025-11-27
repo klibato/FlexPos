@@ -255,12 +255,20 @@ const updateUser = async (req, res, next) => {
 
 /**
  * Supprimer un utilisateur (soft delete via is_active)
+ * MULTI-TENANT: Vérifie que l'utilisateur appartient à l'organisation
  */
 const deleteUser = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const organizationId = req.organizationId;
 
-    const user = await User.findByPk(id);
+    // MULTI-TENANT: Vérifier que l'utilisateur appartient à la même organisation
+    const user = await User.findOne({
+      where: {
+        id,
+        organization_id: organizationId,
+      },
+    });
 
     if (!user) {
       return res.status(404).json({

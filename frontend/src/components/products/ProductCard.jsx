@@ -53,26 +53,35 @@ const ProductCard = React.memo(({ product, onClick }) => {
         </div>
       )}
 
-      {/* Image ou icône */}
-      <div className="flex items-center justify-center h-20 mb-3">
+      {/* Image ou icône - responsive */}
+      <div className="flex items-center justify-center h-12 sm:h-16 md:h-20 mb-2 sm:mb-3">
         {image_url ? (
           <img
             src={image_url}
             alt={name}
             className="w-full h-full object-cover rounded-lg"
+            onError={(e) => {
+              // Si l'image ne charge pas, afficher l'icône de catégorie
+              e.target.style.display = 'none';
+              e.target.nextElementSibling.style.display = 'inline';
+            }}
           />
-        ) : (
-          <span className="text-5xl">{getCategoryIcon()}</span>
-        )}
+        ) : null}
+        <span
+          className="text-3xl sm:text-4xl md:text-5xl"
+          style={{ display: image_url ? 'none' : 'inline' }}
+        >
+          {getCategoryIcon()}
+        </span>
       </div>
 
-      {/* Nom du produit */}
-      <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-center mb-2 line-clamp-2 min-h-[3rem]">
+      {/* Nom du produit - responsive */}
+      <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-center mb-1 sm:mb-2 line-clamp-2 text-xs sm:text-sm md:text-base min-h-[2rem] sm:min-h-[2.5rem] md:min-h-[3rem]">
         {name}
       </h3>
 
-      {/* Prix */}
-      <p className="text-2xl font-bold text-primary-600 dark:text-primary-400 text-center">
+      {/* Prix - responsive */}
+      <p className="text-lg sm:text-xl md:text-2xl font-bold text-primary-600 dark:text-primary-400 text-center">
         {formatPrice(price_ttc)}
       </p>
     </div>

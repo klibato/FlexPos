@@ -178,59 +178,59 @@ const POSPage = () => {
 
   return (
     <div className="h-screen bg-gray-100 dark:bg-gray-900 flex flex-col overflow-hidden">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm px-6 py-4 flex justify-between items-center flex-shrink-0">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">🍔 {t('pos.title')}</h1>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+      {/* Header - responsive */}
+      <header className="bg-white dark:bg-gray-800 shadow-sm px-3 sm:px-6 py-2 sm:py-4 flex justify-between items-center flex-shrink-0">
+        <div className="min-w-0 flex-shrink">
+          <h1 className="text-lg sm:text-2xl font-bold text-gray-800 dark:text-gray-100 truncate">🍔 {t('pos.title')}</h1>
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 truncate">
             {t('pos.cashier')} : {user.first_name} {user.last_name}
             {user.role === 'admin' && (
-              <span className="ml-2 text-xs bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 px-2 py-1 rounded">
+              <span className="ml-2 text-xs bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded">
                 {t('auth.admin')}
               </span>
             )}
           </p>
-          {/* Statut de la caisse */}
+          {/* Statut de la caisse - caché sur très petits écrans */}
           {hasActiveCashRegister() && activeCashRegister && (
-            <p className="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1">
+            <p className="hidden sm:flex text-xs text-green-600 dark:text-green-400 mt-1 items-center gap-1">
               <DollarSign size={14} />
               {t('pos.cashRegister')}: {activeCashRegister.register_name} - Fond: {formatPrice(activeCashRegister.opening_balance)}
             </p>
           )}
         </div>
-        <div className="flex gap-2">
-          {/* Bouton gestion caisse - toujours visible */}
+        <div className="flex gap-1 sm:gap-2 flex-shrink-0">
+          {/* Bouton gestion caisse - icône seulement sur mobile */}
           {hasActiveCashRegister() ? (
             <Button
               variant="danger"
               size="md"
               onClick={() => setIsCloseCashRegisterModalOpen(true)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 !px-2 sm:!px-4"
             >
               <CreditCard size={20} />
-              Fermer caisse
+              <span className="hidden md:inline">Fermer caisse</span>
             </Button>
           ) : (
             <Button
               variant="success"
               size="md"
               onClick={() => setIsOpenCashRegisterModalOpen(true)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 !px-2 sm:!px-4"
             >
               <CreditCard size={20} />
-              Ouvrir caisse
+              <span className="hidden md:inline">Ouvrir caisse</span>
             </Button>
           )}
 
-          {/* Bouton changer caissier - toujours visible */}
+          {/* Bouton changer caissier - icône seulement sur mobile */}
           <Button
             variant="primary"
             size="md"
             onClick={() => setIsSwitchCashierModalOpen(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 !px-2 sm:!px-4"
           >
             <UserCircle size={20} />
-            Changer caissier
+            <span className="hidden md:inline">Changer caissier</span>
           </Button>
 
           {/* Bouton menu burger */}
@@ -238,10 +238,10 @@ const POSPage = () => {
             variant="secondary"
             size="md"
             onClick={() => setIsMenuOpen(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 !px-2 sm:!px-4"
           >
             <Menu size={20} />
-            Menu
+            <span className="hidden md:inline">Menu</span>
           </Button>
         </div>
       </header>
@@ -467,10 +467,10 @@ const POSPage = () => {
         </div>
       )}
 
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* Main Content - responsive layout */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Zone produits */}
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
             {/* Avertissement si pas de caisse ouverte */}
             {!hasActiveCashRegister() && !cashRegisterLoading && (
@@ -512,9 +512,9 @@ const POSPage = () => {
           </div>
         </div>
 
-        {/* Zone panier */}
-        <div className="w-96 bg-white dark:bg-gray-800 shadow-lg p-6 flex flex-col overflow-hidden border-l dark:border-gray-700">
-          <h2 className="text-xl font-semibold mb-4 flex-shrink-0 text-gray-800 dark:text-gray-100">{t('pos.cart')}</h2>
+        {/* Zone panier - responsive */}
+        <div className="w-full lg:w-96 bg-white dark:bg-gray-800 shadow-lg p-3 sm:p-4 lg:p-6 flex flex-col overflow-hidden border-t lg:border-t-0 lg:border-l dark:border-gray-700 max-h-[40vh] lg:max-h-none">
+          <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 flex-shrink-0 text-gray-800 dark:text-gray-100">{t('pos.cart')}</h2>
 
           {/* Liste des items */}
           <div className="flex-1 overflow-y-auto mb-4">
