@@ -1,7 +1,7 @@
 const { AuditLog, User, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const logger = require('../utils/logger');
-const { sendCsvResponse, formatDateForCsv } = require('../utils/csvHelper');
+const { sendCsvResponse, formatDate } = require('../utils/csvHelper');
 
 /**
  * Récupérer tous les logs d'audit avec filtres
@@ -250,7 +250,7 @@ const exportLogsCSV = async (req, res, next) => {
           : 'Système';
 
         return [
-          formatDateForCsv(log.created_at),
+          formatDate(log.created_at),
           username,
           log.user?.role || 'N/A',
           log.action,

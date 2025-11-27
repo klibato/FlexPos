@@ -1,6 +1,7 @@
 const { DailyReport } = require('../models');
 const logger = require('../utils/logger');
 const { logAction } = require('../middlewares/audit');
+const { formatDate } = require('../utils/helpers');
 
 /**
  * Daily Report Controller - Rapports Z (Clôture journalière NF525)
@@ -268,7 +269,7 @@ const exportDailyReportsCSV = async (req, res, next) => {
     // Lignes de données
     reports.forEach((report) => {
       const date = new Date(report.report_date).toLocaleDateString('fr-FR');
-      const createdAt = new Date(report.created_at).toLocaleString('fr-FR');
+      const createdAt = formatDate(report.created_at);
 
       csvRows.push([
         date,

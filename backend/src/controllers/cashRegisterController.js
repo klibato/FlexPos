@@ -2,6 +2,7 @@ const { CashRegister, Sale, SaleItem, User, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const logger = require('../utils/logger');
 const { logAction } = require('../middlewares/audit');
+const { formatDate } = require('../utils/helpers');
 
 /**
  * Récupérer toutes les caisses
@@ -517,23 +518,8 @@ const exportCashRegistersCSV = async (req, res, next) => {
 
     // Lignes de données
     cashRegisters.forEach((register) => {
-      const dateOpened = new Date(register.opened_at).toLocaleString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-
-      const dateClosed = register.closed_at
-        ? new Date(register.closed_at).toLocaleString('fr-FR', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        })
-        : '';
+      const dateOpened = formatDate(register.opened_at);
+      const dateClosed = register.closed_at ? formatDate(register.closed_at) : '';
 
       const openedBy = register.openedByUser
         ? `${register.openedByUser.first_name || ''} ${register.openedByUser.last_name || ''}`.trim() ||

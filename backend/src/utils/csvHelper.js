@@ -4,6 +4,7 @@
  */
 
 const logger = require('./logger');
+const { formatDate } = require('./helpers');
 
 /**
  * Échappe une valeur pour CSV (gère les guillemets et virgules)
@@ -105,31 +106,6 @@ const sendCsvResponse = ({
 };
 
 /**
- * Formater une date pour CSV (format français)
- * @param {Date|string} date - Date à formater
- * @returns {string} - Date formatée "DD/MM/YYYY HH:MM"
- */
-const formatDateForCsv = (date) => {
-  if (!date) {
-    return '';
-  }
-
-  const d = date instanceof Date ? date : new Date(date);
-
-  if (isNaN(d.getTime())) {
-    return 'Date invalide';
-  }
-
-  return d.toLocaleString('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-/**
  * Formater un montant pour CSV (2 décimales)
  * @param {number|string} amount - Montant
  * @returns {string} - Montant formaté "12.50"
@@ -156,7 +132,7 @@ const formatBooleanForCsv = (value) => {
 module.exports = {
   escapeCsvValue,
   sendCsvResponse,
-  formatDateForCsv,
+  formatDate, // Ré-export du helper existant depuis helpers.js
   formatAmountForCsv,
   formatBooleanForCsv,
 };

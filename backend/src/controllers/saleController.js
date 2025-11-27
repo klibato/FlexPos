@@ -5,6 +5,7 @@ const printerService = require('../services/printerService');
 const NF525Service = require('../services/nf525Service');
 const logger = require('../utils/logger');
 const { logAction } = require('../middlewares/audit');
+const { formatDate } = require('../utils/helpers');
 
 /**
  * Créer une nouvelle vente
@@ -691,13 +692,7 @@ const exportSalesCSV = async (req, res, next) => {
 
     // Lignes de données
     sales.forEach((sale) => {
-      const date = new Date(sale.created_at).toLocaleString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+      const date = formatDate(sale.created_at);
 
       const vendeur = sale.user
         ? `${sale.user.first_name || ''} ${sale.user.last_name || ''}`.trim() || sale.user.username
