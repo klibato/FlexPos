@@ -5,7 +5,7 @@ const printerService = require('../services/printerService');
 const NF525Service = require('../services/nf525Service');
 const logger = require('../utils/logger');
 const { logAction } = require('../middlewares/audit');
-const { formatDate } = require('../utils/helpers');
+const { sendCsvResponse, formatAmountForCsv, formatDate } = require('../utils/csvHelper');
 
 /**
  * Créer une nouvelle vente
@@ -673,98 +673,67 @@ const exportSalesCSV = async (req, res, next) => {
 
     // Vérifier si limite atteinte
     const totalCount = await Sale.count({ where });
-    const limitReached = totalCount > MAX_EXPORT_LIMIT;
 
-    // Formater en CSV
-    const csvRows = [];
+    // Labels pour les valeurs
+    const paymentMethodLabels = {
+      cash: 'Espèces',
+      card: 'Carte bancaire',
+      meal_voucher: 'Ticket restaurant',
+      mixed: 'Mixte',
+    };
 
-    // Header
-    csvRows.push([
-      'Date',
-      'Ticket',
-      'Vendeur',
-      'Paiement',
-      'Montant TTC (€)',
-      'Produits',
-      'Quantité totale',
-      'Statut',
-    ].join(';'));
+    const statusLabels = {
+      completed: 'Complétée',
+      cancelled: 'Annulée',
+      refunded: 'Remboursée',
+    };
 
-    // Lignes de données
-    sales.forEach((sale) => {
-      const date = formatDate(sale.created_at);
+    // Utiliser le helper CSV réutilisable
+    sendCsvResponse({
+      res,
+      data: sales,
+      columns: [
+        'Date',
+        'Ticket',
+        'Vendeur',
+        'Paiement',
+        'Montant TTC (€)',
+        'Produits',
+        'Quantité totale',
+        'Statut',
+      ],
+      rowMapper: (sale) => {
+        const vendeur = sale.user
+          ? `${sale.user.first_name || ''} ${sale.user.last_name || ''}`.trim() || sale.user.username
+          : 'N/A';
 
-      const vendeur = sale.user
-        ? `${sale.user.first_name || ''} ${sale.user.last_name || ''}`.trim() || sale.user.username
-        : 'N/A';
+        const products = sale.items
+          ? sale.items.map((item) => `${item.product_name} (x${item.quantity})`).join(', ')
+          : '';
 
-      const paymentMethodLabels = {
-        cash: 'Espèces',
-        card: 'Carte bancaire',
-        meal_voucher: 'Ticket restaurant',
-        mixed: 'Mixte',
-      };
-      const paymentMethod = paymentMethodLabels[sale.payment_method] || sale.payment_method;
+        const totalQuantity = sale.items
+          ? sale.items.reduce((sum, item) => sum + parseInt(item.quantity), 0)
+          : 0;
 
-      const totalTTC = parseFloat(sale.total_ttc).toFixed(2);
-
-      // Liste des produits
-      const products = sale.items
-        ? sale.items.map((item) => `${item.product_name} (x${item.quantity})`).join(', ')
-        : '';
-
-      // Quantité totale d'articles
-      const totalQuantity = sale.items
-        ? sale.items.reduce((sum, item) => sum + parseInt(item.quantity), 0)
-        : 0;
-
-      const statusLabels = {
-        completed: 'Complétée',
-        cancelled: 'Annulée',
-        refunded: 'Remboursée',
-      };
-      const status = statusLabels[sale.status] || sale.status;
-
-      csvRows.push([
-        date,
-        sale.ticket_number,
-        vendeur,
-        paymentMethod,
-        totalTTC,
-        `"${products}"`, // Encadrer avec guillemets pour gérer les virgules
-        totalQuantity,
-        status,
-      ].join(';'));
+        return [
+          formatDate(sale.created_at),
+          sale.ticket_number,
+          vendeur,
+          paymentMethodLabels[sale.payment_method] || sale.payment_method,
+          formatAmountForCsv(sale.total_ttc),
+          products,
+          totalQuantity,
+          statusLabels[sale.status] || sale.status,
+        ];
+      },
+      filename: 'ventes',
+      logger,
+      user: req.user,
+      totalCount,
+      maxLimit: MAX_EXPORT_LIMIT,
     });
-
-    const csvContent = csvRows.join('\n');
-
-    // Générer le nom de fichier avec la date du jour
-    const today = new Date().toISOString().split('T')[0];
-    const filename = `ventes_${today}.csv`;
-
-    // Headers pour le téléchargement CSV
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-
-    // Ajouter le BOM UTF-8 pour Excel
-    res.write('\ufeff');
-    res.end(csvContent);
-
-    logger.info(
-      `Export CSV ventes généré par ${req.user.username}: ${sales.length} ventes${
-        limitReached ? ` (LIMITE ATTEINTE: ${totalCount} ventes au total)` : ''
-      }`,
-    );
-
-    // Log warning si limite atteinte
-    if (limitReached) {
-      logger.warn(
-        `Export CSV ventes limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} ventes au total). Utilisez des filtres de date pour exporter le reste.`,
-      );
-    }
   } catch (error) {
-    logger.error('Erreur lors de l\'export CSV:', error);
+    logger.error('Erreur lors de l\'export CSV ventes:', error);
     next(error);
   }
 };

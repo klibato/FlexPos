@@ -64,6 +64,12 @@ const User = sequelize.define('users', {
     },
     comment: 'Organisation à laquelle appartient l\'utilisateur',
   },
+  deletion_requested_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+    comment: 'Date de demande de suppression du compte (RGPD Article 17). Les comptes sont supprimés 30 jours après cette date.',
+  },
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,

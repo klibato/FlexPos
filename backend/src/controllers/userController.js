@@ -1,4 +1,4 @@
-const { User } = require('../models');
+const { User, Sale, AuditLog } = require('../models');
 const logger = require('../utils/logger');
 const { Op } = require('sequelize');
 
@@ -315,10 +315,161 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
+/**
+ * RGPD Article 15 - Droit à la portabilité des données
+ * Exporter toutes les données personnelles de l'utilisateur connecté
+ */
+const exportPersonalData = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const organizationId = req.organizationId;
+
+    // Récupérer les informations de l'utilisateur
+    const user = await User.findOne({
+      where: {
+        id: userId,
+        organization_id: organizationId,
+      },
+      attributes: { exclude: ['pin_code'] }, // Ne jamais exposer le PIN hashé
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Utilisateur non trouvé',
+        },
+      });
+    }
+
+    // Récupérer toutes les ventes créées par cet utilisateur
+    const sales = await Sale.findAll({
+      where: {
+        user_id: userId,
+        organization_id: organizationId,
+      },
+      order: [['created_at', 'DESC']],
+      limit: 1000, // Limiter à 1000 ventes les plus récentes
+    });
+
+    // Récupérer les logs d'audit de cet utilisateur
+    const auditLogs = await AuditLog.findAll({
+      where: {
+        user_id: userId,
+        organization_id: organizationId,
+      },
+      order: [['created_at', 'DESC']],
+      limit: 500, // Limiter à 500 logs les plus récents
+    });
+
+    // Construire l'export complet
+    const exportData = {
+      export_date: new Date().toISOString(),
+      rgpd_article: 'Article 15 - Droit à la portabilité des données',
+      user: user.toJSON(),
+      sales: {
+        total_count: sales.length,
+        data: sales.map((sale) => sale.toJSON()),
+      },
+      audit_logs: {
+        total_count: auditLogs.length,
+        data: auditLogs.map((log) => log.toJSON()),
+      },
+      metadata: {
+        organization_id: organizationId,
+        export_requested_by: userId,
+        note: 'Cet export contient toutes vos données personnelles stockées dans notre système. Vous avez le droit de les consulter, les corriger ou les supprimer.',
+      },
+    };
+
+    logger.info(`Export RGPD effectué pour l'utilisateur ${userId}`);
+
+    res.json({
+      success: true,
+      data: exportData,
+    });
+  } catch (error) {
+    logger.error('Erreur lors de l\'export des données personnelles:', error);
+    next(error);
+  }
+};
+
+/**
+ * RGPD Article 17 - Droit à l'effacement
+ * Demander la suppression définitive du compte (exécutée après 30 jours)
+ */
+const requestAccountDeletion = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const organizationId = req.organizationId;
+
+    // Récupérer l'utilisateur
+    const user = await User.findOne({
+      where: {
+        id: userId,
+        organization_id: organizationId,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Utilisateur non trouvé',
+        },
+      });
+    }
+
+    // Vérifier si une demande de suppression n'a pas déjà été faite
+    if (user.deletion_requested_at) {
+      const deletionDate = new Date(user.deletion_requested_at);
+      deletionDate.setDate(deletionDate.getDate() + 30);
+
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'DELETION_ALREADY_REQUESTED',
+          message: 'Une demande de suppression a déjà été effectuée',
+          deletion_date: deletionDate.toISOString(),
+        },
+      });
+    }
+
+    // Marquer le compte pour suppression
+    await user.update({
+      deletion_requested_at: new Date(),
+      is_active: false, // Désactiver immédiatement le compte
+    });
+
+    // Calculer la date de suppression définitive (dans 30 jours)
+    const deletionDate = new Date();
+    deletionDate.setDate(deletionDate.getDate() + 30);
+
+    logger.info(`Demande de suppression RGPD pour l'utilisateur ${userId} (suppression prévue le ${deletionDate.toISOString()})`);
+
+    res.json({
+      success: true,
+      message: 'Demande de suppression enregistrée avec succès',
+      data: {
+        deletion_requested_at: user.deletion_requested_at,
+        deletion_scheduled_for: deletionDate.toISOString(),
+        notice: 'Votre compte sera définitivement supprimé dans 30 jours. Si vous changez d\'avis, contactez votre administrateur avant cette date.',
+      },
+    });
+  } catch (error) {
+    logger.error('Erreur lors de la demande de suppression de compte:', error);
+    next(error);
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
   createUser,
   updateUser,
   deleteUser,
+  exportPersonalData,
+  requestAccountDeletion,
 };

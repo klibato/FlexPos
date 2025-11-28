@@ -2,7 +2,7 @@ const { CashRegister, Sale, SaleItem, User, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const logger = require('../utils/logger');
 const { logAction } = require('../middlewares/audit');
-const { formatDate } = require('../utils/helpers');
+const { sendCsvResponse, formatAmountForCsv, formatDate } = require('../utils/csvHelper');
 
 /**
  * Récupérer toutes les caisses
@@ -491,108 +491,71 @@ const exportCashRegistersCSV = async (req, res, next) => {
 
     // Vérifier si limite atteinte
     const totalCount = await CashRegister.count({ where });
-    const limitReached = totalCount > MAX_EXPORT_LIMIT;
 
-    // Formater en CSV
-    const csvRows = [];
+    // Labels pour les statuts
+    const statusLabels = {
+      open: 'Ouverte',
+      closed: 'Fermée',
+    };
 
-    // Header
-    csvRows.push([
-      'ID',
-      'Date ouverture',
-      'Date clôture',
-      'Ouvert par',
-      'Fermé par',
-      'Statut',
-      'Fond de caisse (€)',
-      'Total ventes (€)',
-      'Espèces (€)',
-      'Carte bancaire (€)',
-      'Tickets restaurant (€)',
-      'Espèces collectées (€)',
-      'Montant compté (€)',
-      'Différence (€)',
-      'Nb tickets',
-      'Notes',
-    ].join(';'));
+    // Utiliser le helper CSV réutilisable
+    sendCsvResponse({
+      res,
+      data: cashRegisters,
+      columns: [
+        'ID',
+        'Date ouverture',
+        'Date clôture',
+        'Ouvert par',
+        'Fermé par',
+        'Statut',
+        'Fond de caisse (€)',
+        'Total ventes (€)',
+        'Espèces (€)',
+        'Carte bancaire (€)',
+        'Tickets restaurant (€)',
+        'Espèces collectées (€)',
+        'Montant compté (€)',
+        'Différence (€)',
+        'Nb tickets',
+        'Notes',
+      ],
+      rowMapper: (register) => {
+        const openedBy = register.openedByUser
+          ? `${register.openedByUser.first_name || ''} ${register.openedByUser.last_name || ''}`.trim() ||
+            register.openedByUser.username
+          : 'N/A';
 
-    // Lignes de données
-    cashRegisters.forEach((register) => {
-      const dateOpened = formatDate(register.opened_at);
-      const dateClosed = register.closed_at ? formatDate(register.closed_at) : '';
+        const closedBy = register.closedByUser
+          ? `${register.closedByUser.first_name || ''} ${register.closedByUser.last_name || ''}`.trim() ||
+            register.closedByUser.username
+          : '';
 
-      const openedBy = register.openedByUser
-        ? `${register.openedByUser.first_name || ''} ${register.openedByUser.last_name || ''}`.trim() ||
-          register.openedByUser.username
-        : 'N/A';
-
-      const closedBy = register.closedByUser
-        ? `${register.closedByUser.first_name || ''} ${register.closedByUser.last_name || ''}`.trim() ||
-          register.closedByUser.username
-        : '';
-
-      const statusLabels = {
-        open: 'Ouverte',
-        closed: 'Fermée',
-      };
-      const status = statusLabels[register.status] || register.status;
-
-      const openingBalance = parseFloat(register.opening_balance || 0).toFixed(2);
-      const totalSales = parseFloat(register.total_sales || 0).toFixed(2);
-      const totalCash = parseFloat(register.total_cash || 0).toFixed(2);
-      const totalCard = parseFloat(register.total_card || 0).toFixed(2);
-      const totalMealVoucher = parseFloat(register.total_meal_voucher || 0).toFixed(2);
-      const totalCashCollected = parseFloat(register.total_cash_collected || 0).toFixed(2);
-      const closingBalance = parseFloat(register.closing_balance || 0).toFixed(2);
-      const difference = parseFloat(register.difference || 0).toFixed(2);
-      const ticketCount = register.ticket_count || 0;
-
-      csvRows.push([
-        register.id,
-        dateOpened,
-        dateClosed,
-        openedBy,
-        closedBy,
-        status,
-        openingBalance,
-        totalSales,
-        totalCash,
-        totalCard,
-        totalMealVoucher,
-        totalCashCollected,
-        closingBalance,
-        difference,
-        ticketCount,
-        `"${register.notes || ''}"`,
-      ].join(';'));
+        return [
+          register.id,
+          formatDate(register.opened_at),
+          register.closed_at ? formatDate(register.closed_at) : '',
+          openedBy,
+          closedBy,
+          statusLabels[register.status] || register.status,
+          formatAmountForCsv(register.opening_balance),
+          formatAmountForCsv(register.total_sales),
+          formatAmountForCsv(register.total_cash),
+          formatAmountForCsv(register.total_card),
+          formatAmountForCsv(register.total_meal_voucher),
+          formatAmountForCsv(register.total_cash_collected),
+          formatAmountForCsv(register.closing_balance),
+          formatAmountForCsv(register.difference),
+          register.ticket_count || 0,
+          register.notes || '',
+        ];
+      },
+      filename: 'clotures_caisse',
+      logger,
+      user: req.user,
+      totalCount,
+      maxLimit: MAX_EXPORT_LIMIT,
     });
-
-    const csvContent = csvRows.join('\n');
-
-    // Générer le nom de fichier avec la date du jour
-    const today = new Date().toISOString().split('T')[0];
-    const filename = `clotures_caisse_${today}.csv`;
-
-    // Headers pour le téléchargement CSV
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-
-    // Ajouter le BOM UTF-8 pour Excel
-    res.write('\ufeff');
-    res.end(csvContent);
-
-    logger.info(
-      `Export CSV clôtures généré par ${req.user.username}: ${cashRegisters.length} clôtures${
-        limitReached ? ` (LIMITE ATTEINTE: ${totalCount} clôtures au total)` : ''
-      }`,
-    );
-
-    // Log warning si limite atteinte
-    if (limitReached) {
-      logger.warn(
-        `Export CSV clôtures limité à ${MAX_EXPORT_LIMIT} lignes (${totalCount} clôtures au total). Utilisez des filtres de date pour exporter le reste.`,
-      );
-    }
   } catch (error) {
     logger.error('Erreur lors de l\'export CSV clôtures:', error);
     next(error);
