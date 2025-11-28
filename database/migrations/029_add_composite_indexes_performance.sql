@@ -65,6 +65,7 @@ COMMENT ON INDEX idx_products_org_category_active IS 'Index composite pour affic
 DO $$
 DECLARE
   idx_count INTEGER;
+  idx_record RECORD;
 BEGIN
   -- Compter les nouveaux index
   SELECT COUNT(*) INTO idx_count
