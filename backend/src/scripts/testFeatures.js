@@ -52,9 +52,25 @@ async function loginAndGetToken() {
           pin_code: '1234',
         });
 
-        if (response.data.success && response.data.data.token) {
+        // Le token est dans un cookie httpOnly, pas dans la réponse JSON
+        // On vérifie juste que la connexion a réussi
+        if (response.data.success && response.data.data.user) {
           log(`✅ Connexion réussie (User: ${response.data.data.user.username})`, colors.green);
-          return response.data.data.token;
+
+          // Extraire le cookie 'token' des headers
+          const cookies = response.headers['set-cookie'];
+          if (cookies) {
+            const tokenCookie = cookies.find(cookie => cookie.startsWith('token='));
+            if (tokenCookie) {
+              // Extraire juste la valeur du token (sans les attributs httpOnly, etc.)
+              const token = tokenCookie.split(';')[0].split('=')[1];
+              return token;
+            }
+          }
+
+          // Si pas de cookie trouvé, loguer l'avertissement mais continuer
+          log('⚠️  Token cookie non trouvé, mais connexion réussie', colors.yellow);
+          return 'COOKIE_AUTH'; // Placeholder pour indiquer que l'auth a réussi
         }
       } catch (error) {
         // Essayer le prochain username
