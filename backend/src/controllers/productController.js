@@ -60,17 +60,14 @@ const getAllProducts = async (req, res, next) => {
       return productData;
     });
 
+    // Rétrocompatibilité: retourner array directement + pagination en headers
+    res.set('X-Total-Count', count);
+    res.set('X-Pagination-Limit', limit);
+    res.set('X-Pagination-Offset', offset);
+
     res.json({
       success: true,
-      data: {
-        products: productsWithImageUrls,
-        pagination: {
-          total: count,
-          limit: parseInt(limit),
-          offset: parseInt(offset),
-          has_more: count > parseInt(offset) + parseInt(limit),
-        },
-      },
+      data: productsWithImageUrls, // Array direct pour compatibilité frontend
     });
   } catch (error) {
     next(error);

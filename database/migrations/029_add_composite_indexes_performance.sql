@@ -88,12 +88,12 @@ BEGIN
   -- Afficher taille des index créés
   RAISE NOTICE '';
   RAISE NOTICE '📊 Taille des nouveaux index:';
-  FOR idx_name IN
+  FOR idx_record IN
     SELECT indexname FROM pg_indexes
     WHERE schemaname = 'public'
     AND indexname LIKE 'idx_%_org_%'
   LOOP
-    RAISE NOTICE '   - %', idx_name;
+    RAISE NOTICE '   - %', idx_record.indexname;
   END LOOP;
 
   RAISE NOTICE '';

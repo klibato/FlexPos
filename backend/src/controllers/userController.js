@@ -35,17 +35,14 @@ const getAllUsers = async (req, res, next) => {
       ],
     });
 
+    // Rétrocompatibilité: retourner array directement + pagination en headers
+    res.set('X-Total-Count', count);
+    res.set('X-Pagination-Limit', limit);
+    res.set('X-Pagination-Offset', offset);
+
     res.json({
       success: true,
-      data: {
-        users,
-        pagination: {
-          total: count,
-          limit: parseInt(limit),
-          offset: parseInt(offset),
-          has_more: count > parseInt(offset) + parseInt(limit),
-        },
-      },
+      data: users, // Array direct pour compatibilité frontend
     });
   } catch (error) {
     logger.error('Erreur lors de la récupération des utilisateurs:', error);
