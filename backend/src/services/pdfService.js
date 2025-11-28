@@ -253,6 +253,195 @@ const generateTicketPDF = (sale, cashRegister, user, settings) => {
   return doc;
 };
 
+/**
+ * Génère une facture d'abonnement SaaS au format PDF
+ * @param {Object} invoice - La facture avec ses relations
+ * @returns {Buffer} Le PDF généré
+ */
+const generateInvoicePDF = async (invoice) => {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({
+      size: 'A4',
+      margins: { top: 50, bottom: 50, left: 50, right: 50 },
+    });
+
+    // Accumuler les chunks du PDF
+    const chunks = [];
+    doc.on('data', (chunk) => chunks.push(chunk));
+    doc.on('end', () => {
+      resolve(Buffer.concat(chunks));
+    });
+    doc.on('error', reject);
+
+    const pageWidth = doc.page.width;
+    const pageHeight = doc.page.height;
+    const contentWidth = pageWidth - 100;
+
+    // Helper pour centrer le texte
+    const centerText = (text, y, fontSize = 12, bold = false) => {
+      const font = bold ? 'Helvetica-Bold' : 'Helvetica';
+      doc.font(font).fontSize(fontSize);
+      const textWidth = doc.widthOfString(text);
+      const x = (pageWidth - textWidth) / 2;
+      doc.text(text, x, y);
+    };
+
+    // Header
+    centerText('FACTURE', 50, 24, true);
+    doc.fontSize(10);
+    doc.text(
+      `Numéro: ${invoice.invoice_number}`,
+      50,
+      100,
+    );
+    doc.text(
+      `Date: ${new Date(invoice.created_at).toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })}`,
+      50,
+      115,
+    );
+
+    // Organization Info (Émetteur)
+    doc.fontSize(11).font('Helvetica-Bold');
+    doc.text('Émetteur:', 50, 150);
+    doc.font('Helvetica').fontSize(10);
+    doc.text(invoice.organization.name, 50, 170);
+    if (invoice.organization.settings?.address_line1) {
+      doc.text(invoice.organization.settings.address_line1, 50, 185);
+    }
+    if (invoice.organization.settings?.postal_code) {
+      doc.text(
+        `${invoice.organization.settings.postal_code} ${
+          invoice.organization.settings.city || ''
+        }`,
+        50,
+        200,
+      );
+    }
+    if (invoice.organization.email) {
+      doc.text(invoice.organization.email, 50, 215);
+    }
+    if (invoice.organization.phone) {
+      doc.text(invoice.organization.phone, 50, 230);
+    }
+
+    // Invoice Details
+    doc.fontSize(11).font('Helvetica-Bold');
+    doc.text('Période de facturation:', 350, 150);
+    doc.font('Helvetica').fontSize(10);
+    const startDate = new Date(invoice.period_start).toLocaleDateString(
+      'fr-FR',
+      { day: '2-digit', month: '2-digit', year: 'numeric' },
+    );
+    const endDate = new Date(invoice.period_end).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+    doc.text(`Du ${startDate} au ${endDate}`, 350, 170);
+
+    doc.fontSize(10).font('Helvetica-Bold');
+    doc.text('Plan:', 350, 195);
+    doc.font('Helvetica');
+    doc.text(invoice.subscription?.plan || 'Non spécifié', 350, 210);
+
+    // Separator line
+    doc.moveTo(50, 260).lineTo(pageWidth - 50, 260).stroke();
+
+    // Table header
+    let y = 280;
+    doc.fontSize(10).font('Helvetica-Bold');
+    doc.text('Description', 50, y);
+    doc.text('Montant HT', 400, y, { align: 'right' });
+    doc.text('Montant TTC', 500, y, { align: 'right' });
+
+    // Table content
+    y = 305;
+    doc.font('Helvetica').fontSize(10);
+    const description = `Abonnement ${invoice.subscription?.plan || 'FlexPOS'} - ${startDate} au ${endDate}`;
+    doc.text(description, 50, y, { width: 300 });
+
+    const subtotal = (invoice.subtotal_cents / 100).toFixed(2);
+    const total = (invoice.total_cents / 100).toFixed(2);
+
+    doc.text(`${subtotal} €`, 400, y, { align: 'right' });
+    doc.text(`${total} €`, 500, y, { align: 'right' });
+
+    // Totals section
+    y = 360;
+    doc.moveTo(50, y).lineTo(pageWidth - 50, y).stroke();
+
+    y = 375;
+    doc.fontSize(10).font('Helvetica');
+    doc.text('Sous-total HT:', 400, y);
+    doc.text(`${subtotal} €`, 500, y, { align: 'right' });
+
+    y = 395;
+    const tax = (invoice.tax_cents / 100).toFixed(2);
+    doc.text(`TVA (${invoice.tax_rate}%):', 400, y);
+    doc.text(`${tax} €`, 500, y, { align: 'right' });
+
+    y = 420;
+    doc.fontSize(12).font('Helvetica-Bold');
+    doc.moveTo(50, y - 5).lineTo(pageWidth - 50, y - 5).stroke();
+    doc.text('TOTAL TTC:', 400, y);
+    doc.text(`${total} €`, 500, y, { align: 'right' });
+    doc.moveTo(50, y + 20).lineTo(pageWidth - 50, y + 20).stroke();
+
+    // Payment info
+    y = 460;
+    doc.fontSize(10).font('Helvetica-Bold');
+    doc.text('Statut de paiement:', 50, y);
+    doc.font('Helvetica');
+    const statusLabel =
+      invoice.status === 'paid'
+        ? 'Payée'
+        : invoice.status === 'open'
+          ? 'En attente de paiement'
+          : invoice.status === 'void'
+            ? 'Annulée'
+            : 'Impayée';
+    doc.text(statusLabel, 50, y + 15);
+
+    if (invoice.paid_at) {
+      const paidDate = new Date(invoice.paid_at).toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+      doc.text(`Date de paiement: ${paidDate}`, 50, y + 30);
+    }
+
+    // Footer
+    y = pageHeight - 80;
+    doc.fontSize(8).fillColor('#666666');
+    doc.moveTo(50, y).lineTo(pageWidth - 50, y).stroke();
+
+    y = y + 15;
+    doc.text('Conditions:', 50, y);
+    doc.text(
+      'Cette facture concerne votre abonnement FlexPOS. Le paiement doit être effectué selon les conditions de votre contrat.',
+      50,
+      y + 15,
+      { width: contentWidth },
+    );
+
+    doc.fontSize(7).fillColor('#999999');
+    y = pageHeight - 25;
+    centerText(
+      `Facture générée le ${new Date().toLocaleDateString('fr-FR')} - FlexPOS`,
+      y,
+      8,
+    );
+
+    doc.end();
+  });
+};
+
 module.exports = {
   generateTicketPDF,
+  generateInvoicePDF,
 };

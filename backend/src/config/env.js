@@ -42,6 +42,31 @@ module.exports = {
     port: parseInt(process.env.PRINTER_PORT, 10) || 9100,
   },
 
+  // Stripe
+  stripe: {
+    secretKey: process.env.STRIPE_SECRET_KEY || '',
+    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
+    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+    // Price IDs pour chaque plan
+    prices: {
+      starter: process.env.STRIPE_PRICE_ID_STARTER || '',
+      premium: process.env.STRIPE_PRICE_ID_PREMIUM || '',
+      enterprise: process.env.STRIPE_PRICE_ID_ENTERPRISE || '',
+    },
+  },
+
+  // Email
+  email: {
+    brevoApiKey: process.env.BREVO_API_KEY || '',
+    fromEmail: process.env.FROM_EMAIL || 'noreply@flexpos.app',
+    fromName: process.env.FROM_NAME || 'FlexPOS',
+  },
+
+  // Frontend
+  frontend: {
+    url: process.env.FRONTEND_URL || 'https://app.flexpos.app',
+  },
+
   // Configuration app
   app: {
     businessName: 'FlexPOS',

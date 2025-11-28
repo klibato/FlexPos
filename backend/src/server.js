@@ -151,6 +151,12 @@ app.use('/api/printer', apiLimiter, require('./routes/printer'));
 app.use('/api/logs', apiLimiter, require('./routes/logs'));
 app.use('/api/nf525', apiLimiter, require('./routes/nf525')); // NF525: Conformité fiscale française
 app.use('/api/daily-reports', apiLimiter, require('./routes/dailyReports')); // NF525: Rapports Z (clôture journalière)
+app.use('/api/subscriptions', apiLimiter, require('./routes/subscriptions')); // SaaS: Abonnements & Billing Stripe
+app.use('/api/invoices', apiLimiter, require('./routes/invoices')); // Factures client & PDF
+
+// Webhook Stripe (BEFORE body parser - utilise raw body)
+const stripeWebhookHandler = require('./controllers/stripeWebhookController');
+app.post('/api/billing/stripe/webhook', express.raw({ type: 'application/json' }), stripeWebhookHandler);
 
 // Routes API (Admin - Super-Admin Dashboard)
 app.use('/api/admin', apiLimiter, require('./routes/admin'));

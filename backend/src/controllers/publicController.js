@@ -191,6 +191,124 @@ const signup = async (req, res, next) => {
 };
 
 /**
+ * Inscription publique simplifiée (pour wizard onboarding)
+ * Crée une organisation avec trial 30 jours
+ * POST /api/public/auth/signup
+ */
+const signupSimplified = async (req, res, next) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const { organizationName, email, phone } = req.body;
+
+    // Validation
+    if (!organizationName || !email) {
+      await transaction.rollback();
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Nom organisation et email requis',
+        },
+      });
+    }
+
+    // Vérifier si email déjà utilisé
+    const existingOrg = await Organization.findOne({ where: { email } });
+    if (existingOrg) {
+      await transaction.rollback();
+      return res.status(409).json({
+        success: false,
+        error: {
+          code: 'EMAIL_ALREADY_EXISTS',
+          message: 'Un compte existe déjà avec cet email',
+        },
+      });
+    }
+
+    // Générer slug unique depuis le nom
+    let slug = organizationName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    let slugExists = await Organization.findOne({ where: { slug } });
+    let slugSuffix = 1;
+    while (slugExists) {
+      slug = `${slug}-${slugSuffix}`;
+      slugExists = await Organization.findOne({ where: { slug } });
+      slugSuffix++;
+    }
+
+    // Créer l'organisation avec trial 30 jours
+    const trialEndsAt = new Date();
+    trialEndsAt.setDate(trialEndsAt.getDate() + 30);
+
+    const organization = await Organization.create(
+      {
+        name: organizationName,
+        slug,
+        email,
+        phone: phone || null,
+        plan: 'free',
+        status: 'active',
+        trial_ends_at: trialEndsAt,
+        max_users: 3,
+        max_products: 50,
+        settings: {
+          store_name: organizationName,
+          currency: 'EUR',
+          currency_symbol: '€',
+          language: 'fr-FR',
+          timezone: 'Europe/Paris',
+        },
+      },
+      { transaction }
+    );
+
+    // Créer une subscription en trial
+    const currentPeriodStart = new Date();
+    const currentPeriodEnd = new Date(trialEndsAt);
+
+    const subscription = await Subscription.create(
+      {
+        organization_id: organization.id,
+        plan: 'free',
+        status: 'trialing',
+        price_cents: 0,
+        currency: 'EUR',
+        billing_interval: 'monthly',
+        started_at: currentPeriodStart,
+        trial_ends_at: trialEndsAt,
+        current_period_start: currentPeriodStart,
+        current_period_end: currentPeriodEnd,
+      },
+      { transaction }
+    );
+
+    await transaction.commit();
+
+    logger.info(`Simplified signup: ${organization.name} (${organization.id})`);
+
+    return res.status(201).json({
+      success: true,
+      data: {
+        organization_id: organization.id,
+        organization_name: organization.name,
+        slug: organization.slug,
+        email: organization.email,
+        trial_ends_at: organization.trial_ends_at,
+        message: 'Organisation créée avec succès. Trial 30 jours activé.',
+      },
+    });
+  } catch (error) {
+    await transaction.rollback();
+    logger.error('Simplified signup error:', error);
+    next(error);
+  }
+};
+
+/**
  * Vérifier disponibilité d'un slug
  * GET /api/public/check-slug?slug=mon-restaurant
  */
@@ -231,5 +349,6 @@ const checkSlugAvailability = async (req, res, next) => {
 
 module.exports = {
   signup,
+  signupSimplified,
   checkSlugAvailability,
 };

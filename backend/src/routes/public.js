@@ -21,6 +21,18 @@ const publicController = require('../controllers/publicController');
 router.post('/signup', publicController.signup);
 
 /**
+ * POST /api/public/auth/signup
+ * Inscription publique simplifiée (pour wizard onboarding)
+ * Crée une organisation avec trial 30 jours
+ *
+ * Body:
+ * - organizationName: string (required)
+ * - email: string (required)
+ * - phone: string (optional)
+ */
+router.post('/auth/signup', publicController.signupSimplified);
+
+/**
  * GET /api/public/check-slug?slug=mon-restaurant
  * Vérifie si un slug est disponible
  */
