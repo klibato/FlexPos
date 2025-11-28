@@ -135,7 +135,7 @@ Organization.prototype.isActive = function () {
  * @returns {boolean}
  */
 Organization.prototype.isInTrial = function () {
-  if (!this.trial_ends_at) return false;
+  if (!this.trial_ends_at) {return false;}
   return new Date() < new Date(this.trial_ends_at);
 };
 
@@ -144,7 +144,7 @@ Organization.prototype.isInTrial = function () {
  * @returns {boolean}
  */
 Organization.prototype.isSubscriptionExpired = function () {
-  if (!this.subscription_ends_at) return false;
+  if (!this.subscription_ends_at) {return false;}
   return new Date() > new Date(this.subscription_ends_at);
 };
 

@@ -1,6 +1,7 @@
 const { Product, MenuComposition } = require('../models');
 const { Op } = require('sequelize');
 const logger = require('../utils/logger');
+const { sendCsvResponse, formatAmountForCsv, formatBooleanForCsv } = require('../utils/csvHelper');
 
 /**
  * Récupérer tous les produits (avec filtres optionnels)
@@ -11,6 +12,8 @@ const getAllProducts = async (req, res, next) => {
       category,
       is_menu,
       include_inactive = 'false',
+      limit = 100,
+      offset = 0,
     } = req.query;
 
     // Construire les filtres
@@ -32,9 +35,11 @@ const getAllProducts = async (req, res, next) => {
       where.is_active = true;
     }
 
-    // Récupérer les produits
-    const products = await Product.findAll({
+    // Récupérer les produits avec pagination
+    const { count, rows: products } = await Product.findAndCountAll({
       where,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
       order: [
         ['category', 'ASC'],
         ['display_order', 'ASC'],
@@ -55,9 +60,14 @@ const getAllProducts = async (req, res, next) => {
       return productData;
     });
 
+    // Rétrocompatibilité: retourner array directement + pagination en headers
+    res.set('X-Total-Count', count);
+    res.set('X-Pagination-Limit', limit);
+    res.set('X-Pagination-Offset', offset);
+
     res.json({
       success: true,
-      data: productsWithImageUrls,
+      data: productsWithImageUrls, // Array direct pour compatibilité frontend
     });
   } catch (error) {
     next(error);
@@ -349,10 +359,10 @@ const updateProductsOrder = async (req, res, next) => {
         {
           where: {
             id: item.id,
-            organization_id: req.organizationId // MULTI-TENANT: Sécurité cross-org
-          }
-        }
-      )
+            organization_id: req.organizationId, // MULTI-TENANT: Sécurité cross-org
+          },
+        },
+      ),
     );
 
     await Promise.all(updatePromises);
@@ -394,9 +404,11 @@ const exportProductsCSV = async (req, res, next) => {
       where.is_active = true;
     }
 
-    // Récupérer tous les produits
+    // Récupérer tous les produits (MAX 10,000 pour éviter OutOfMemory)
+    const MAX_EXPORT_LIMIT = 10000;
     const products = await Product.findAll({
       where,
+      limit: MAX_EXPORT_LIMIT,
       order: [
         ['category', 'ASC'],
         ['display_order', 'ASC'],
@@ -405,62 +417,45 @@ const exportProductsCSV = async (req, res, next) => {
       paranoid: include_inactive !== 'true', // Si on veut les supprimés
     });
 
-    // Formater en CSV
-    const csvRows = [];
+    // Vérifier si limite atteinte
+    const totalCount = await Product.count({ where });
 
-    // Header
-    csvRows.push([
-      'ID',
-      'Nom',
-      'Description',
-      'Catégorie',
-      'Prix HT (€)',
-      'Prix TTC (€)',
-      'TVA (%)',
-      'Type',
-      'Actif',
-      'Ordre',
-      'Image URL',
-    ].join(';'));
-
-    // Lignes de données
-    products.forEach((product) => {
-      const priceHT = parseFloat(product.price_ht).toFixed(2);
-      const priceTTC = parseFloat(product.price_ttc).toFixed(2);
-      const vatRate = parseFloat(product.vat_rate).toFixed(2);
-      const type = product.is_menu ? 'Menu' : 'Produit';
-      const isActive = product.is_active ? 'Oui' : 'Non';
-
-      csvRows.push([
+    // Utiliser le helper CSV réutilisable
+    sendCsvResponse({
+      res,
+      data: products,
+      columns: [
+        'ID',
+        'Nom',
+        'Description',
+        'Catégorie',
+        'Prix HT (€)',
+        'Prix TTC (€)',
+        'TVA (%)',
+        'Type',
+        'Actif',
+        'Ordre',
+        'Image URL',
+      ],
+      rowMapper: (product) => [
         product.id,
-        `"${product.name}"`,
-        `"${product.description || ''}"`,
+        product.name,
+        product.description || '',
         product.category,
-        priceHT,
-        priceTTC,
-        vatRate,
-        type,
-        isActive,
+        formatAmountForCsv(product.price_ht),
+        formatAmountForCsv(product.price_ttc),
+        formatAmountForCsv(product.vat_rate),
+        product.is_menu ? 'Menu' : 'Produit',
+        formatBooleanForCsv(product.is_active),
         product.display_order,
-        `"${product.image_url || ''}"`,
-      ].join(';'));
+        product.image_url || '',
+      ],
+      filename: 'produits',
+      logger,
+      user: req.user,
+      totalCount,
+      maxLimit: MAX_EXPORT_LIMIT,
     });
-
-    const csvContent = csvRows.join('\n');
-
-    // Générer le nom de fichier avec la date du jour
-    const today = new Date().toISOString().split('T')[0];
-    const filename = `produits_${today}.csv`;
-
-    // Headers pour le téléchargement CSV
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-
-    // Ajouter le BOM UTF-8 pour Excel
-    res.write('\ufeff');
-    res.end(csvContent);
-
-    logger.info(`Export CSV produits généré par ${req.user.username}: ${products.length} produits`);
   } catch (error) {
     logger.error('Erreur lors de l\'export CSV produits:', error);
     next(error);
@@ -524,7 +519,7 @@ const uploadProductImage = async (req, res, next) => {
     });
 
     logger.info(
-      `Image uploadée pour produit ${product.name} (ID: ${id}) par ${req.user.username}`
+      `Image uploadée pour produit ${product.name} (ID: ${id}) par ${req.user.username}`,
     );
 
     res.json({
@@ -591,7 +586,7 @@ const deleteProductImage = async (req, res, next) => {
     });
 
     logger.info(
-      `Image supprimée pour produit ${product.name} (ID: ${id}) par ${req.user.username}`
+      `Image supprimée pour produit ${product.name} (ID: ${id}) par ${req.user.username}`,
     );
 
     res.json({

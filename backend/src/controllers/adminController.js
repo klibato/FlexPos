@@ -134,7 +134,7 @@ const getOrganizations = async (req, res, next) => {
             products: productCount,
           },
         };
-      })
+      }),
     );
 
     return res.status(200).json({
@@ -253,20 +253,20 @@ const updateOrganization = async (req, res, next) => {
     }
 
     // Mise à jour des champs
-    if (name !== undefined) organization.name = name;
-    if (slug !== undefined) organization.slug = slug;
-    if (email !== undefined) organization.email = email;
-    if (phone !== undefined) organization.phone = phone;
+    if (name !== undefined) {organization.name = name;}
+    if (slug !== undefined) {organization.slug = slug;}
+    if (email !== undefined) {organization.email = email;}
+    if (phone !== undefined) {organization.phone = phone;}
     if (plan !== undefined) {
       organization.plan = plan;
       // Appliquer automatiquement les limites selon le plan
       organization.applyPlanLimits(plan);
     }
-    if (status !== undefined) organization.status = status;
-    if (max_users !== undefined) organization.max_users = max_users;
-    if (max_products !== undefined) organization.max_products = max_products;
-    if (trial_ends_at !== undefined) organization.trial_ends_at = trial_ends_at;
-    if (subscription_ends_at !== undefined) organization.subscription_ends_at = subscription_ends_at;
+    if (status !== undefined) {organization.status = status;}
+    if (max_users !== undefined) {organization.max_users = max_users;}
+    if (max_products !== undefined) {organization.max_products = max_products;}
+    if (trial_ends_at !== undefined) {organization.trial_ends_at = trial_ends_at;}
+    if (subscription_ends_at !== undefined) {organization.subscription_ends_at = subscription_ends_at;}
 
     await organization.save();
 

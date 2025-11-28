@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { User, Organization } = require('../models');
+const { User, Organization, Sale, CashRegister, AuditLog, sequelize } = require('../models');
 const config = require('../config/env');
 const logger = require('../utils/logger');
 const { getRolePermissions } = require('../config/permissions');
@@ -70,7 +70,7 @@ const login = async (req, res, next) => {
         organization_id: user.organization_id, // MULTI-TENANT: Important pour tenantIsolation
       },
       config.jwt.secret,
-      { expiresIn: config.jwt.expiration }
+      { expiresIn: config.jwt.expiration },
     );
 
     logger.info(`Utilisateur ${username} connecté`);
@@ -233,7 +233,7 @@ const switchCashier = async (req, res, next) => {
         organization_id: newUser.organization_id, // MULTI-TENANT: Important pour tenantIsolation
       },
       config.jwt.secret,
-      { expiresIn: config.jwt.expiration }
+      { expiresIn: config.jwt.expiration },
     );
 
     logger.info(`Changement de caissier: ${req.user.username} -> ${newUser.username}`);
@@ -459,6 +459,240 @@ const signup = async (req, res, next) => {
   }
 };
 
+/**
+ * RGPD Art. 15 - Droit d'accès aux données personnelles
+ * GET /api/auth/user/data
+ * Exporte toutes les données personnelles de l'utilisateur au format JSON
+ */
+const exportUserData = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const organizationId = req.organizationId;
+
+    // Charger utilisateur avec toutes ses relations
+    const user = await User.findByPk(userId, {
+      include: [
+        {
+          model: Organization,
+          as: 'organization',
+          attributes: ['id', 'name', 'slug', 'email', 'phone', 'plan', 'created_at'],
+        },
+      ],
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'Utilisateur introuvable',
+        },
+      });
+    }
+
+    // Charger ventes créées par l'utilisateur
+    const sales = await Sale.findAll({
+      where: {
+        user_id: userId,
+        organization_id: organizationId,
+      },
+      attributes: ['id', 'ticket_number', 'total_ttc', 'payment_method', 'created_at', 'status'],
+      limit: 1000, // Limiter pour éviter surcharge
+    });
+
+    // Charger caisses ouvertes par l'utilisateur
+    const cashRegisters = await CashRegister.findAll({
+      where: {
+        opened_by: userId,
+        organization_id: organizationId,
+      },
+      attributes: ['id', 'opened_at', 'closed_at', 'status', 'opening_balance', 'closing_balance'],
+      limit: 100,
+    });
+
+    // Charger logs d'audit de l'utilisateur
+    const auditLogs = await AuditLog.findAll({
+      where: {
+        user_id: userId,
+      },
+      attributes: ['id', 'action', 'entity_type', 'entity_id', 'ip_address', 'created_at'],
+      limit: 500,
+      order: [['created_at', 'DESC']],
+    });
+
+    // Construire export RGPD complet
+    const exportData = {
+      export_date: new Date().toISOString(),
+      export_type: 'rgpd_article_15',
+      user: {
+        id: user.id,
+        username: user.username,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        role: user.role,
+        is_active: user.is_active,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      },
+      organization: user.organization ? {
+        id: user.organization.id,
+        name: user.organization.name,
+        slug: user.organization.slug,
+        email: user.organization.email,
+        phone: user.organization.phone,
+        plan: user.organization.plan,
+        created_at: user.organization.created_at,
+      } : null,
+      sales_count: sales.length,
+      sales: sales.map(sale => ({
+        id: sale.id,
+        ticket_number: sale.ticket_number,
+        total_ttc: parseFloat(sale.total_ttc),
+        payment_method: sale.payment_method,
+        created_at: sale.created_at,
+        status: sale.status,
+      })),
+      cash_registers_count: cashRegisters.length,
+      cash_registers: cashRegisters.map(cr => ({
+        id: cr.id,
+        opened_at: cr.opened_at,
+        closed_at: cr.closed_at,
+        status: cr.status,
+        opening_balance: cr.opening_balance ? parseFloat(cr.opening_balance) : null,
+        closing_balance: cr.closing_balance ? parseFloat(cr.closing_balance) : null,
+      })),
+      audit_logs_count: auditLogs.length,
+      audit_logs: auditLogs.map(log => ({
+        id: log.id,
+        action: log.action,
+        entity_type: log.entity_type,
+        entity_id: log.entity_id,
+        ip_address: log.ip_address,
+        created_at: log.created_at,
+      })),
+      gdpr_rights: {
+        right_to_access: 'Exercé via cet export',
+        right_to_rectification: 'Contactez votre administrateur pour modifier vos données',
+        right_to_erasure: 'DELETE /api/auth/user/data pour supprimer définitivement',
+        right_to_portability: 'Cet export JSON est portable vers d\'autres systèmes',
+        right_to_object: 'Contactez support@flexpos.app',
+      },
+    };
+
+    logger.info(`RGPD: User data export for user ${userId}`);
+
+    return res.status(200).json({
+      success: true,
+      data: exportData,
+    });
+  } catch (error) {
+    logger.error('Export user data error:', error);
+    next(error);
+  }
+};
+
+/**
+ * RGPD Art. 17 - Droit à l'effacement (droit à l'oubli)
+ * DELETE /api/auth/user/data
+ * Supprime définitivement le compte et toutes les données personnelles
+ */
+const deleteUserData = async (req, res, next) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const userId = req.user.id;
+    const organizationId = req.organizationId;
+    const { confirmation } = req.body;
+
+    // Vérifier confirmation explicite
+    if (confirmation !== 'DELETE_MY_DATA') {
+      await transaction.rollback();
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'CONFIRMATION_REQUIRED',
+          message: 'Veuillez confirmer la suppression en envoyant { "confirmation": "DELETE_MY_DATA" }',
+        },
+      });
+    }
+
+    const user = await User.findByPk(userId, { transaction });
+
+    if (!user) {
+      await transaction.rollback();
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'Utilisateur introuvable',
+        },
+      });
+    }
+
+    // Vérifier si c'est le dernier admin de l'organisation
+    if (user.role === 'admin') {
+      const adminCount = await User.count({
+        where: {
+          organization_id: organizationId,
+          role: 'admin',
+          is_active: true,
+        },
+        transaction,
+      });
+
+      if (adminCount <= 1) {
+        await transaction.rollback();
+        return res.status(403).json({
+          success: false,
+          error: {
+            code: 'LAST_ADMIN',
+            message: 'Impossible de supprimer le dernier administrateur. Veuillez d\'abord créer un autre admin.',
+          },
+        });
+      }
+    }
+
+    // Anonymiser les logs d'audit (conservation légale mais anonymisée)
+    await AuditLog.update(
+      {
+        user_id: null,
+        ip_address: '0.0.0.0',
+        user_agent: 'ANONYMIZED',
+        old_values: null,
+        new_values: null,
+      },
+      {
+        where: { user_id: userId },
+        transaction,
+      },
+    );
+
+    // Note: Les ventes sont conservées pour conformité NF525 (6 ans légal)
+    // Mais le lien user_id reste pour traçabilité fiscale
+    // L'utilisateur est supprimé, mais les transactions restent
+
+    // Suppression définitive de l'utilisateur
+    await user.destroy({ force: true, transaction }); // force: true = hard delete
+
+    await transaction.commit();
+
+    logger.info(`RGPD: User data deleted for user ${userId} (email: ${user.email})`);
+
+    // Effacer le cookie de session
+    res.clearCookie('token');
+
+    return res.status(200).json({
+      success: true,
+      message: 'Vos données personnelles ont été supprimées définitivement. Votre compte n\'existe plus.',
+    });
+  } catch (error) {
+    await transaction.rollback();
+    logger.error('Delete user data error:', error);
+    next(error);
+  }
+};
+
 module.exports = {
   login,
   logout,
@@ -466,4 +700,6 @@ module.exports = {
   getPermissions,
   switchCashier,
   signup,
+  exportUserData,
+  deleteUserData,
 };

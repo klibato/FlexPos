@@ -30,7 +30,7 @@ const sendEmail = async ({ to, subject, htmlContent, textContent = null }) => {
           'api-key': BREVO_API_KEY,
           'Content-Type': 'application/json',
         },
-      }
+      },
     );
 
     logger.info(`Email sent to ${to}: ${subject}`);

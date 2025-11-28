@@ -156,7 +156,7 @@ const exportArchive = async (req, res, next) => {
     const { format = 'json', startDate, endDate } = req.query;
 
     logger.info(
-      `📦 NF525: Export archive demandé par ${req.user.username} (org: ${organizationId}, format: ${format})`
+      `📦 NF525: Export archive demandé par ${req.user.username} (org: ${organizationId}, format: ${format})`,
     );
 
     // Valider format
@@ -263,7 +263,7 @@ const exportArchive = async (req, res, next) => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename="nf525_archive_org${organizationId}_${Date.now()}.json"`
+        `attachment; filename="nf525_archive_org${organizationId}_${Date.now()}.json"`,
       );
       return res.status(200).json(exportData);
     }
@@ -305,7 +305,7 @@ const exportArchive = async (req, res, next) => {
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename="nf525_archive_org${organizationId}_${Date.now()}.csv"`
+        `attachment; filename="nf525_archive_org${organizationId}_${Date.now()}.csv"`,
       );
       return res.status(200).send(csvContent);
     }

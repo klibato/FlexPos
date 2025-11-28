@@ -2,6 +2,7 @@ const { CashRegister, Sale, SaleItem, User, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const logger = require('../utils/logger');
 const { logAction } = require('../middlewares/audit');
+const { sendCsvResponse, formatAmountForCsv, formatDate } = require('../utils/csvHelper');
 
 /**
  * Récupérer toutes les caisses
@@ -160,7 +161,7 @@ const openCashRegister = async (req, res, next) => {
         status: 'open',
         notes,
       },
-      { transaction }
+      { transaction },
     );
 
     await transaction.commit();
@@ -181,7 +182,7 @@ const openCashRegister = async (req, res, next) => {
     });
 
     logger.info(
-      `Caisse ouverte: ${register_name} par ${req.user.username} - Fond: ${opening_balance}€`
+      `Caisse ouverte: ${register_name} par ${req.user.username} - Fond: ${opening_balance}€`,
     );
 
     // Logger l'action dans audit_logs
@@ -326,7 +327,7 @@ const closeCashRegister = async (req, res, next) => {
         total_cash_collected: cashCollected,
         notes: notes || cashRegister.notes,
       },
-      { transaction }
+      { transaction },
     );
 
     await transaction.commit();
@@ -352,7 +353,7 @@ const closeCashRegister = async (req, res, next) => {
     });
 
     logger.info(
-      `Caisse fermée: ${cashRegister.register_name} par ${req.user.username} - Différence: ${difference}€`
+      `Caisse fermée: ${cashRegister.register_name} par ${req.user.username} - Différence: ${difference}€`,
     );
 
     // Logger l'action dans audit_logs
@@ -468,9 +469,11 @@ const exportCashRegistersCSV = async (req, res, next) => {
       };
     }
 
-    // Récupérer toutes les caisses
+    // Récupérer toutes les caisses (MAX 10,000 pour éviter OutOfMemory)
+    const MAX_EXPORT_LIMIT = 10000;
     const cashRegisters = await CashRegister.findAll({
       where,
+      limit: MAX_EXPORT_LIMIT,
       order: [['opened_at', 'DESC']],
       include: [
         {
@@ -486,110 +489,73 @@ const exportCashRegistersCSV = async (req, res, next) => {
       ],
     });
 
-    // Formater en CSV
-    const csvRows = [];
+    // Vérifier si limite atteinte
+    const totalCount = await CashRegister.count({ where });
 
-    // Header
-    csvRows.push([
-      'ID',
-      'Date ouverture',
-      'Date clôture',
-      'Ouvert par',
-      'Fermé par',
-      'Statut',
-      'Fond de caisse (€)',
-      'Total ventes (€)',
-      'Espèces (€)',
-      'Carte bancaire (€)',
-      'Tickets restaurant (€)',
-      'Espèces collectées (€)',
-      'Montant compté (€)',
-      'Différence (€)',
-      'Nb tickets',
-      'Notes',
-    ].join(';'));
+    // Labels pour les statuts
+    const statusLabels = {
+      open: 'Ouverte',
+      closed: 'Fermée',
+    };
 
-    // Lignes de données
-    cashRegisters.forEach((register) => {
-      const dateOpened = new Date(register.opened_at).toLocaleString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+    // Utiliser le helper CSV réutilisable
+    sendCsvResponse({
+      res,
+      data: cashRegisters,
+      columns: [
+        'ID',
+        'Date ouverture',
+        'Date clôture',
+        'Ouvert par',
+        'Fermé par',
+        'Statut',
+        'Fond de caisse (€)',
+        'Total ventes (€)',
+        'Espèces (€)',
+        'Carte bancaire (€)',
+        'Tickets restaurant (€)',
+        'Espèces collectées (€)',
+        'Montant compté (€)',
+        'Différence (€)',
+        'Nb tickets',
+        'Notes',
+      ],
+      rowMapper: (register) => {
+        const openedBy = register.openedByUser
+          ? `${register.openedByUser.first_name || ''} ${register.openedByUser.last_name || ''}`.trim() ||
+            register.openedByUser.username
+          : 'N/A';
 
-      const dateClosed = register.closed_at
-        ? new Date(register.closed_at).toLocaleString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-        : '';
+        const closedBy = register.closedByUser
+          ? `${register.closedByUser.first_name || ''} ${register.closedByUser.last_name || ''}`.trim() ||
+            register.closedByUser.username
+          : '';
 
-      const openedBy = register.openedByUser
-        ? `${register.openedByUser.first_name || ''} ${register.openedByUser.last_name || ''}`.trim() ||
-          register.openedByUser.username
-        : 'N/A';
-
-      const closedBy = register.closedByUser
-        ? `${register.closedByUser.first_name || ''} ${register.closedByUser.last_name || ''}`.trim() ||
-          register.closedByUser.username
-        : '';
-
-      const statusLabels = {
-        open: 'Ouverte',
-        closed: 'Fermée',
-      };
-      const status = statusLabels[register.status] || register.status;
-
-      const openingBalance = parseFloat(register.opening_balance || 0).toFixed(2);
-      const totalSales = parseFloat(register.total_sales || 0).toFixed(2);
-      const totalCash = parseFloat(register.total_cash || 0).toFixed(2);
-      const totalCard = parseFloat(register.total_card || 0).toFixed(2);
-      const totalMealVoucher = parseFloat(register.total_meal_voucher || 0).toFixed(2);
-      const totalCashCollected = parseFloat(register.total_cash_collected || 0).toFixed(2);
-      const closingBalance = parseFloat(register.closing_balance || 0).toFixed(2);
-      const difference = parseFloat(register.difference || 0).toFixed(2);
-      const ticketCount = register.ticket_count || 0;
-
-      csvRows.push([
-        register.id,
-        dateOpened,
-        dateClosed,
-        openedBy,
-        closedBy,
-        status,
-        openingBalance,
-        totalSales,
-        totalCash,
-        totalCard,
-        totalMealVoucher,
-        totalCashCollected,
-        closingBalance,
-        difference,
-        ticketCount,
-        `"${register.notes || ''}"`,
-      ].join(';'));
+        return [
+          register.id,
+          formatDate(register.opened_at),
+          register.closed_at ? formatDate(register.closed_at) : '',
+          openedBy,
+          closedBy,
+          statusLabels[register.status] || register.status,
+          formatAmountForCsv(register.opening_balance),
+          formatAmountForCsv(register.total_sales),
+          formatAmountForCsv(register.total_cash),
+          formatAmountForCsv(register.total_card),
+          formatAmountForCsv(register.total_meal_voucher),
+          formatAmountForCsv(register.total_cash_collected),
+          formatAmountForCsv(register.closing_balance),
+          formatAmountForCsv(register.difference),
+          register.ticket_count || 0,
+          register.notes || '',
+        ];
+      },
+      filename: 'clotures_caisse',
+      logger,
+      user: req.user,
+      totalCount,
+      maxLimit: MAX_EXPORT_LIMIT,
     });
-
-    const csvContent = csvRows.join('\n');
-
-    // Générer le nom de fichier avec la date du jour
-    const today = new Date().toISOString().split('T')[0];
-    const filename = `clotures_caisse_${today}.csv`;
-
-    // Headers pour le téléchargement CSV
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-
-    // Ajouter le BOM UTF-8 pour Excel
-    res.write('\ufeff');
-    res.end(csvContent);
-
-    logger.info(`Export CSV clôtures généré par ${req.user.username}: ${cashRegisters.length} clôtures`);
   } catch (error) {
     logger.error('Erreur lors de l\'export CSV clôtures:', error);
     next(error);

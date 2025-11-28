@@ -5,6 +5,7 @@ const printerService = require('../services/printerService');
 const NF525Service = require('../services/nf525Service');
 const logger = require('../utils/logger');
 const { logAction } = require('../middlewares/audit');
+const { sendCsvResponse, formatAmountForCsv, formatDate } = require('../utils/csvHelper');
 
 /**
  * Créer une nouvelle vente
@@ -108,9 +109,9 @@ const createSale = async (req, res, next) => {
         const amount = parseFloat(p.amount || 0);
         totalPaid += amount;
 
-        if (p.method === 'cash') cashAmount += amount;
-        else if (p.method === 'card') cardAmount += amount;
-        else if (p.method === 'meal_voucher') mealVoucherAmount += amount;
+        if (p.method === 'cash') {cashAmount += amount;}
+        else if (p.method === 'card') {cardAmount += amount;}
+        else if (p.method === 'meal_voucher') {mealVoucherAmount += amount;}
       });
 
       // Vérifier que le montant total payé est suffisant
@@ -197,7 +198,7 @@ const createSale = async (req, res, next) => {
         discount_amount: discountAmount,
         status: 'completed',
       },
-      { transaction }
+      { transaction },
     );
 
     // Créer les lignes de vente
@@ -217,36 +218,68 @@ const createSale = async (req, res, next) => {
 
     await SaleItem.bulkCreate(saleItemsData, { transaction });
 
-    // Décrémenter les stocks des produits vendus
+    // Décrémenter les stocks des produits vendus (OPTIMISATION: Batch query)
+    // Charger tous les produits en une seule requête pour éviter N+1
+    const productIds = items.map(item => item.product_id);
+    const products = await Product.findAll({
+      where: {
+        id: productIds,
+        organization_id: req.organizationId, // MULTI-TENANT
+      },
+      transaction,
+    });
+
+    // Créer Map pour accès O(1)
+    const productMap = new Map(products.map(p => [p.id, p]));
+
+    // Vérifier stock et collecter updates
+    const stockUpdates = [];
     for (const item of items) {
-      try {
-        const product = await Product.findOne({
-          where: {
-            id: item.product_id,
-            organization_id: req.organizationId, // MULTI-TENANT: Vérifier l'organisation
+      const product = productMap.get(item.product_id);
+
+      if (!product) {
+        await transaction.rollback();
+        return res.status(422).json({
+          success: false,
+          error: {
+            code: 'PRODUCT_NOT_FOUND',
+            message: `Produit ID ${item.product_id} introuvable`,
           },
-          transaction,
         });
+      }
 
-        if (!product) {
-          logger.warn(`Produit non trouvé pour décrémentation stock: ID ${item.product_id}`);
-          continue;
-        }
-
-        // Décrémenter le stock (cette méthode gère les menus automatiquement)
-        await product.decrementStock(item.quantity);
-
-        logger.info(`Stock décrémenté: ${product.name} - Quantité: ${item.quantity}, Nouveau stock: ${product.quantity}`);
-      } catch (error) {
-        // Si erreur de stock insuffisant, on rollback toute la transaction
+      // Vérifier stock disponible (skip pour menus)
+      if (!product.is_menu && product.quantity < item.quantity) {
         await transaction.rollback();
         return res.status(422).json({
           success: false,
           error: {
             code: 'INSUFFICIENT_STOCK',
-            message: error.message || `Stock insuffisant pour un ou plusieurs produits`,
+            message: `Stock insuffisant pour ${product.name}. Disponible: ${product.quantity}, Demandé: ${item.quantity}`,
           },
         });
+      }
+
+      // Collecter updates (skip menus)
+      if (!product.is_menu) {
+        stockUpdates.push({
+          id: product.id,
+          quantity: item.quantity,
+          name: product.name,
+        });
+      }
+    }
+
+    // Appliquer décréments en batch (1 seule requête UPDATE)
+    if (stockUpdates.length > 0) {
+      for (const update of stockUpdates) {
+        await Product.decrement('quantity', {
+          by: update.quantity,
+          where: { id: update.id },
+          transaction,
+        });
+
+        logger.info(`Stock décrémenté: ${update.name} - Quantité: ${update.quantity}`);
       }
     }
 
@@ -260,7 +293,7 @@ const createSale = async (req, res, next) => {
         total_cash_collected: parseFloat(activeCashRegister.total_cash_collected || 0) + cashCollected,
         ticket_count: parseInt(activeCashRegister.ticket_count || 0) + 1,
       },
-      { transaction }
+      { transaction },
     );
 
     // ============================================
@@ -275,7 +308,7 @@ const createSale = async (req, res, next) => {
 
       logger.info(
         `✅ NF525: Hash #${hashEntry.sequence_number} créé pour vente ${sale.ticket_number} ` +
-          `(hash: ${hashEntry.current_hash.substring(0, 16)}...)`
+          `(hash: ${hashEntry.current_hash.substring(0, 16)}...)`,
       );
     } catch (nf525Error) {
       // Si échec NF525, rollback TOUTE la transaction (critère bloquant)
@@ -316,7 +349,7 @@ const createSale = async (req, res, next) => {
     });
 
     logger.info(
-      `Vente créée: ${completeSale.ticket_number} - ${totalTTC}€ (${payment_method}) par ${req.user.username}`
+      `Vente créée: ${completeSale.ticket_number} - ${totalTTC}€ (${payment_method}) par ${req.user.username}`,
     );
 
     // Logger l'action dans audit_logs
@@ -559,7 +592,7 @@ const generateTicketPDFEndpoint = async (req, res, next) => {
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="ticket-${sale.ticket_number}.pdf"`
+      `attachment; filename="ticket-${sale.ticket_number}.pdf"`,
     );
 
     // Streamer le PDF vers la réponse
@@ -619,9 +652,11 @@ const exportSalesCSV = async (req, res, next) => {
       where.status = status;
     }
 
-    // Récupérer toutes les ventes (pas de limit pour l'export)
+    // Récupérer toutes les ventes (MAX 10,000 pour éviter OutOfMemory)
+    const MAX_EXPORT_LIMIT = 10000;
     const sales = await Sale.findAll({
       where,
+      limit: MAX_EXPORT_LIMIT,
       order: [['created_at', 'DESC']],
       include: [
         {
@@ -636,91 +671,69 @@ const exportSalesCSV = async (req, res, next) => {
       ],
     });
 
-    // Formater en CSV
-    const csvRows = [];
+    // Vérifier si limite atteinte
+    const totalCount = await Sale.count({ where });
 
-    // Header
-    csvRows.push([
-      'Date',
-      'Ticket',
-      'Vendeur',
-      'Paiement',
-      'Montant TTC (€)',
-      'Produits',
-      'Quantité totale',
-      'Statut',
-    ].join(';'));
+    // Labels pour les valeurs
+    const paymentMethodLabels = {
+      cash: 'Espèces',
+      card: 'Carte bancaire',
+      meal_voucher: 'Ticket restaurant',
+      mixed: 'Mixte',
+    };
 
-    // Lignes de données
-    sales.forEach((sale) => {
-      const date = new Date(sale.created_at).toLocaleString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+    const statusLabels = {
+      completed: 'Complétée',
+      cancelled: 'Annulée',
+      refunded: 'Remboursée',
+    };
 
-      const vendeur = sale.user
-        ? `${sale.user.first_name || ''} ${sale.user.last_name || ''}`.trim() || sale.user.username
-        : 'N/A';
+    // Utiliser le helper CSV réutilisable
+    sendCsvResponse({
+      res,
+      data: sales,
+      columns: [
+        'Date',
+        'Ticket',
+        'Vendeur',
+        'Paiement',
+        'Montant TTC (€)',
+        'Produits',
+        'Quantité totale',
+        'Statut',
+      ],
+      rowMapper: (sale) => {
+        const vendeur = sale.user
+          ? `${sale.user.first_name || ''} ${sale.user.last_name || ''}`.trim() || sale.user.username
+          : 'N/A';
 
-      const paymentMethodLabels = {
-        cash: 'Espèces',
-        card: 'Carte bancaire',
-        meal_voucher: 'Ticket restaurant',
-        mixed: 'Mixte',
-      };
-      const paymentMethod = paymentMethodLabels[sale.payment_method] || sale.payment_method;
+        const products = sale.items
+          ? sale.items.map((item) => `${item.product_name} (x${item.quantity})`).join(', ')
+          : '';
 
-      const totalTTC = parseFloat(sale.total_ttc).toFixed(2);
+        const totalQuantity = sale.items
+          ? sale.items.reduce((sum, item) => sum + parseInt(item.quantity), 0)
+          : 0;
 
-      // Liste des produits
-      const products = sale.items
-        ? sale.items.map((item) => `${item.product_name} (x${item.quantity})`).join(', ')
-        : '';
-
-      // Quantité totale d'articles
-      const totalQuantity = sale.items
-        ? sale.items.reduce((sum, item) => sum + parseInt(item.quantity), 0)
-        : 0;
-
-      const statusLabels = {
-        completed: 'Complétée',
-        cancelled: 'Annulée',
-        refunded: 'Remboursée',
-      };
-      const status = statusLabels[sale.status] || sale.status;
-
-      csvRows.push([
-        date,
-        sale.ticket_number,
-        vendeur,
-        paymentMethod,
-        totalTTC,
-        `"${products}"`, // Encadrer avec guillemets pour gérer les virgules
-        totalQuantity,
-        status,
-      ].join(';'));
+        return [
+          formatDate(sale.created_at),
+          sale.ticket_number,
+          vendeur,
+          paymentMethodLabels[sale.payment_method] || sale.payment_method,
+          formatAmountForCsv(sale.total_ttc),
+          products,
+          totalQuantity,
+          statusLabels[sale.status] || sale.status,
+        ];
+      },
+      filename: 'ventes',
+      logger,
+      user: req.user,
+      totalCount,
+      maxLimit: MAX_EXPORT_LIMIT,
     });
-
-    const csvContent = csvRows.join('\n');
-
-    // Générer le nom de fichier avec la date du jour
-    const today = new Date().toISOString().split('T')[0];
-    const filename = `ventes_${today}.csv`;
-
-    // Headers pour le téléchargement CSV
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-
-    // Ajouter le BOM UTF-8 pour Excel
-    res.write('\ufeff');
-    res.end(csvContent);
-
-    logger.info(`Export CSV généré par ${req.user.username}: ${sales.length} ventes`);
   } catch (error) {
-    logger.error('Erreur lors de l\'export CSV:', error);
+    logger.error('Erreur lors de l\'export CSV ventes:', error);
     next(error);
   }
 };

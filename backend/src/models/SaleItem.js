@@ -80,7 +80,7 @@ const SaleItem = sequelize.define('sale_items', {
     beforeUpdate: () => {
       // NF525 Compliance: Les lignes de vente sont immuables après création
       throw new Error(
-        'NF525 Compliance: Sale items are immutable. UPDATE operations are not allowed.'
+        'NF525 Compliance: Sale items are immutable. UPDATE operations are not allowed.',
       );
     },
   },

@@ -1,5 +1,5 @@
 const cron = require('node-cron');
-const { Organization, Subscription, Invoice } = require('../models');
+const { Organization, Subscription, Invoice, AuditLog, User } = require('../models');
 const { Op } = require('sequelize');
 const logger = require('../utils/logger');
 const { sendTrialEndingEmail } = require('./emailService');
@@ -85,12 +85,102 @@ const generateMonthlyInvoices = cron.schedule('0 0 1 * *', async () => {
 });
 
 /**
+ * RGPD: Anonymiser les logs d'audit de plus de 3 mois
+ * Exécuté tous les jours à 2h du matin
+ */
+const anonymizeOldAuditLogs = cron.schedule('0 2 * * *', async () => {
+  try {
+    logger.info('Cron job: Anonymizing audit logs older than 3 months...');
+
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+    const result = await AuditLog.update(
+      {
+        ip_address: '0.0.0.0',
+        user_agent: 'ANONYMIZED',
+        old_values: null,
+        new_values: null,
+      },
+      {
+        where: {
+          created_at: {
+            [Op.lt]: threeMonthsAgo,
+          },
+          ip_address: {
+            [Op.ne]: '0.0.0.0', // Ne pas anonymiser ce qui l'est déjà
+          },
+        },
+      },
+    );
+
+    logger.info(`Cron job: ${result[0]} audit logs anonymized (older than 3 months)`);
+  } catch (error) {
+    logger.error('Cron job error (anonymizeOldAuditLogs):', error);
+  }
+}, {
+  scheduled: false,
+});
+
+/**
+ * RGPD Article 17: Supprimer définitivement les comptes après 30 jours
+ * Exécuté tous les jours à 3h du matin
+ */
+const deleteAccountsAfter30Days = cron.schedule('0 3 * * *', async () => {
+  try {
+    logger.info('Cron job: Deleting accounts requested for deletion 30+ days ago...');
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Trouver tous les utilisateurs dont la suppression a été demandée il y a plus de 30 jours
+    const usersToDelete = await User.findAll({
+      where: {
+        deletion_requested_at: {
+          [Op.lte]: thirtyDaysAgo,
+        },
+      },
+      attributes: ['id', 'username', 'email', 'organization_id', 'deletion_requested_at'],
+    });
+
+    let deletedCount = 0;
+
+    for (const user of usersToDelete) {
+      try {
+        logger.info(`Suppression RGPD du compte utilisateur ${user.id} (${user.username}) - Demande faite le ${user.deletion_requested_at}`);
+
+        // Supprimer définitivement l'utilisateur
+        // Note: Les ventes et audit logs sont conservés pour conformité NF525
+        // mais anonymisés (user_id reste pour intégrité référentielle)
+        await user.destroy();
+
+        deletedCount++;
+      } catch (error) {
+        logger.error(`Erreur lors de la suppression de l'utilisateur ${user.id}:`, error);
+      }
+    }
+
+    logger.info(`Cron job: ${deletedCount} comptes utilisateurs supprimés définitivement (RGPD Article 17)`);
+
+    if (deletedCount > 0) {
+      logger.info(`Les ventes et logs d'audit associés sont conservés pour conformité NF525 mais les comptes utilisateurs sont supprimés`);
+    }
+  } catch (error) {
+    logger.error('Cron job error (deleteAccountsAfter30Days):', error);
+  }
+}, {
+  scheduled: false,
+});
+
+/**
  * Démarrer tous les cron jobs
  */
 const startCronJobs = () => {
   logger.info('Starting cron jobs...');
   checkTrialsExpiring.start();
   generateMonthlyInvoices.start();
+  anonymizeOldAuditLogs.start();
+  deleteAccountsAfter30Days.start();
   logger.info('Cron jobs started successfully');
 };
 
@@ -101,6 +191,8 @@ const stopCronJobs = () => {
   logger.info('Stopping cron jobs...');
   checkTrialsExpiring.stop();
   generateMonthlyInvoices.stop();
+  anonymizeOldAuditLogs.stop();
+  deleteAccountsAfter30Days.stop();
   logger.info('Cron jobs stopped');
 };
 

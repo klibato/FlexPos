@@ -43,4 +43,22 @@ router.put('/:id', requirePermission(PERMISSIONS.USERS_UPDATE), userController.u
  */
 router.delete('/:id', requirePermission(PERMISSIONS.USERS_DELETE), userController.deleteUser);
 
+/**
+ * RGPD - Endpoints pour la protection des données personnelles
+ */
+
+/**
+ * @route   GET /api/users/me/data-export
+ * @desc    Exporter toutes les données personnelles (RGPD Article 15)
+ * @access  Authenticated user (self)
+ */
+router.get('/me/data-export', userController.exportPersonalData);
+
+/**
+ * @route   DELETE /api/users/me/account
+ * @desc    Demander la suppression du compte (RGPD Article 17)
+ * @access  Authenticated user (self)
+ */
+router.delete('/me/account', userController.requestAccountDeletion);
+
 module.exports = router;

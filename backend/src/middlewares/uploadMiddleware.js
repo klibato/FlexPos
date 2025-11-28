@@ -34,9 +34,9 @@ const fileFilter = (req, file, cb) => {
     cb(
       new Error(
         `Format de fichier non autorisé: ${file.mimetype}. ` +
-          `Formats acceptés: JPEG, PNG, WebP, GIF`
+          `Formats acceptés: JPEG, PNG, WebP, GIF`,
       ),
-      false
+      false,
     );
   }
 };

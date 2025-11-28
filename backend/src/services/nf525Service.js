@@ -56,7 +56,7 @@ class NF525Service {
       if (logger && logger.info) {
         logger.info(
           `NF525: Hash généré pour vente #${sale.id} ` +
-            `(org: ${sale.organization_id}, seq: TBD) → ${hash.substring(0, 16)}...`
+            `(org: ${sale.organization_id}, seq: TBD) → ${hash.substring(0, 16)}...`,
         );
       }
 
@@ -89,7 +89,7 @@ class NF525Service {
       if (!transaction) {
         throw new Error(
           'Transaction required for createHashChainEntry. ' +
-            'Hash chain must be created atomically with sale to prevent data inconsistency.'
+            'Hash chain must be created atomically with sale to prevent data inconsistency.',
         );
       }
 
@@ -112,7 +112,7 @@ class NF525Service {
       if (logger && logger.info) {
         logger.info(
           `NF525: Création hash #${nextSequenceNumber} pour org ${sale.organization_id} ` +
-            `(vente #${sale.id})`
+            `(vente #${sale.id})`,
         );
       }
 
@@ -131,13 +131,13 @@ class NF525Service {
           previous_hash: previousHash,
           certified_timestamp: new Date(),
         },
-        { transaction }
+        { transaction },
       );
 
       if (logger && logger.info) {
         logger.info(
           `✅ NF525: Hash #${hashEntry.sequence_number} créé avec succès ` +
-            `(hash: ${currentHash.substring(0, 16)}...)`
+            `(hash: ${currentHash.substring(0, 16)}...)`,
         );
       }
 
@@ -169,7 +169,7 @@ class NF525Service {
       if (logger && logger.info) {
         logger.info(
           `🔍 NF525: Vérification intégrité chaîne org ${organizationId} ` +
-            `(options: ${JSON.stringify(options)})`
+            `(options: ${JSON.stringify(options)})`,
         );
       }
 
@@ -251,7 +251,7 @@ class NF525Service {
           if (logger && logger.error) {
             logger.error(
               `❌ NF525: Chaîne brisée à séquence ${current.sequence_number} ` +
-                `(previous_hash mismatch)`
+                `(previous_hash mismatch)`,
             );
           }
 
@@ -282,7 +282,7 @@ class NF525Service {
           if (logger && logger.error) {
             logger.error(
               `❌ NF525: Données altérées à séquence ${current.sequence_number} ` +
-                `(hash mismatch)`
+                `(hash mismatch)`,
             );
           }
 
@@ -312,7 +312,7 @@ class NF525Service {
           if (logger && logger.error) {
             logger.error(
               `❌ NF525: Séquence incorrecte à position ${i}: ` +
-                `attendu ${expectedSequence}, reçu ${current.sequence_number}`
+                `attendu ${expectedSequence}, reçu ${current.sequence_number}`,
             );
           }
 

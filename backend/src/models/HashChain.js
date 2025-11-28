@@ -105,7 +105,7 @@ HashChain.init(
       },
     ],
     comment: 'Chaînage cryptographique NF525 - Hash SHA-256 immuable',
-  }
+  },
 );
 
 /**
@@ -144,8 +144,8 @@ HashChain.getNextSequenceNumber = async function (organizationId, transaction = 
  * @returns {Boolean}
  */
 HashChain.isValidHash = function (hash) {
-  if (!hash || typeof hash !== 'string') return false;
-  if (hash.length !== 64) return false;
+  if (!hash || typeof hash !== 'string') {return false;}
+  if (hash.length !== 64) {return false;}
   return /^[a-f0-9]{64}$/.test(hash);
 };
 

@@ -1,6 +1,7 @@
 const { DailyReport } = require('../models');
 const logger = require('../utils/logger');
 const { logAction } = require('../middlewares/audit');
+const { formatDate } = require('../utils/helpers');
 
 /**
  * Daily Report Controller - Rapports Z (Clôture journalière NF525)
@@ -50,7 +51,7 @@ const generateDailyReport = async (req, res, next) => {
     }
 
     logger.info(
-      `Génération rapport Z pour org ${organizationId} date ${report_date} par ${req.user.username}`
+      `Génération rapport Z pour org ${organizationId} date ${report_date} par ${req.user.username}`,
     );
 
     // Générer le rapport
@@ -66,7 +67,7 @@ const generateDailyReport = async (req, res, next) => {
     });
 
     logger.info(
-      `✅ Rapport Z généré: ID ${report.id}, ${report.total_sales_count} ventes, ${report.total_amount_ttc}€`
+      `✅ Rapport Z généré: ID ${report.id}, ${report.total_sales_count} ventes, ${report.total_amount_ttc}€`,
     );
 
     res.status(201).json({
@@ -237,8 +238,8 @@ const exportDailyReportsCSV = async (req, res, next) => {
     const organizationId = req.organizationId;
 
     const options = {};
-    if (start_date) options.startDate = start_date;
-    if (end_date) options.endDate = end_date;
+    if (start_date) {options.startDate = start_date;}
+    if (end_date) {options.endDate = end_date;}
 
     const reports = await DailyReport.getReports(organizationId, options);
 
@@ -268,7 +269,7 @@ const exportDailyReportsCSV = async (req, res, next) => {
     // Lignes de données
     reports.forEach((report) => {
       const date = new Date(report.report_date).toLocaleDateString('fr-FR');
-      const createdAt = new Date(report.created_at).toLocaleString('fr-FR');
+      const createdAt = formatDate(report.created_at);
 
       csvRows.push([
         date,

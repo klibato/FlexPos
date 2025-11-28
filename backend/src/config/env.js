@@ -1,8 +1,23 @@
 require('dotenv').config();
 
+// Validation JWT_SECRET en production
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (NODE_ENV === 'production' && !JWT_SECRET) {
+  throw new Error('SECURITY ERROR: JWT_SECRET environment variable must be set in production');
+}
+
+// Utiliser secret par défaut uniquement en développement
+const jwtSecret = JWT_SECRET || (NODE_ENV === 'development' ? 'dev-secret-key' : null);
+
+if (!jwtSecret) {
+  throw new Error('JWT_SECRET is required');
+}
+
 module.exports = {
   // Environnement
-  NODE_ENV: process.env.NODE_ENV || 'development',
+  NODE_ENV,
   PORT: parseInt(process.env.PORT, 10) || 3000,
 
   // Base de données
@@ -16,10 +31,10 @@ module.exports = {
 
   // JWT
   jwt: {
-    secret: process.env.JWT_SECRET || 'dev-secret-key',
+    secret: jwtSecret,
     expiration: process.env.JWT_EXPIRATION || '8h',
   },
-  jwtSecret: process.env.JWT_SECRET || 'dev-secret-key', // Alias pour compatibilité admin
+  jwtSecret, // Alias pour compatibilité admin
 
   // Imprimante
   printer: {

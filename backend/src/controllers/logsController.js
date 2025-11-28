@@ -1,6 +1,7 @@
 const { AuditLog, User, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const logger = require('../utils/logger');
+const { sendCsvResponse, formatDate } = require('../utils/csvHelper');
 
 /**
  * Récupérer tous les logs d'audit avec filtres
@@ -211,9 +212,11 @@ const exportLogsCSV = async (req, res, next) => {
       where.entity_type = entity_type;
     }
 
-    // Récupérer tous les logs (pas de limit pour l'export)
+    // Récupérer tous les logs (MAX 10,000 pour éviter OutOfMemory)
+    const MAX_EXPORT_LIMIT = 10000;
     const logs = await AuditLog.findAll({
       where,
+      limit: MAX_EXPORT_LIMIT,
       order: [['created_at', 'DESC']],
       include: [
         {
@@ -224,70 +227,45 @@ const exportLogsCSV = async (req, res, next) => {
       ],
     });
 
-    // Formater en CSV
-    const csvRows = [];
+    // Vérifier si limite atteinte
+    const totalCount = await AuditLog.count({ where });
 
-    // Header
-    csvRows.push([
-      'Date',
-      'Utilisateur',
-      'Rôle',
-      'Action',
-      'Type d\'entité',
-      'ID entité',
-      'IP',
-      'User Agent',
-    ].join(';'));
+    // Utiliser le helper CSV réutilisable
+    sendCsvResponse({
+      res,
+      data: logs,
+      columns: [
+        'Date',
+        'Utilisateur',
+        'Rôle',
+        'Action',
+        'Type d\'entité',
+        'ID entité',
+        'IP',
+        'User Agent',
+      ],
+      rowMapper: (log) => {
+        const username = log.user
+          ? `${log.user.first_name || ''} ${log.user.last_name || ''}`.trim() || log.user.username
+          : 'Système';
 
-    // Lignes de données
-    logs.forEach((log) => {
-      const date = new Date(log.created_at).toLocaleString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      });
-
-      const username = log.user
-        ? `${log.user.first_name || ''} ${log.user.last_name || ''}`.trim() || log.user.username
-        : 'Système';
-
-      const role = log.user?.role || 'N/A';
-      const action = log.action;
-      const entityType = log.entity_type || 'N/A';
-      const entityId = log.entity_id || 'N/A';
-      const ipAddress = log.ip_address || 'N/A';
-      const userAgent = log.user_agent ? `"${log.user_agent.substring(0, 50)}..."` : 'N/A';
-
-      csvRows.push([
-        date,
-        username,
-        role,
-        action,
-        entityType,
-        entityId,
-        ipAddress,
-        userAgent,
-      ].join(';'));
+        return [
+          formatDate(log.created_at),
+          username,
+          log.user?.role || 'N/A',
+          log.action,
+          log.entity_type || 'N/A',
+          log.entity_id || 'N/A',
+          log.ip_address || 'N/A',
+          log.user_agent ? `${log.user_agent.substring(0, 50)}...` : 'N/A',
+        ];
+      },
+      filename: 'logs_audit',
+      logger,
+      user: req.user,
+      totalCount,
+      maxLimit: MAX_EXPORT_LIMIT,
     });
-
-    const csvContent = csvRows.join('\n');
-
-    // Générer le nom de fichier avec la date du jour
-    const today = new Date().toISOString().split('T')[0];
-    const filename = `logs_audit_${today}.csv`;
-
-    // Headers pour le téléchargement CSV
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-
-    // Ajouter le BOM UTF-8 pour Excel
-    res.write('\ufeff');
-    res.end(csvContent);
-
-    logger.info(`Export CSV logs généré par ${req.user.username}: ${logs.length} logs`);
   } catch (error) {
     logger.error('Erreur lors de l\'export CSV logs:', error);
     next(error);

@@ -177,7 +177,7 @@ const Invoice = sequelize.define('invoices', {
         throw new Error(
           `NF525 Compliance: Cannot modify fiscal data. ` +
           `Immutable fields: ${forbiddenChanges.join(', ')}. ` +
-          `Only status, paid_at, payment_method, pdf_url can be updated.`
+          `Only status, paid_at, payment_method, pdf_url can be updated.`,
         );
       }
     },
@@ -201,7 +201,7 @@ Invoice.prototype.isPaid = function () {
  * @returns {boolean}
  */
 Invoice.prototype.isOverdue = function () {
-  if (this.isPaid() || this.status === 'void') return false;
+  if (this.isPaid() || this.status === 'void') {return false;}
   return new Date() > new Date(this.due_date);
 };
 
@@ -210,7 +210,7 @@ Invoice.prototype.isOverdue = function () {
  * @returns {number}
  */
 Invoice.prototype.getDaysOverdue = function () {
-  if (!this.isOverdue()) return 0;
+  if (!this.isOverdue()) {return 0;}
   const now = new Date();
   const due = new Date(this.due_date);
   const diffTime = now - due;

@@ -20,7 +20,7 @@ router.get(
   '/',
   authenticateToken,
   requireSuperAdmin,
-  organizationController.getAllOrganizations
+  organizationController.getAllOrganizations,
 );
 
 /**
@@ -39,7 +39,7 @@ router.put(
   '/:id',
   authenticateToken,
   requirePermission(PERMISSIONS.SETTINGS_UPDATE),
-  organizationController.updateOrganization
+  organizationController.updateOrganization,
 );
 
 /**
@@ -51,7 +51,7 @@ router.delete(
   '/:id',
   authenticateToken,
   requireSuperAdmin,
-  organizationController.deleteOrganization
+  organizationController.deleteOrganization,
 );
 
 module.exports = router;

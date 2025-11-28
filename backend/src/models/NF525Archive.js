@@ -199,7 +199,7 @@ NF525Archive.init(
       },
     ],
     comment: 'Archives certifiées NF525 - Conservation légale 6 ans minimum',
-  }
+  },
 );
 
 /**
@@ -353,7 +353,7 @@ NF525Archive.prototype.softDelete = async function (reason = null) {
     const remainingDays = 2190 - daysSinceCreation;
     throw new Error(
       `Cannot delete archive: Legal retention period not met. ` +
-      `${remainingDays} days remaining (6 years required).`
+      `${remainingDays} days remaining (6 years required).`,
     );
   }
 
@@ -378,9 +378,9 @@ NF525Archive.prototype.getPeriodDurationDays = function () {
  */
 NF525Archive.prototype.getFormattedFileSize = function () {
   const bytes = parseInt(this.file_size_bytes);
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  if (bytes < 1024) {return `${bytes} B`;}
+  if (bytes < 1024 * 1024) {return `${(bytes / 1024).toFixed(2)} KB`;}
+  if (bytes < 1024 * 1024 * 1024) {return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;}
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 };
 

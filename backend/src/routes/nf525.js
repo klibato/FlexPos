@@ -33,7 +33,7 @@ router.get(
   '/verify-integrity',
   authenticateToken,
   requirePermission(PERMISSIONS.AUDIT_LOGS_VIEW),
-  nf525Controller.verifyIntegrity
+  nf525Controller.verifyIntegrity,
 );
 
 /**
@@ -54,7 +54,7 @@ router.get(
   '/stats',
   authenticateToken,
   requirePermission(PERMISSIONS.AUDIT_LOGS_VIEW),
-  nf525Controller.getStats
+  nf525Controller.getStats,
 );
 
 /**
@@ -78,7 +78,7 @@ router.get(
   '/export',
   authenticateToken,
   requirePermission(PERMISSIONS.AUDIT_LOGS_VIEW),
-  nf525Controller.exportArchive
+  nf525Controller.exportArchive,
 );
 
 module.exports = router;

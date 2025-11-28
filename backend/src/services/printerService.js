@@ -101,7 +101,7 @@ class PrinterService {
    * Tester la connexion à l'imprimante
    */
   async testConnection() {
-    if (!this.printer) return false;
+    if (!this.printer) {return false;}
 
     try {
       const result = await this.printer.isPrinterConnected();
@@ -139,13 +139,13 @@ class PrinterService {
       this.printer.newLine();
 
       // Informations commerce
-      if (settings.address) this.printer.println(settings.address);
+      if (settings.address) {this.printer.println(settings.address);}
       if (settings.postal_code && settings.city) {
         this.printer.println(`${settings.postal_code} ${settings.city}`);
       }
-      if (settings.phone) this.printer.println(`Tel: ${settings.phone}`);
-      if (settings.siret) this.printer.println(`SIRET: ${settings.siret}`);
-      if (settings.vat_number) this.printer.println(`TVA: ${settings.vat_number}`);
+      if (settings.phone) {this.printer.println(`Tel: ${settings.phone}`);}
+      if (settings.siret) {this.printer.println(`SIRET: ${settings.siret}`);}
+      if (settings.vat_number) {this.printer.println(`TVA: ${settings.vat_number}`);}
 
       this.printer.drawLine();
 
@@ -182,7 +182,7 @@ class PrinterService {
       if (sale.vat_details && Array.isArray(sale.vat_details)) {
         sale.vat_details.forEach((vat) => {
           this.printer.println(
-            `TVA ${vat.rate}%:      ${formatPrice(vat.amount_tva).padStart(20)}`
+            `TVA ${vat.rate}%:      ${formatPrice(vat.amount_tva).padStart(20)}`,
           );
         });
       }

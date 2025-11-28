@@ -76,7 +76,7 @@ const login = async (req, res, next) => {
     // Définir cookie httpOnly
     res.cookie('admin_token', token, {
       httpOnly: true,
-      secure: config.nodeEnv === 'production',
+      secure: config.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 8 * 60 * 60 * 1000, // 8h
     });
@@ -177,7 +177,7 @@ const requestPasswordReset = async (req, res, next) => {
     const resetToken = await admin.generateResetToken();
 
     // TODO: Envoyer email avec Brevo (à implémenter)
-    logger.info(`Password reset requested for admin: ${email}. Token: ${resetToken}`);
+    logger.info(`Password reset requested for admin: ${email}`);
 
     return res.status(200).json({
       success: true,

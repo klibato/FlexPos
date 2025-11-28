@@ -50,4 +50,11 @@ router.get('/me', authenticateToken, authController.getMe);
 // GET /api/auth/permissions - Permissions de l'utilisateur connecté
 router.get('/permissions', authenticateToken, authController.getPermissions);
 
+// RGPD Compliance Routes
+// GET /api/auth/user/data - Export complet données personnelles (RGPD Art. 15)
+router.get('/user/data', authenticateToken, authController.exportUserData);
+
+// DELETE /api/auth/user/data - Suppression définitive compte et données (RGPD Art. 17)
+router.delete('/user/data', authenticateToken, authController.deleteUserData);
+
 module.exports = router;
