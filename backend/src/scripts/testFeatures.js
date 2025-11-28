@@ -42,19 +42,32 @@ async function loginAndGetToken() {
   try {
     log('\n📝 Connexion pour obtenir un token JWT...', colors.cyan);
 
-    // Essayer avec un compte admin par défaut
-    const response = await axios.post(`${API_URL}/auth/login`, {
-      username: 'admin',
-      pin_code: '1234',
-    });
+    // Essayer avec plusieurs usernames courants
+    const usernames = ['admin316', 'admin', 'ehamza', 'thng'];
 
-    if (response.data.success && response.data.data.token) {
-      log(`✅ Connexion réussie (User: ${response.data.data.user.username})`, colors.green);
-      return response.data.data.token;
+    for (const username of usernames) {
+      try {
+        const response = await axios.post(`${API_URL}/auth/login`, {
+          username: username,
+          pin_code: '1234',
+        });
+
+        if (response.data.success && response.data.data.token) {
+          log(`✅ Connexion réussie (User: ${response.data.data.user.username})`, colors.green);
+          return response.data.data.token;
+        }
+      } catch (error) {
+        // Essayer le prochain username
+        continue;
+      }
     }
+
+    // Aucun username n'a fonctionné
+    log('⚠️  Impossible de se connecter avec les usernames testés', colors.yellow);
+    log('💡 Usernames testés: admin316, admin, ehamza, thng (PIN: 1234)', colors.yellow);
+    return null;
   } catch (error) {
-    log('⚠️  Impossible de se connecter avec admin/1234', colors.yellow);
-    log('💡 Veuillez créer un utilisateur ou fournir des credentials valides', colors.yellow);
+    log(`❌ Erreur de connexion: ${error.message}`, colors.red);
     return null;
   }
 }
