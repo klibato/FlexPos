@@ -6,6 +6,10 @@ const adminOrganizationsController = require('../controllers/admin/adminOrganiza
 const adminAnalyticsController = require('../controllers/admin/adminAnalyticsController');
 
 const { authenticateAdmin, requireSuperAdmin, requireAdminPermission } = require('../middlewares/adminAuth');
+const tenantIsolation = require('../middlewares/tenantIsolation');
+
+// ✅ FIX CVE-FLEXPOS-007: Forcer isolation multi-tenant
+router.use(tenantIsolation);
 
 // ============================================
 // AUTH ROUTES (Public)

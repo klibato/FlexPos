@@ -3,6 +3,10 @@ const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { authenticateToken } = require('../middlewares/auth');
+const tenantIsolation = require('../middlewares/tenantIsolation');
+
+// ✅ FIX CVE-FLEXPOS-007: Forcer isolation multi-tenant
+router.use(tenantIsolation);
 
 // Rate limiting strict pour le login (protection brute force)
 const loginLimiter = rateLimit({

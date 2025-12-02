@@ -3,6 +3,10 @@ const router = express.Router();
 const settingsController = require('../controllers/settingsController');
 const { authenticateToken, optionalAuthenticate, requirePermission } = require('../middlewares/auth');
 const { PERMISSIONS } = require('../config/permissions');
+const tenantIsolation = require('../middlewares/tenantIsolation');
+
+// ✅ FIX CVE-FLEXPOS-007: Forcer isolation multi-tenant
+router.use(tenantIsolation);
 
 /**
  * @route   GET /api/settings/config

@@ -6,6 +6,10 @@ const {
 } = require('../controllers/dashboardController');
 const { authenticateToken, requirePermission } = require('../middlewares/auth');
 const { PERMISSIONS } = require('../config/permissions');
+const tenantIsolation = require('../middlewares/tenantIsolation');
+
+// ✅ FIX CVE-FLEXPOS-007: Forcer isolation multi-tenant
+router.use(tenantIsolation);
 
 // Toutes les routes nécessitent une authentification
 router.use(authenticateToken);

@@ -34,7 +34,7 @@ async function seedUsers() {
     logger.info('');
     logger.info('📝 Compte admin disponible :');
     logger.info('  - Username: admin');
-    logger.info('  - PIN: 789456');
+    logger.info('  - PIN: [REDACTED]'); // ✅ FIX: Ne pas logger les credentials
     logger.info('  - Rôle: Administrateur');
     logger.info('');
     logger.warn('⚠️  IMPORTANT: Changer le PIN en production via l\'interface');

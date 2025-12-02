@@ -18,6 +18,7 @@ if (!jwtSecret) {
 module.exports = {
   // Environnement
   NODE_ENV,
+  env: NODE_ENV, // ✅ FIX CVE-FLEXPOS-002: Ajouter pour cookies sécurisés
   PORT: parseInt(process.env.PORT, 10) || 3000,
 
   // Base de données

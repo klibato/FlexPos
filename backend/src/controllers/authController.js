@@ -677,7 +677,7 @@ const deleteUserData = async (req, res, next) => {
 
     await transaction.commit();
 
-    logger.info(`RGPD: User data deleted for user ${userId} (email: ${user.email})`);
+    logger.info(`RGPD: User data deleted for user ID ${userId}`); // ✅ FIX: Ne pas logger l'email
 
     // Effacer le cookie de session
     res.clearCookie('token');

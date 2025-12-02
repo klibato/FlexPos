@@ -4,6 +4,10 @@ const productController = require('../controllers/productController');
 const { authenticateToken, optionalAuthenticate, requirePermission } = require('../middlewares/auth');
 const { PERMISSIONS } = require('../config/permissions');
 const { uploadSingleImage } = require('../middlewares/uploadMiddleware');
+const tenantIsolation = require('../middlewares/tenantIsolation');
+
+// ✅ FIX CVE-FLEXPOS-007: Forcer isolation multi-tenant
+router.use(tenantIsolation);
 
 // GET /api/products - Récupérer tous les produits (avec auth optionnelle pour admins)
 router.get('/', optionalAuthenticate, productController.getAllProducts);

@@ -38,6 +38,18 @@ const tenantIsolation = async (req, res, next) => {
     // - Tests automatisés
     // - API calls spécifiques
     else if (req.headers['x-organization-id']) {
+      // ✅ FIX CVE-FLEXPOS-006: Autoriser uniquement super-admins
+      if (!req.admin || req.admin.role !== 'super_admin') {
+        logger.warn(`Unauthorized X-Organization-ID attempt from user ${req.user?.id || 'unknown'}`);
+        return res.status(403).json({
+          success: false,
+          error: {
+            code: 'FORBIDDEN',
+            message: 'X-Organization-ID header is restricted to super-admins only',
+          },
+        });
+      }
+
       organizationId = parseInt(req.headers['x-organization-id'], 10);
 
       if (isNaN(organizationId)) {
@@ -50,7 +62,21 @@ const tenantIsolation = async (req, res, next) => {
         });
       }
 
-      logger.debug(`Tenant detection: From header X-Organization-ID (org_id=${organizationId})`);
+      logger.warn(`Super-admin ${req.admin.id} accessing organization ${organizationId} (audit logged)`);
+
+      // Créer audit log pour traçabilité RGPD
+      if (req.admin) {
+        const AuditLog = require('../models/AuditLog');
+        AuditLog.create({
+          user_id: req.admin.id,
+          action: 'CROSS_TENANT_ACCESS',
+          entity_type: 'organization',
+          entity_id: organizationId,
+          ip_address: req.ip,
+          user_agent: req.get('user-agent'),
+          details: { original_org: req.user?.organization_id, target_org: organizationId },
+        }).catch(err => logger.error('Failed to log cross-tenant access:', err));
+      }
     }
 
     // ============================================

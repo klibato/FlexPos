@@ -177,7 +177,7 @@ const requestPasswordReset = async (req, res, next) => {
     const resetToken = await admin.generateResetToken();
 
     // TODO: Envoyer email avec Brevo (à implémenter)
-    logger.info(`Password reset requested for admin: ${email}`);
+    logger.info(`Password reset requested for admin ID: ${admin.id}`); // ✅ FIX: Ne pas logger l'email
 
     return res.status(200).json({
       success: true,
@@ -237,7 +237,7 @@ const resetPassword = async (req, res, next) => {
     // Réinitialiser le mot de passe
     await admin.resetPasswordWithToken(token, new_password);
 
-    logger.info(`Password reset successful for admin: ${admin.email}`);
+    logger.info(`Password reset successful for admin ID: ${admin.id}`); // ✅ FIX: Ne pas logger l'email
 
     return res.status(200).json({
       success: true,

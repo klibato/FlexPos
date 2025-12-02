@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const logsController = require('../controllers/logsController');
 const { authenticateToken, requireAdmin } = require('../middlewares/auth');
+const tenantIsolation = require('../middlewares/tenantIsolation');
+
+// ✅ FIX CVE-FLEXPOS-007: Forcer isolation multi-tenant
+router.use(tenantIsolation);
 
 // Toutes les routes nécessitent une authentification admin
 router.use(authenticateToken);

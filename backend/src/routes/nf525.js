@@ -3,6 +3,7 @@ const router = express.Router();
 const nf525Controller = require('../controllers/nf525Controller');
 const { authenticateToken, requirePermission } = require('../middlewares/auth');
 const { PERMISSIONS } = require('../config/permissions');
+const tenantIsolation = require('../middlewares/tenantIsolation');
 
 /**
  * Routes NF525 - Administration Conformité Fiscale
@@ -13,6 +14,9 @@ const { PERMISSIONS } = require('../config/permissions');
  * - Chaque organisation ne peut accéder QU'À SES PROPRES données NF525
  * - Isolation multi-tenant garantie par req.organizationId
  */
+
+// ✅ FIX CVE-FLEXPOS-007: Forcer isolation multi-tenant
+router.use(tenantIsolation);
 
 /**
  * @route   GET /api/nf525/verify-integrity

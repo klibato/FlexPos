@@ -348,7 +348,11 @@ DailyReport.generateForDate = async function (organizationId, reportDate, userId
     total_card: totalCard.toFixed(2),
     total_meal_voucher: totalMealVoucher.toFixed(2),
     total_mixed: totalMixed.toFixed(2),
-    vat_breakdown: {},
+    vat_breakdown: await DailyReport.calculateVATBreakdown(
+      organizationId,
+      reportDate,
+      transaction
+    ),
     first_sale_time: sales.length > 0 ? sales[0].created_at : null,
     last_sale_time: sales.length > 0 ? sales[sales.length - 1].created_at : null,
     first_ticket_number: sales.length > 0 ? sales[0].ticket_number : null,
@@ -360,6 +364,66 @@ DailyReport.generateForDate = async function (organizationId, reportDate, userId
   });
 
   return report;
+};
+
+/**
+ * Calcule la ventilation TVA pour un rapport journalier
+ * @param {number} organizationId - ID de l'organisation
+ * @param {string} reportDate - Date du rapport (YYYY-MM-DD)
+ * @param {Transaction} transaction - Transaction Sequelize
+ * @returns {Object} Ventilation TVA par taux
+ */
+DailyReport.calculateVATBreakdown = async function (organizationId, reportDate, transaction) {
+  const { Op } = require('sequelize');
+  const Sale = require('./Sale');
+
+  // Récupérer toutes les ventes de la journée
+  const startDate = new Date(reportDate + ' 00:00:00');
+  const endDate = new Date(reportDate + ' 23:59:59');
+
+  const sales = await Sale.findAll({
+    where: {
+      organization_id: organizationId,
+      created_at: {
+        [Op.gte]: startDate,
+        [Op.lte]: endDate,
+      },
+    },
+    attributes: ['vat_details'],
+    transaction,
+  });
+
+  // Agréger par taux de TVA
+  const breakdown = {};
+
+  sales.forEach((sale) => {
+    if (sale.vat_details && typeof sale.vat_details === 'object') {
+      Object.entries(sale.vat_details).forEach(([rate, details]) => {
+        const rateKey = parseFloat(rate).toFixed(2); // Normaliser (ex: "20.00")
+
+        if (!breakdown[rateKey]) {
+          breakdown[rateKey] = {
+            base_ht: 0,
+            amount_vat: 0,
+            total_ttc: 0,
+          };
+        }
+
+        breakdown[rateKey].base_ht += parseFloat(details.base_ht || 0);
+        breakdown[rateKey].amount_vat += parseFloat(details.amount_vat || 0);
+        breakdown[rateKey].total_ttc += parseFloat(details.total_ttc || 0);
+      });
+    }
+  });
+
+  // Arrondir à 2 décimales (conformité comptable)
+  Object.keys(breakdown).forEach((rate) => {
+    breakdown[rate].base_ht = parseFloat(breakdown[rate].base_ht.toFixed(2));
+    breakdown[rate].amount_vat = parseFloat(breakdown[rate].amount_vat.toFixed(2));
+    breakdown[rate].total_ttc = parseFloat(breakdown[rate].total_ttc.toFixed(2));
+  });
+
+  return breakdown;
 };
 
 /**
