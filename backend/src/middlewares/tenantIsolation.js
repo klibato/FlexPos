@@ -108,9 +108,9 @@ const tenantIsolation = async (req, res, next) => {
     // ============================================
     // STRATÉGIE 4: Domaine personnalisé
     // ============================================
-    // Format: restaurant.com
+    // Format: restaurant.com ou api.flexpos.app
     // Cherche dans organizations.domain
-    if (!organizationId && req.hostname !== 'localhost' && !req.hostname.includes('flexpos')) {
+    if (!organizationId && req.hostname !== 'localhost') {
       organization = await Organization.findOne({
         where: { domain: req.hostname },
       });
